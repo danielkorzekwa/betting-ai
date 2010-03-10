@@ -1,10 +1,13 @@
-package dk.ai.test
+package dk.bettingai
 
+import org.encog.examples.neural.adaline._
 /**
  * Hello world!
  *
  */
-object App extends Application {
-	// val stack = new Stack[Int]
-  println( "Hello World!" )
+object App  {
+	
+  def main(args:Array[String]) {
+    println("hello")	
+  }
 }
