@@ -35,10 +35,10 @@ class BetOracleTest {
 	
     var iter=0
 	do {
-	  computeAndLearn(betOracle, xorInput, xorIdeal)
+	  computeAndLearn(iter,betOracle, xorInput, xorIdeal)
       iter+=1
 	}
-	while(iter<2000 && betOracle.getError>0.01) 
+	while(iter<20 && betOracle.getError>0.01) 
 	
     /**Assert if BetOracle returns correct values*/
 	assertBetOracle(betOracle, xorInput, xorIdeal)
@@ -62,7 +62,7 @@ class BetOracleTest {
 	
     var iter=0
 	do {
-	  computeAndLearn(betOracle, xorInput, xorIdeal)
+	  computeAndLearn(iter,betOracle, xorInput, xorIdeal)
       iter+=1
 	}
 	while(iter<2000 && betOracle.getError>0.01) 
@@ -72,9 +72,92 @@ class BetOracleTest {
     assertTrue("Error should be:  0 < e <= 0.01",betOracle.getError()>0 && betOracle.getError()<=0.01)
   }
   
-  private def computeAndLearn(betOracle:BetOracle,xorInput:Array[Array[Double]],xorIdeal:Array[Double]) {
+  @Test def testOneInputGoesUpAndDown() {
+	val betOracle = new BetOracle(1)
+	  
+	val xorInput = new Array[Array[Double]](10)
+    val xorIdeal = Array[Double](-1,-1,-1,-1,1,1,1,1,1,-1)
+	   
+    xorInput(0) = Array(1/1.1)
+    xorInput(1) = Array(1/1.2)
+    xorInput(2) = Array(1/1.3)
+    xorInput(3) = Array(1/1.4)
+    xorInput(4) = Array(1/1.5)
+    xorInput(5) = Array(1/1.6)
+    xorInput(6) = Array(1/1.7)
+    xorInput(7) = Array(1/1.6)
+    xorInput(8) = Array(1/1.5)
+    xorInput(9) = Array(1/1.4)
+    
+    var iter=0
+	do {
+	  computeAndLearn(iter,betOracle, xorInput, xorIdeal)
+      iter+=1
+	}
+	while(iter<2000 && betOracle.getError>0.01) 
+  }
+  
+    @Test def testOneInputGoesUpAndDownDisorted1() {
+	val betOracle = new BetOracle(1)
+	  
+	val xorInput = new Array[Array[Double]](11)
+    val xorIdeal = Array[Double](-1,-1,-1,-1,1,1,1,1,1,1,1)
+	   
+    xorInput(0) = Array(1/1.1)
+    xorInput(1) = Array(1/1.2)
+    xorInput(2) = Array(1/1.3)
+    xorInput(3) = Array(1/1.4)
+    xorInput(4) = Array(1/1.5)
+    xorInput(5) = Array(1/1.6)
+    xorInput(6) = Array(1/1.7)
+    xorInput(7) = Array(1/1.6)
+    xorInput(8) = Array(1/1.5)
+    xorInput(9) = Array(1/1.4)
+    xorInput(10) = Array(1/1.4)
+    
+    var iter=0
+	do {
+	  computeAndLearn(iter,betOracle, xorInput, xorIdeal)
+      iter+=1
+	}
+	while(iter<10 && betOracle.getError>0.01) 
+		
+	assertEquals(1,betOracle.compute(Array(1/1.4)),0)
+		
+  }
+  
+  @Test def testOneInputGoesUpAndDownDisorted2() {
+	val betOracle = new BetOracle(1)
+	  
+	val xorInput = new Array[Array[Double]](11)
+    val xorIdeal = Array[Double](-1,-1,-1,-1,1,1,1,1,1,1,-1)
+	   
+    xorInput(0) = Array(1/1.1)
+    xorInput(1) = Array(1/1.2)
+    xorInput(2) = Array(1/1.3)
+    xorInput(3) = Array(1/1.4)
+    xorInput(4) = Array(1/1.5)
+    xorInput(5) = Array(1/1.6)
+    xorInput(6) = Array(1/1.7)
+    xorInput(7) = Array(1/1.6)
+    xorInput(8) = Array(1/1.5)
+    xorInput(9) = Array(1/1.4)
+    xorInput(10) = Array(1/1.4)
+    
+    var iter=0
+	do {
+	  computeAndLearn(iter,betOracle, xorInput, xorIdeal)
+      iter+=1
+	}
+	while(iter<10 && betOracle.getError>0.01) 
+		
+    assertEquals(-1,betOracle.compute(Array(1/1.4)),0)
+  }
+  
+  
+  private def computeAndLearn(iter:Int,betOracle:BetOracle,xorInput:Array[Array[Double]],xorIdeal:Array[Double]) {
     for (i <- 0 until xorInput.length) {
-      println("input=" + xorInput(i).mkString(",") + " output=" + betOracle.compute(xorInput(i)) + " ideal=" + xorIdeal(i) + " error=" + betOracle.getError()) 
+      println("iter=" + iter + " input=" + xorInput(i).mkString(",") + " output=" + betOracle.compute(xorInput(i)) + " ideal=" + xorIdeal(i) + " error=" + betOracle.getError()) 
 	  betOracle.train(xorInput(i),xorIdeal(i))
     }	
   }
