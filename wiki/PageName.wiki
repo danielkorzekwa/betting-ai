@@ -1,2 +1,1 @@
 [http://domain/page label]
-http://domain/page
