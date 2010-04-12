@@ -1,6 +1,6 @@
 package dk.bettingai
 
-import org.encog.examples.neural.adaline._
+//import org.encog.examples.neural.adaline._
 /**
  * Hello world!
  *
