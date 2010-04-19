@@ -1,4 +1,4 @@
-package dk.bettingai
+package dk.bettingai.bettingoracle
 
 import org.junit._
 import Assert._

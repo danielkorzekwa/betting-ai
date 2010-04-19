@@ -1,4 +1,4 @@
-package dk.bettingai
+package dk.bettingai.bettingoracle
 
 import org.encog.neural.networks._
 import org.encog.neural.networks.layers._
