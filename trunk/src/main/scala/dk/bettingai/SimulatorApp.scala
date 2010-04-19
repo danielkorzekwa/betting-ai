@@ -5,9 +5,11 @@ package dk.bettingai
  * Hello world!
  *
  */
-object App  {
+object SimulatorApp  {
 	
   def main(args:Array[String]) {
-    println("hello")	
+    println("hello: " + args)
+    println(args.length)
+    args.foreach(println)
   }
 }
