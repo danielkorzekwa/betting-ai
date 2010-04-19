@@ -19,7 +19,7 @@ class BetOracleTest {
 	while(iter<1000 && betOracle.getError>0.01)
     	
     assertEquals(idealOutput,betOracle.compute(inputs),0)
-    assertTrue("Error should be:  0 < e <= 0.01",betOracle.getError()>0 && betOracle.getError()<=0.01)
+    assertTrue("Error should be:  0 < e <= 0.01, but was " + betOracle.getError(),betOracle.getError()>0 && betOracle.getError()<=0.01)
   }
    
   @Test def testTwoInputs {
@@ -42,7 +42,7 @@ class BetOracleTest {
 	
     /**Assert if BetOracle returns correct values*/
 	assertBetOracle(betOracle, xorInput, xorIdeal)
-    assertTrue("Error should be:  0 < e <= 0.01",betOracle.getError()>0 && betOracle.getError()<=0.01)
+    assertTrue("Error should be:  0 < e <= 0.01 but was " + betOracle.getError(),betOracle.getError()>0 && betOracle.getError()<=0.01)
   }
    
   @Test def testThreeInputs {
