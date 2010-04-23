@@ -14,19 +14,31 @@ object SimulatorApp  {
 
 		printHeader(console)
 
-		/**Wrong input parameters.*/
+		/**Parse input parameters.*/
 		val argsMap:Map[String,String] = argsToMap(args)
+
+		/**Check if required parameters are present.*/
 		if(!argsMap.contains("marketData") || !argsMap.contains("traderImpl")) {
 			printHelpMessage(console)
 			return
 		}
 
-		/**Market data file not found.*/
+		/**Load market data file.*/
 		if(!new File(argsMap("marketData")).exists) {
 			console.println("Market data file not found: " + argsMap("marketData"))
 			return
 		}
 		val marketDataFile = Source.fromFile(new File(argsMap("marketData")))
+
+		/**Load trader implementation class.*/
+		val traderImplClass = {
+			try {
+				Class.forName(argsMap("traderImpl")).newInstance()
+			}
+			catch{
+			case e:Exception => console.println("Can't load trader implementation class: " + argsMap("traderImpl") + ". Details: " + e); return
+			}
+		}
 
 		console.println("""Simulation is started.Simulation progress: 1% 2% 3% 4% 5% 6%
 				.......................................................
