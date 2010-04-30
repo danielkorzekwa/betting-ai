@@ -10,17 +10,19 @@ import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import java.text._
+import org.jmock.integration.junit4._
 
+@RunWith(value=classOf[JMock])
 class MarketEventProcessorImplTest {
 
 	private val mockery = new Mockery()
 	private val betex:Betex = mockery.mock(classOf[Betex])
 
 	private val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+
 	@Test def testProcessCreateMarketEvent() {
 
-		
+
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
@@ -42,9 +44,20 @@ class MarketEventProcessorImplTest {
 				"selectionName":"Arsenal"}]
 				}
 		"""))
-		mockery.assertIsSatisfied()
 	}
 
+	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
+		new MarketEventProcessorImpl(betex).process(new String(""))
+	}
+	@Test(expected=classOf[IllegalArgumentException]) def testProcessNoEventTypeAttribute() {
+		new MarketEventProcessorImpl(betex).process(new String("{}"))
+	}
+	@Test(expected=classOf[IllegalArgumentException]) def testProcessNotSupportedEventType() {
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"NOT_SUPPORTED_EVENT_NAME"}
+		"""))
+	}
+	
 	/**Check if both market objects are the same.*/
 	private class StringStartsWithMatcher(market:Market) extends TypeSafeMatcher[Market] {
 
