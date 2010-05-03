@@ -22,7 +22,6 @@ class MarketEventProcessorImplTest {
 
 	@Test def testProcessCreateMarketEvent() {
 
-
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
@@ -46,6 +45,42 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
+	@Test(expected=classOf[ClassCastException])
+	def testProcessCreateMarketEventMarketIdNotANumber() {
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"CREATE_MARKET",
+				"marketId":"not_a_number", 
+				"marketName":"Match Odds",
+				"eventName":"Man Utd vs Arsenal", 
+				"numOfWinners":1, 
+				"marketTime":
+				"2010-04-15 14:00:00", 
+				"selections": [{"selectionId":11,
+				"selectionName":"Man Utd"},
+				{"selectionId":12, 
+				"selectionName":"Arsenal"}]
+				}
+		"""))
+	}
+
+	@Test(expected=classOf[NoSuchElementException])
+	def testProcessCreateMarketEventNoMarketName() {
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"CREATE_MARKET",
+				"marketId":1, 
+				"eventName":"Man Utd vs Arsenal", 
+				"numOfWinners":1, 
+				"marketTime":
+				"2010-04-15 14:00:00", 
+				"selections": [{"selectionId":11,
+				"selectionName":"Man Utd"},
+				{"selectionId":12, 
+				"selectionName":"Arsenal"}]
+				}
+		"""))
+	}
+
+
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
 		new MarketEventProcessorImpl(betex).process(new String(""))
 	}
@@ -57,7 +92,7 @@ class MarketEventProcessorImplTest {
 				{"eventType":"NOT_SUPPORTED_EVENT_NAME"}
 		"""))
 	}
-	
+
 	/**Check if both market objects are the same.*/
 	private class StringStartsWithMatcher(market:Market) extends TypeSafeMatcher[Market] {
 
