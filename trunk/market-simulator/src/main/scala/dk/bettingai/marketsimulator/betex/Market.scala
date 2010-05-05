@@ -8,7 +8,12 @@ import java.util.Date
  *
  */
 object Market {
-	class Selection(val selectionId:Long, val selectionName:String)
+	class Selection(val selectionId:Long, val selectionName:String) {
+		override def toString = "Selection [selectionId=%s, selectionName=%s]".format(selectionId, selectionName)
+	}
 }
 
-class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val selections:List[Market.Selection])
+class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val selections:List[Market.Selection]) {
+	
+	override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, selections=%s]".format(marketId,marketName,eventName,numOfWinners,marketTime,selections)
+}
