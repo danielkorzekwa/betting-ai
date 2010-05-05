@@ -8,7 +8,8 @@ import org.junit.runner._
 import java.util.Date
 import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.Description
-import org.hamcrest.Matcher
+import org.hamcrest._
+import org.hamcrest.Matchers._
 import java.text._
 import org.jmock.integration.junit4._
 
@@ -25,9 +26,9 @@ class MarketEventProcessorImplTest {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
-				one(betex).createMarket(withArg(new StringStartsWithMatcher(market)))
+				one(betex).createMarket(withArg(new MarketMatcher(market)))
 			}
-		});
+		})
 
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"CREATE_MARKET",
@@ -80,6 +81,60 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
+	@Test def testProcessPlaceBetEventLay() {
+		val bet = new Bet(10,3, Bet.BetTypeEnum.LAY, 1,11)
+		mockery.checking(new SExpectations(){
+			{
+				one(betex).placeBet(withArg(equalTo(123)), withArg(new BetMatcher(bet)))
+			}
+		})
+
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"PLACE_BET",
+				"userId":123,
+				"betSize":10,
+				"betPrice":3,
+				"betType":"LAY",
+				"marketId":1,
+				"selectionId":11
+				}
+		"""))
+	}
+	
+	@Test def testProcessPlaceBetEventBack() {
+		val bet = new Bet(10,3, Bet.BetTypeEnum.BACK, 1,11)
+		mockery.checking(new SExpectations(){
+			{
+				one(betex).placeBet(withArg(equalTo(345)), withArg(new BetMatcher(bet)))
+			}
+		})
+
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"PLACE_BET",
+				"userId":345,
+				"betSize":10,
+				"betPrice":3,
+				"betType":"BACK",
+				"marketId":1,
+				"selectionId":11
+				}
+		"""))
+	}
+	
+	@Test(expected=classOf[NoSuchElementException]) 
+	def testProcessPlaceBetEventNotSupportedBetType() {
+	
+		new MarketEventProcessorImpl(betex).process(new String("""
+				{"eventType":"PLACE_BET",
+				"userId":345,
+				"betSize":10,
+				"betPrice":3,
+				"betType":"NOT_SUPPORTED",
+				"marketId":1,
+				"selectionId":11
+				}
+		"""))
+	}
 
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
 		new MarketEventProcessorImpl(betex).process(new String(""))
@@ -94,7 +149,7 @@ class MarketEventProcessorImplTest {
 	}
 
 	/**Check if both market objects are the same.*/
-	private class StringStartsWithMatcher(market:Market) extends TypeSafeMatcher[Market] {
+	private class MarketMatcher(market:Market) extends TypeSafeMatcher[Market] {
 
 		def matchesSafely(s:Market):Boolean = {
 				if(s.marketId!=market.marketId) return false
@@ -113,6 +168,24 @@ class MarketEventProcessorImplTest {
 
 		def describeTo(description:Description) = {
 			description.appendText("market equals to").appendValue(market);
+		}
+	}
+
+	/**Check if both bet objects are the same.*/
+	private class BetMatcher(bet:Bet) extends TypeSafeMatcher[Bet] {
+
+		def matchesSafely(s:Bet):Boolean = {
+				if(s.betSize!=bet.betSize) return false
+				if(s.betPrice!=bet.betPrice) return false
+				if(s.betType!=bet.betType) return false
+				if(s.marketId!=bet.marketId) return false
+				if(s.selectionId!=bet.selectionId) return false
+
+				return true
+		}
+
+		def describeTo(description:Description) = {
+			description.appendText("bet equals to").appendValue(bet);
 		}
 	}
 

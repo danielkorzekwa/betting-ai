@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator.marketevent
 import dk.bettingai.marketsimulator.betex._
 import java.util.Date
 import  dk.bettingai.marketsimulator.betex.Market._
+import  dk.bettingai.marketsimulator.betex.Bet.BetTypeEnum._
 import scala.util.parsing.json._
 import java.text._
 
@@ -26,14 +27,17 @@ class MarketEventProcessorImpl(betex:Betex) extends MarketEventProcessor{
 			throw new IllegalArgumentException("No 'eventType' attribute for event: " + marketEvent)
 		}
 		else if(eventMap("eventType") == "CREATE_MARKET") {
-			val selections = eventMap("selections").asInstanceOf[List[Map[String,String]]].map(s => new Market.Selection(s("selectionId").asInstanceOf[Double].toInt,s("selectionName")))
-			val market = new Market(eventMap("marketId").asInstanceOf[Double].toInt,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
+			val selections = eventMap("selections").asInstanceOf[List[Map[String,String]]].map(s => new Market.Selection(s("selectionId").asInstanceOf[Double].toLong,s("selectionName")))
+			val market = new Market(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
 			betex.createMarket(market)
+		}
+		else if(eventMap("eventType") == "PLACE_BET") {
+			val bet = new Bet(eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
+			betex.placeBet(eventMap("userId").asInstanceOf[Double].toInt, bet)
 		}
 		else {
 			throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
 		}
-
 	}
 
 
