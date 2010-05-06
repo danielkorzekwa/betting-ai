@@ -58,4 +58,14 @@ class BetexImplTest {
 		assertEquals(12,marketFromBetex2.selections(1).selectionId)
 		assertEquals("Arsenal",marketFromBetex2.selections(1).selectionName)
 	}
+
+
+	@Test(expected=classOf[IllegalArgumentException]) def testCreateMarketAlreadyExist() {
+		val market1 = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		val market2 = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		betex.createMarket(market1)
+		betex.createMarket(market2)
+	}
+
 }
