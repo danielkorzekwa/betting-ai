@@ -16,10 +16,9 @@ trait Betex {
 	
 	/** Places a bet on a betting exchange.
 	 * 
-	 * @param userId Unique id of a user that places a bet.
-	 * @param bet
+	* @param bet
 	*/
-	def placeBet(userId:Int,bet: Bet)
+	def placeBet(bet: Bet)
 	
 	/** Cancels a bet on a betting exchange.
 	 * 
@@ -30,4 +29,10 @@ trait Betex {
 	
 	/**Returns all markets that are not settled.*/
 	def getActiveMarkets(): List[Market]
+	
+	/**Returns all bets place bet user.
+	 *
+	 *@param userId
+	 */
+	def getBets(userId:Int):List[Bet]
 }
