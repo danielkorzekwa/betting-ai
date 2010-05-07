@@ -82,16 +82,17 @@ class MarketEventProcessorImplTest {
 	}
 
 	@Test def testProcessPlaceBetEventLay() {
-		val bet = new Bet(10,3, Bet.BetTypeEnum.LAY, 1,11)
+		val bet = new Bet(100,123,10,3, Bet.BetTypeEnum.LAY, 1,11)
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(withArg(equalTo(123)), withArg(new BetMatcher(bet)))
+				one(betex).placeBet(withArg(new BetMatcher(bet)))
 			}
 		})
 
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
 				"userId":123,
+				"betId":100,	
 				"betSize":10,
 				"betPrice":3,
 				"betType":"LAY",
@@ -100,18 +101,19 @@ class MarketEventProcessorImplTest {
 				}
 		"""))
 	}
-	
+
 	@Test def testProcessPlaceBetEventBack() {
-		val bet = new Bet(10,3, Bet.BetTypeEnum.BACK, 1,11)
+		val bet = new Bet(100,345,10,3, Bet.BetTypeEnum.BACK, 1,11)
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(withArg(equalTo(345)), withArg(new BetMatcher(bet)))
+				one(betex).placeBet(withArg(new BetMatcher(bet)))
 			}
 		})
 
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
 				"userId":345,
+				"betId":100,	
 				"betSize":10,
 				"betPrice":3,
 				"betType":"BACK",
@@ -120,10 +122,10 @@ class MarketEventProcessorImplTest {
 				}
 		"""))
 	}
-	
+
 	@Test(expected=classOf[NoSuchElementException]) 
 	def testProcessPlaceBetEventNotSupportedBetType() {
-	
+
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
 				"userId":345,
@@ -175,6 +177,8 @@ class MarketEventProcessorImplTest {
 	private class BetMatcher(bet:Bet) extends TypeSafeMatcher[Bet] {
 
 		def matchesSafely(s:Bet):Boolean = {
+				if(s.betId!=bet.betId) return false
+				if(s.userId!=bet.userId) return false
 				if(s.betSize!=bet.betSize) return false
 				if(s.betPrice!=bet.betPrice) return false
 				if(s.betType!=bet.betType) return false

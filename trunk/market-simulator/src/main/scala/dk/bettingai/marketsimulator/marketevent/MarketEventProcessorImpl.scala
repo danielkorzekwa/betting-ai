@@ -32,8 +32,8 @@ class MarketEventProcessorImpl(betex:Betex) extends MarketEventProcessor{
 			betex.createMarket(market)
 		}
 		else if(eventMap("eventType") == "PLACE_BET") {
-			val bet = new Bet(eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
-			betex.placeBet(eventMap("userId").asInstanceOf[Double].toInt, bet)
+			val bet = new Bet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
+			betex.placeBet(bet)
 		}
 		else {
 			throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))

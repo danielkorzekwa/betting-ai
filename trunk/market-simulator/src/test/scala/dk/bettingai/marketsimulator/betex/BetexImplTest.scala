@@ -3,12 +3,13 @@ package dk.bettingai.marketsimulator.betex
 import org.junit._
 import Assert._
 import java.util.Date
+import Bet.BetTypeEnum._
 
 class BetexImplTest {
 
 	private val betex = new BetexImpl()
 
-	@Test def testCreateMarket() {
+	@Test def testCreateMarket {
 		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		betex.createMarket(market)
 		assertEquals(1,betex.getActiveMarkets.size)
@@ -26,7 +27,7 @@ class BetexImplTest {
 		assertEquals("Arsenal",marketFromBetex.selections(1).selectionName)
 	}
 
-	@Test def testCreateTwoMarkets() {
+	@Test def testCreateTwoMarkets {
 		val market1 = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		val market2 = new Market(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Selection(31,"Fulham"),new Market.Selection(42,"Wigan")))
 
@@ -60,7 +61,8 @@ class BetexImplTest {
 	}
 
 
-	@Test(expected=classOf[IllegalArgumentException]) def testCreateMarketAlreadyExist() {
+	@Test(expected=classOf[IllegalArgumentException]) 
+	def testCreateMarketAlreadyExist {
 		val market1 = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		val market2 = new Market(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 
@@ -68,4 +70,46 @@ class BetexImplTest {
 		betex.createMarket(market2)
 	}
 
+	@Test(expected=classOf[IllegalArgumentException]) 
+	def testPlaceBetMarketNotFound {
+		val bet = new Bet(100,123,2,1.01,BACK,1,11)
+		betex.placeBet(bet)
+	}
+
+	@Test(expected=classOf[IllegalArgumentException]) 
+	def testPlaceBetMarketSelectionNotFound {
+		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)	
+
+		val bet = new Bet(100,123,2,1.01,BACK,1,13)
+		betex.placeBet(bet)
+	}
+
+	@Test def testPlaceNoBets {
+		val bets = betex.getBets(123)
+		assertEquals(0, bets.size)
+	}
+	
+	@Test def testPlaceBackBet {
+		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		val bet = new Bet(100,123,2,1.5,BACK,1,11)
+		betex.placeBet(bet)
+
+		val bets = betex.getBets(123)
+		assertEquals(1, bets.size)
+		
+		val betFromBetex = bets(0)
+		assertEquals(100,betFromBetex.betId)
+		assertEquals(2,betFromBetex.betSize,0)
+		assertEquals(1.5,betFromBetex.betPrice,0)
+		assertEquals(BACK,betFromBetex.betType)
+		assertEquals(1,betFromBetex.marketId)
+		assertEquals(11,betFromBetex.selectionId)
+		
+		val betsForNotExistingUser = betex.getBets(1234)
+		assertEquals(0, betsForNotExistingUser.size)
+	}
+	
 }
