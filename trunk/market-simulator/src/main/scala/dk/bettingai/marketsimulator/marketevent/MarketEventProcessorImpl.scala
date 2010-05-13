@@ -19,24 +19,18 @@ class MarketEventProcessorImpl(betex:Betex) extends MarketEventProcessor{
 	 * 
 	 * @param marketEvent
 	 */
-	def process(marketEvent:String) {
-
+	def process(marketEvent:String) {		
 		val eventMap = JSON.parseFull(marketEvent).getOrElse(Map()).asInstanceOf[Map[String,Any]];
+		require(eventMap.contains("eventType"),"No 'eventType' attribute for event: " + marketEvent)
 
-		if(!eventMap.contains("eventType")) {
-			throw new IllegalArgumentException("No 'eventType' attribute for event: " + marketEvent)
-		}
-		else if(eventMap("eventType") == "CREATE_MARKET") {
+		eventMap("eventType") match {
+		case "CREATE_MARKET" => {
 			val selections = eventMap("selections").asInstanceOf[List[Map[String,String]]].map(s => new Market.Selection(s("selectionId").asInstanceOf[Double].toLong,s("selectionName")))
 			val market = new Market(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
 			betex.createMarket(market)
 		}
-		else if(eventMap("eventType") == "PLACE_BET") {
-			val bet = new Bet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
-			betex.placeBet(bet)
-		}
-		else {
-			throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
+		case "PLACE_BET" => betex.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
+		case _ =>	throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
 		}
 	}
 
