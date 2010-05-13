@@ -18,7 +18,7 @@ trait Betex {
 	 * 
 	* @param bet
 	*/
-	def placeBet(bet: Bet)
+	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:Bet.BetTypeEnum.BetTypeEnum, marketId:Long,selectionId:Long)
 	
 	/** Cancels a bet on a betting exchange.
 	 * 

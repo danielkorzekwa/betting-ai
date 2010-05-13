@@ -82,10 +82,9 @@ class MarketEventProcessorImplTest {
 	}
 
 	@Test def testProcessPlaceBetEventLay() {
-		val bet = new Bet(100,123,10,3, Bet.BetTypeEnum.LAY, 1,11)
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(withArg(new BetMatcher(bet)))
+				one(betex).placeBet(100,123,10,3, Bet.BetTypeEnum.LAY, 1,11)
 			}
 		})
 
@@ -103,10 +102,9 @@ class MarketEventProcessorImplTest {
 	}
 
 	@Test def testProcessPlaceBetEventBack() {
-		val bet = new Bet(100,345,10,3, Bet.BetTypeEnum.BACK, 1,11)
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(withArg(new BetMatcher(bet)))
+				one(betex).placeBet(100,345,10,3, Bet.BetTypeEnum.BACK, 1,11)
 			}
 		})
 
@@ -170,26 +168,6 @@ class MarketEventProcessorImplTest {
 
 		def describeTo(description:Description) = {
 			description.appendText("market equals to").appendValue(market);
-		}
-	}
-
-	/**Check if both bet objects are the same.*/
-	private class BetMatcher(bet:Bet) extends TypeSafeMatcher[Bet] {
-
-		def matchesSafely(s:Bet):Boolean = {
-				if(s.betId!=bet.betId) return false
-				if(s.userId!=bet.userId) return false
-				if(s.betSize!=bet.betSize) return false
-				if(s.betPrice!=bet.betPrice) return false
-				if(s.betType!=bet.betType) return false
-				if(s.marketId!=bet.marketId) return false
-				if(s.selectionId!=bet.selectionId) return false
-
-				return true
-		}
-
-		def describeTo(description:Description) = {
-			description.appendText("bet equals to").appendValue(bet);
 		}
 	}
 
