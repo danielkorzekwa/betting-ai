@@ -35,12 +35,10 @@ class BetexImpl extends Betex{
 		require(markets.contains(marketId),"Can't place a bet on a market. Market not found for marketId=" + marketId)
 		require(markets.values.exists(m => m.selections.exists(s => s.selectionId==selectionId)),"Can't place a bet on a market. Market selection not found for marketId/selectionId=" + marketId + "/" + selectionId)
 
-
 		/**This is a spike implementation only, will be improved very soon.*/
 		if(betType==LAY) {
 			var newBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,selectionId)
-			var continue=true
-			while(newBet.betSize>0 && continue) {
+			while(newBet.betSize>0) {
 				val betsToBeMatched = bets.filter(b => b.betStatus == U && b.betType ==BACK && b.betPrice<= newBet.betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
 				if(betsToBeMatched.size>0) {
 					val matchingResult = newBet.matchBet(betsToBeMatched(0))
@@ -56,8 +54,7 @@ class BetexImpl extends Betex{
 		}
 		else if(betType==BACK){
 			var newBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,selectionId)
-			var continue=true
-			while(newBet.betSize>0 && continue) {
+			while(newBet.betSize>0) {
 				val betsToBeMatched = bets.filter(b => b.betStatus == U && b.betType ==LAY && b.betPrice>= newBet.betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
 				if(betsToBeMatched.size>0) {
 					val matchingResult = newBet.matchBet(betsToBeMatched(0))
