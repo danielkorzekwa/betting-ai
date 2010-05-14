@@ -102,7 +102,7 @@ class BetexImplTest {
 	def testPlaceBetBetSizeLessThanMin {
 		betex.placeBet(100,123,1.9,1.01,BACK,1,11)
 	}
-	
+
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testPlaceBetMarketNotFound {
 		betex.placeBet(100,123,2,1.01,BACK,1,11)
@@ -182,9 +182,39 @@ class BetexImplTest {
 		assertEquals(U,bets(1).betStatus)
 		assertEquals(1,bets(1).marketId)
 		assertEquals(11,bets(1).selectionId)
+
+		val bets122 = betex.getBets(122)
+		assertEquals(3, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(13,bets122(0).betSize,0)
+		assertEquals(2.1,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+
+		assertEquals(102,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(5,bets122(1).betSize,0)
+		assertEquals(2.2,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(U,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+
+		assertEquals(104,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(25,bets122(2).betSize,0)
+		assertEquals(2.5,bets122(2).betPrice,0)
+		assertEquals(BACK,bets122(2).betType)
+		assertEquals(U,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).selectionId)
 	}
 
-	@Test def testMatchingPlaceBackThenLay {
+	@Test def testMatchLayBetWithBackBet {
 		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		betex.createMarket(market1)
 
@@ -227,8 +257,8 @@ class BetexImplTest {
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).selectionId)
 	}
-	
-	@Test def testMatchingPlaceLayThenBack {
+
+	@Test def testMatchBackBetWithLayBet {
 		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		betex.createMarket(market1)
 
@@ -272,4 +302,571 @@ class BetexImplTest {
 		assertEquals(11,bets123(0).selectionId)
 	}
 
+	@Test def testMatchLayBetWithTwoBackBets {
+			val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,2,5,BACK,1,11)
+		betex.placeBet(101,122,2,4,BACK,1,11)
+		betex.placeBet(102,123,4,7,LAY,1,11)
+
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(101,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(4,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+
+		assertEquals(100,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(2,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(BACK,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(102,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(4,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(102,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(5,bets123(1).betPrice,0)
+		assertEquals(LAY,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+	}
+
+	@Test def testMatchBackBetWithTwoLaysBets {
+				val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,2,4,LAY,1,11)
+		betex.placeBet(101,122,2,5,LAY,1,11)
+		betex.placeBet(102,123,4,3,BACK,1,11)
+
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(101,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(5,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+
+		assertEquals(100,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(2,bets122(1).betSize,0)
+		assertEquals(4,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(102,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(102,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(4,bets123(1).betPrice,0)
+		assertEquals(BACK,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+	}
+
+	@Test def testMatchBackBetPartiallyMatchedWithLayBet {
+		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,2,5,LAY,1,11)
+		betex.placeBet(101,123,6,3,BACK,1,11)
+		
+			/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(1, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(5,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(101,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(101,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(4,bets123(1).betSize,0)
+		assertEquals(3,bets123(1).betPrice,0)
+		assertEquals(BACK,bets123(1).betType)
+		assertEquals(U,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+	}
+	@Test def testMatchBackBetPartiallyMatchedWithTwoLayBets {
+			val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,7,2,LAY,1,11)
+		betex.placeBet(101,122,2,4,LAY,1,11)
+		betex.placeBet(102,122,3,5,LAY,1,11)
+		betex.placeBet(103,123,4,3,BACK,1,11)
+		
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(4, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(7,bets122(0).betSize,0)
+		assertEquals(2,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+		assertEquals(102,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(3,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+		
+		assertEquals(101,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(1,bets122(2).betSize,0)
+		assertEquals(4,bets122(2).betPrice,0)
+		assertEquals(LAY,bets122(2).betType)
+		assertEquals(M,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).selectionId)
+		
+		assertEquals(101,bets122(3).betId)
+		assertEquals(122,bets122(3).userId)
+		assertEquals(1,bets122(3).betSize,0)
+		assertEquals(4,bets122(3).betPrice,0)
+		assertEquals(LAY,bets122(3).betType)
+		assertEquals(U,bets122(3).betStatus)
+		assertEquals(1,bets122(3).marketId)
+		assertEquals(11,bets122(3).selectionId)
+		
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(103,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(3,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(103,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(1,bets123(1).betSize,0)
+		assertEquals(4,bets123(1).betPrice,0)
+		assertEquals(BACK,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+		
+	}
+	@Test def testMatchBackBetPartiallyMatchedWithTwoLayBetsNoBetsRemainsAtMatchingPrice {
+			val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,7,2,LAY,1,11)
+		betex.placeBet(101,122,2,4,LAY,1,11)
+		betex.placeBet(102,122,3,5,LAY,1,11)
+		betex.placeBet(103,123,6,3,BACK,1,11)
+		
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(3, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(7,bets122(0).betSize,0)
+		assertEquals(2,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+		assertEquals(102,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(3,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+		
+		assertEquals(101,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(2,bets122(2).betSize,0)
+		assertEquals(4,bets122(2).betPrice,0)
+		assertEquals(LAY,bets122(2).betType)
+		assertEquals(M,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).selectionId)
+		
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(3, bets123.size)
+
+		assertEquals(103,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(3,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(103,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(4,bets123(1).betPrice,0)
+		assertEquals(BACK,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+		
+		assertEquals(103,bets123(2).betId)
+		assertEquals(123,bets123(2).userId)
+		assertEquals(1,bets123(2).betSize,0)
+		assertEquals(3,bets123(2).betPrice,0)
+		assertEquals(BACK,bets123(2).betType)
+		assertEquals(U,bets123(2).betStatus)
+		assertEquals(1,bets123(2).marketId)
+		assertEquals(11,bets123(2).selectionId)
+	}
+
+	@Test def testMatchBackBetFullyMatchedWithBiggerLayBet {
+		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,6,5,LAY,1,11)
+		betex.placeBet(101,123,2,3,BACK,1,11)
+		
+			/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(5,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+		assertEquals(100,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(4,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(U,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(1, bets123.size)
+
+		assertEquals(101,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+	}
+
+	@Test def testMatchLayBetPartiallyMatchedWithBackBet {
+		val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,2,8,BACK,1,11)
+		betex.placeBet(101,123,6,11,LAY,1,11)
+		
+			/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(1, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(8,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(101,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(8,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(101,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(4,bets123(1).betSize,0)
+		assertEquals(11,bets123(1).betPrice,0)
+		assertEquals(LAY,bets123(1).betType)
+		assertEquals(U,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+	}
+
+	@Test def testMatchLayBetPartiallyMatchedWithTwoBackBets {
+				val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,7,9,BACK,1,11)
+		betex.placeBet(101,122,2,6,BACK,1,11)
+		betex.placeBet(102,122,3,5,BACK,1,11)
+		betex.placeBet(103,123,4,7,LAY,1,11)
+		
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(4, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(7,bets122(0).betSize,0)
+		assertEquals(9,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+		assertEquals(102,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(3,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(BACK,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+		
+		assertEquals(101,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(1,bets122(2).betSize,0)
+		assertEquals(6,bets122(2).betPrice,0)
+		assertEquals(BACK,bets122(2).betType)
+		assertEquals(M,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).selectionId)
+		
+		assertEquals(101,bets122(3).betId)
+		assertEquals(122,bets122(3).userId)
+		assertEquals(1,bets122(3).betSize,0)
+		assertEquals(6,bets122(3).betPrice,0)
+		assertEquals(BACK,bets122(3).betType)
+		assertEquals(U,bets122(3).betStatus)
+		assertEquals(1,bets122(3).marketId)
+		assertEquals(11,bets122(3).selectionId)
+		
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(103,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(3,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(103,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(1,bets123(1).betSize,0)
+		assertEquals(6,bets123(1).betPrice,0)
+		assertEquals(LAY,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+	}
+
+	@Test def testMatchLayBetPartiallyMatchedWithTwoBackBetsNoBetsRemainsAtMatchingPrice {
+			val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,7,9,BACK,1,11)
+		betex.placeBet(101,122,2,6,BACK,1,11)
+		betex.placeBet(102,122,3,5,BACK,1,11)
+		betex.placeBet(103,123,6,7,LAY,1,11)
+		
+		/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(3, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(7,bets122(0).betSize,0)
+		assertEquals(9,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+		assertEquals(102,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(3,bets122(1).betSize,0)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(BACK,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+		
+		assertEquals(101,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(2,bets122(2).betSize,0)
+		assertEquals(6,bets122(2).betPrice,0)
+		assertEquals(BACK,bets122(2).betType)
+		assertEquals(M,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).selectionId)
+		
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(3, bets123.size)
+
+		assertEquals(103,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(3,bets123(0).betSize,0)
+		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		assertEquals(103,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(6,bets123(1).betPrice,0)
+		assertEquals(LAY,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).selectionId)
+		
+		assertEquals(103,bets123(2).betId)
+		assertEquals(123,bets123(2).userId)
+		assertEquals(1,bets123(2).betSize,0)
+		assertEquals(7,bets123(2).betPrice,0)
+		assertEquals(LAY,bets123(2).betType)
+		assertEquals(U,bets123(2).betStatus)
+		assertEquals(1,bets123(2).marketId)
+		assertEquals(11,bets123(2).selectionId)
+	}
+
+	@Test def testMatchLayBetFullyMatchedWithBiggerBackBet {
+			val market1 = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(market1)
+
+		betex.placeBet(100,122,6,8,BACK,1,11)
+		betex.placeBet(101,123,2,11,LAY,1,11)
+		
+			/**Check bets for user 122.*/
+		val bets122 = betex.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(8,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).selectionId)
+		
+			assertEquals(100,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(4,bets122(1).betSize,0)
+		assertEquals(8,bets122(1).betPrice,0)
+		assertEquals(BACK,bets122(1).betType)
+		assertEquals(U,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).selectionId)
+
+		/**Check bets for user 123.*/
+		val bets123 = betex.getBets(123)
+		assertEquals(1, bets123.size)
+
+		assertEquals(101,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2,bets123(0).betSize,0)
+		assertEquals(8,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).selectionId)
+		
+		
+	}
 }
