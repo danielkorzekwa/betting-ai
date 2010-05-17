@@ -17,7 +17,7 @@ object Market {
 	}
 }
 
-class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val selections:List[Market.Selection]) extends IMarket{
+class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val selections:List[IMarket.ISelection]) extends IMarket{
 
 	private val bets = ListBuffer[IBet]()
 
