@@ -1,38 +1,43 @@
 package dk.bettingai.marketsimulator.betex
 
+import dk.bettingai.marketsimulator.betex.api._
+import scala.collection.mutable.Map
 
-/** This interface represents a betting exchange. It allows to create market, place bet, cancel bet, etc.
+/** This class represents a betting exchange. It allows to create market, place bet, cancel bet, etc.
  * @author korzekwad
  *
  */
-trait Betex {
+class Betex extends IBetex{
+
+	private val markets = Map[Long,IMarket]()
 
 	/**Creates market on a betting exchange.
 	 * 
 	 * @param market
 	 * 
 	 */
-	def createMarket(market:Market)
+	def createMarket(market:IMarket) = {
+		require(!markets.contains(market.marketId),"Market already exist for marketId=" + market.marketId)
+
+		markets+= market.marketId -> market
+	}
 	
-	/** Places a bet on a betting exchange.
+	/**Finds market for market id.
 	 * 
-	* @param bet
-	*/
-	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:Bet.BetTypeEnum.BetTypeEnum, marketId:Long,selectionId:Long)
-	
+	 * @param marketId
+	 * 
+	 * @return Found market is returned or exception is thrown if market not exists.
+	 */
+	def findMarket(marketId: Long):IMarket = markets(marketId)
+
 	/** Cancels a bet on a betting exchange.
 	 * 
 	 * @param userId Unique id of a user that cancels a bet.
 	 * @param betId Unique id of a bet to be cancelled.
-	*/
-	def cancelBet(userId: Int, betId:Long)
-	
-	/**Returns all markets that are not settled.*/
-	def getActiveMarkets(): List[Market]
-	
-	/**Returns all bets place bet user.
-	 *
-	 *@param userId
 	 */
-	def getBets(userId:Int):List[Bet]
+	def cancelBet(userId: Int, betId:Long) = throw new UnsupportedOperationException("Not implemented")
+
+/**Returns all markets.*/
+	def getMarkets(): List[IMarket] = markets.values.toList
+
 }

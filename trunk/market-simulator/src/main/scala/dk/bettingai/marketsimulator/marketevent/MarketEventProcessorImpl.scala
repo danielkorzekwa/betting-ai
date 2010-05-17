@@ -1,9 +1,9 @@
 package dk.bettingai.marketsimulator.marketevent
 
 import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.api._
 import java.util.Date
 import  dk.bettingai.marketsimulator.betex.Market._
-import  dk.bettingai.marketsimulator.betex.Bet.BetTypeEnum._
 import scala.util.parsing.json._
 import java.text._
 
@@ -11,7 +11,7 @@ import java.text._
  * @author korzekwad
  *
  */
-class MarketEventProcessorImpl(betex:Betex) extends MarketEventProcessor{
+class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 
 	private val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -29,7 +29,10 @@ class MarketEventProcessorImpl(betex:Betex) extends MarketEventProcessor{
 			val market = new Market(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
 			betex.createMarket(market)
 		}
-		case "PLACE_BET" => betex.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], Bet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get, eventMap("marketId").asInstanceOf[Double].toLong,eventMap("selectionId").asInstanceOf[Double].toLong)
+		case "PLACE_BET" => {	
+			val market = betex.findMarket( eventMap("marketId").asInstanceOf[Double].toLong)
+			market.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], IBet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get,eventMap("selectionId").asInstanceOf[Double].toLong)
+		}
 		case _ =>	throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
 		}
 	}

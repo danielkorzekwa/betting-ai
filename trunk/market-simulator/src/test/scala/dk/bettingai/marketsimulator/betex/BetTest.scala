@@ -2,11 +2,16 @@ package dk.bettingai.marketsimulator.betex
 
 import org.junit._
 import Assert._
-import Bet.BetTypeEnum._
-import Bet.BetStatusEnum._
+import dk.bettingai.marketsimulator.betex.api._
+import IBet.BetTypeEnum._
+import IBet.BetStatusEnum._
 
 class BetTest {
 
+	/**
+	 * Create bet scenarios.
+	 **/
+	
 	@Test def testCreateBet{
 		new Bet(10,123,2,1.01,BACK,U,1,11)
 		new Bet(10,123,2,1.5,BACK,M,1,11)
@@ -21,6 +26,10 @@ class BetTest {
 	@Test(expected=classOf[IllegalArgumentException]) def testCreateBetPriceMoreThanMax{
 		new Bet(10,123,2,1001,BACK,U,1,11)
 	}
+	
+	/**
+	 * Bets matched scenarios.
+	 **/
 	
 	@Test def testMatchBetBackWithLay {
 		val firstBet = new Bet(10,122,10,2,BACK,U,1,11)
@@ -431,7 +440,9 @@ class BetTest {
 	}
 	
 	
-	/**Bets not matched scenarios.*/
+	/**
+	 * Bets not matched scenarios.
+	 **/
 	
 	@Test def testMatchBetTwoBackBets {
 		val firstBet = new Bet(10,122,10,2,BACK,U,1,11)
