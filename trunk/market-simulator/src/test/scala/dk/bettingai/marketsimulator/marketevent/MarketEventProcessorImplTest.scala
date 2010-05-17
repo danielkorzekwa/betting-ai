@@ -26,13 +26,13 @@ class MarketEventProcessorImplTest {
 	/**
 	 * Tests for CREATE_MARKET event.
 	 */
-	
+
 	@Test def testProcessCreateMarketEvent() {
 
 		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
-				one(betex).createMarket(withArg(new MarketMatcher(market)))
+				one(betex).createMarket(withArg(10),withArg("Match Odds"),withArg("Man Utd vs Arsenal"),withArg(1),withArg(df.parse("2010-04-15 14:00:00")),withArg(new SelectionsMatcher(List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))))
 			}
 		})
 
@@ -90,7 +90,7 @@ class MarketEventProcessorImplTest {
 	/**
 	 * Tests for PLACE_BET event.
 	 */
-	
+
 	@Test def testProcessPlaceBetEventLay() {
 		val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
@@ -114,7 +114,7 @@ class MarketEventProcessorImplTest {
 	}
 
 	@Test def testProcessPlaceBetEventBack() {
-			val market = mockery.mock(classOf[IMarket])
+		val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
 			{
 				one(betex).findMarket(1);will(returnValue(market))
@@ -137,10 +137,10 @@ class MarketEventProcessorImplTest {
 
 	@Test(expected=classOf[NoSuchElementException]) 
 	def testProcessPlaceBetEventNotSupportedBetType() {
-	val market = mockery.mock(classOf[IMarket])
+		val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
 			{
-					one(betex).findMarket(1);will(returnValue(market))
+				one(betex).findMarket(1);will(returnValue(market))
 			}
 		})
 		new MarketEventProcessorImpl(betex).process(new String("""
@@ -158,7 +158,7 @@ class MarketEventProcessorImplTest {
 	/**
 	 * Tests for wrong event data.
 	 */
-	
+
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
 		new MarketEventProcessorImpl(betex).process(new String(""))
 	}
@@ -171,31 +171,30 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
-	/**Check if both market objects are the same.*/
-	private class MarketMatcher(market:Market) extends TypeSafeMatcher[Market] {
+	/**Check if both market selection lists are the same.*/
+	private class SelectionsMatcher(selections:List[Market.Selection]) extends TypeSafeMatcher[List[Market.Selection]] {
 
-		def matchesSafely(s:Market):Boolean = {
-				if(s.marketId!=market.marketId) return false
-				if(s.marketName!=market.marketName) return false
-				if(s.eventName!=market.eventName) return false
-				if(s.numOfWinners!=market.numOfWinners) return  false
-				if(s.marketTime.getTime!=market.marketTime.getTime) return false
-				if(s.selections.length!=market.selections.length) return false
+		def matchesSafely(s:List[Market.Selection]):Boolean = {
 
-				for(i <- 0 until s.selections.length) {
-					if(s.selections(i).selectionId!=market.selections(i).selectionId) return false
-					if(s.selections(i).selectionName!=market.selections(i).selectionName)return false
+				if(s.length!=selections.length) return false
+				for(i <- 0 until s.length) {
+					if(s(i).selectionId!=selections(i).selectionId) return false
+					if(s(i).selectionName!=selections(i).selectionName)return false
 				}
 				return true
 		}
 
 		def describeTo(description:Description) = {
-			description.appendText("market equals to").appendValue(market);
+			description.appendText("market equals to").appendValue(selections);
 		}
 	}
 
 	/**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
 	private class SExpectations extends Expectations {
 		def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)  
+		def withArg(value: Long): Long = super.`with`(value)  
+		def withArg(value: String): String = super.`with`(value)  
+		def withArg(value: Int): Int = super.`with`(value) 
+		def withArg[Any](matcher: Any): Any = super.`with`(matcher)  
 	} 
 }

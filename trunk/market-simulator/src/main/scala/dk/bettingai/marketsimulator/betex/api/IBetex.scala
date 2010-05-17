@@ -1,5 +1,7 @@
 package dk.bettingai.marketsimulator.betex.api
 
+import java.util.Date
+
 /** This trait represents a betting exchange. It allows to create market, place bet, cancel bet, etc.
  * @author korzekwad
  *
@@ -11,7 +13,7 @@ trait IBetex {
 	 * @param market
 	 * 
 	 */
-	def createMarket(market:IMarket)
+	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,selections:List[IMarket.ISelection])
 	
 	/**Finds market for market id.
 	 * 

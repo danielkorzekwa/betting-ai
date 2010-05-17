@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator.betex
 
 import dk.bettingai.marketsimulator.betex.api._
 import scala.collection.mutable.Map
+import java.util.Date
 
 /** This class represents a betting exchange. It allows to create market, place bet, cancel bet, etc.
  * @author korzekwad
@@ -16,10 +17,10 @@ class Betex extends IBetex{
 	 * @param market
 	 * 
 	 */
-	def createMarket(market:IMarket) = {
-		require(!markets.contains(market.marketId),"Market already exist for marketId=" + market.marketId)
+	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,selections:List[IMarket.ISelection]) = {
+		require(!markets.contains(marketId),"Market already exist for marketId=" + marketId)
 
-		markets+= market.marketId -> market
+		markets+= marketId -> new Market(marketId,marketName,eventName,numOfWinners,marketTime,selections)
 	}
 	
 	/**Finds market for market id.

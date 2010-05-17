@@ -26,8 +26,7 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 		eventMap("eventType") match {
 		case "CREATE_MARKET" => {
 			val selections = eventMap("selections").asInstanceOf[List[Map[String,String]]].map(s => new Market.Selection(s("selectionId").asInstanceOf[Double].toLong,s("selectionName")))
-			val market = new Market(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
-			betex.createMarket(market)
+			betex.createMarket(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
 		}
 		case "PLACE_BET" => {	
 			val market = betex.findMarket( eventMap("marketId").asInstanceOf[Double].toLong)
