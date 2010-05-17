@@ -3,6 +3,8 @@ package dk.bettingai.marketsimulator.marketevent
 import org.junit._
 import Assert._
 import org.jmock._
+import org.jmock.Expectations._
+import dk.bettingai.marketsimulator.betex.api._
 import dk.bettingai.marketsimulator.betex._
 import org.junit.runner._
 import java.util.Date
@@ -17,10 +19,14 @@ import org.jmock.integration.junit4._
 class MarketEventProcessorImplTest {
 
 	private val mockery = new Mockery()
-	private val betex:Betex = mockery.mock(classOf[Betex])
+	private val betex:IBetex = mockery.mock(classOf[IBetex])
 
 	private val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	/**
+	 * Tests for CREATE_MARKET event.
+	 */
+	
 	@Test def testProcessCreateMarketEvent() {
 
 		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
@@ -81,10 +87,16 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
+	/**
+	 * Tests for PLACE_BET event.
+	 */
+	
 	@Test def testProcessPlaceBetEventLay() {
+		val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(100,123,10,3, Bet.BetTypeEnum.LAY, 1,11)
+				one(betex).findMarket(1);will(returnValue(market))
+				one(market).placeBet(100,123,10,3, IBet.BetTypeEnum.LAY, 11)
 			}
 		})
 
@@ -102,9 +114,11 @@ class MarketEventProcessorImplTest {
 	}
 
 	@Test def testProcessPlaceBetEventBack() {
+			val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).placeBet(100,345,10,3, Bet.BetTypeEnum.BACK, 1,11)
+				one(betex).findMarket(1);will(returnValue(market))
+				one(market).placeBet(100,345,10,3, IBet.BetTypeEnum.BACK, 11)
 			}
 		})
 
@@ -123,7 +137,12 @@ class MarketEventProcessorImplTest {
 
 	@Test(expected=classOf[NoSuchElementException]) 
 	def testProcessPlaceBetEventNotSupportedBetType() {
-
+	val market = mockery.mock(classOf[IMarket])
+		mockery.checking(new SExpectations(){
+			{
+					one(betex).findMarket(1);will(returnValue(market))
+			}
+		})
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
 				"userId":345,
@@ -136,6 +155,10 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
+	/**
+	 * Tests for wrong event data.
+	 */
+	
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
 		new MarketEventProcessorImpl(betex).process(new String(""))
 	}
