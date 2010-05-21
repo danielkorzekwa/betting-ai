@@ -9,9 +9,9 @@ import IMarket._
  *
  */
 object IMarket {
-	trait ISelection {
-		val selectionId:Long
-		val selectionName:String
+	trait IRunner {
+		val runnerId:Long
+		val runnerName:String
 	}
 	
 	/**This trait represents total unmatched volume to back and to lay at a given price.*/ 
@@ -34,7 +34,7 @@ trait IMarket {
 	val eventName:String
 	val numOfWinners:Int
 	val marketTime:Date
-	val selections:List[ISelection]
+	val runners:List[IRunner]
 	
 	/** Places a bet on a betting exchange market.
 	 * 
@@ -43,9 +43,9 @@ trait IMarket {
 	* @param betSize
 	* @param betPrice
 	* @param betType
-	* @param selectionId
+	* @param runnerId
 	*/
-	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, selectionId:Long)
+	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long)
 	
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
 	 *  Prices with zero volume are not returned by this method.
@@ -53,10 +53,10 @@ trait IMarket {
    * @param runnerId Unique runner id that runner prices are returned for.
    * @return
    */
-	def getRunnerPrices(selectionId:Long):List[IRunnerPrice]
+	def getRunnerPrices(runnerId:Long):List[IRunnerPrice]
 	
 	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(selectionId:Long): List[IPriceTradedVolume]
+	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume]
 	
 	/**Returns all bets placed by user on that market.
 	 *

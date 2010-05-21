@@ -17,10 +17,10 @@ class Betex extends IBetex{
 	 * @param market
 	 * 
 	 */
-	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,selections:List[IMarket.ISelection]) = {
+	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,runners:List[IMarket.IRunner]) = {
 		require(!markets.contains(marketId),"Market already exist for marketId=" + marketId)
 
-		markets+= marketId -> new Market(marketId,marketName,eventName,numOfWinners,marketTime,selections)
+		markets+= marketId -> new Market(marketId,marketName,eventName,numOfWinners,marketTime,runners)
 	}
 	
 	/**Finds market for market id.

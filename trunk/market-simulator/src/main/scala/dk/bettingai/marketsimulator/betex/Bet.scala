@@ -9,7 +9,7 @@ import dk.bettingai.marketsimulator.betex.api.IBet.BetStatusEnum._
  * @author korzekwad
  *
  */
-class Bet(val betId:Long,val userId: Long, val betSize:Double, val betPrice:Double, val betType:BetTypeEnum, val betStatus:BetStatusEnum,val marketId:Long,val selectionId:Long) extends IBet{
+class Bet(val betId:Long,val userId: Long, val betSize:Double, val betPrice:Double, val betType:BetTypeEnum, val betStatus:BetStatusEnum,val marketId:Long,val runnerId:Long) extends IBet{
 	require(betPrice>=1.01 && betPrice<=1000,"Bet price must be between 1.01 and 1000, betPrice=" + betPrice)
 
 	/**Match two bets. Bet that the matchedBet method is executed on is always matched at the best available price. 
@@ -23,9 +23,9 @@ class Bet(val betId:Long,val userId: Long, val betSize:Double, val betPrice:Doub
 	def matchBet(bet:IBet):List[IBet] = {
 
 		/**Do not match scenarios.*/
-		if(betType==bet.betType || marketId!=bet.marketId || selectionId!=bet.selectionId || betStatus==IBet.BetStatusEnum.M || bet.betStatus==IBet.BetStatusEnum.M || (betType==IBet.BetTypeEnum.BACK && betPrice>bet.betPrice) || (betType==IBet.BetTypeEnum.LAY && betPrice<bet.betPrice)) {
-			val firstBetUnmatchedPortion = new Bet(betId,userId,betSize,betPrice,betType,betStatus,marketId,selectionId)
-			val secondBetUnmatchedPortion = new Bet(bet.betId,bet.userId,bet.betSize,bet.betPrice,bet.betType,bet.betStatus,bet.marketId,bet.selectionId)
+		if(betType==bet.betType || marketId!=bet.marketId || runnerId!=bet.runnerId || betStatus==IBet.BetStatusEnum.M || bet.betStatus==IBet.BetStatusEnum.M || (betType==IBet.BetTypeEnum.BACK && betPrice>bet.betPrice) || (betType==IBet.BetTypeEnum.LAY && betPrice<bet.betPrice)) {
+			val firstBetUnmatchedPortion = new Bet(betId,userId,betSize,betPrice,betType,betStatus,marketId,runnerId)
+			val secondBetUnmatchedPortion = new Bet(bet.betId,bet.userId,bet.betSize,bet.betPrice,bet.betType,bet.betStatus,bet.marketId,bet.runnerId)
 
 			List(firstBetUnmatchedPortion,secondBetUnmatchedPortion)
 		}
@@ -34,19 +34,19 @@ class Bet(val betId:Long,val userId: Long, val betSize:Double, val betPrice:Doub
 			val matchedPrice = bet.betPrice
 			val matchedSize = betSize.min(bet.betSize)
 
-			val firstBetMatchedPortion = new Bet(betId,userId,matchedSize,matchedPrice,betType,BetStatusEnum.M,marketId,selectionId)
+			val firstBetMatchedPortion = new Bet(betId,userId,matchedSize,matchedPrice,betType,BetStatusEnum.M,marketId,runnerId)
 			val firstBetUnmatchedSize = betSize - matchedSize
-			val firstBetUnmatchedPortion = new Bet(betId,userId,firstBetUnmatchedSize,betPrice,betType,BetStatusEnum.U,marketId,selectionId)
+			val firstBetUnmatchedPortion = new Bet(betId,userId,firstBetUnmatchedSize,betPrice,betType,BetStatusEnum.U,marketId,runnerId)
 
-			val secondBetMatchedPortion = new Bet(bet.betId,bet.userId,matchedSize,matchedPrice,bet.betType,BetStatusEnum.M,bet.marketId,bet.selectionId)
+			val secondBetMatchedPortion = new Bet(bet.betId,bet.userId,matchedSize,matchedPrice,bet.betType,BetStatusEnum.M,bet.marketId,bet.runnerId)
 			val secondBetUnmatchedSize = bet.betSize - matchedSize
-			val secondBetUnmatchedPortion = new Bet(bet.betId,bet.userId,secondBetUnmatchedSize,bet.betPrice,bet.betType,BetStatusEnum.U,bet.marketId,bet.selectionId)
+			val secondBetUnmatchedPortion = new Bet(bet.betId,bet.userId,secondBetUnmatchedSize,bet.betPrice,bet.betType,BetStatusEnum.U,bet.marketId,bet.runnerId)
 
 			List(firstBetMatchedPortion,firstBetUnmatchedPortion,secondBetMatchedPortion,secondBetUnmatchedPortion).filter(b => b.betSize>0)
 		}
 
 	} 
 
-	override def toString = "Bet [betId=%s, userId=%s, betSize=%s, betPrice=%s, betType=%s, betStatus=%s, marketId=%s, selectionId=%s]".format(betId,userId,betSize,betPrice,betType,betStatus,marketId,selectionId)
+	override def toString = "Bet [betId=%s, userId=%s, betSize=%s, betPrice=%s, betType=%s, betStatus=%s, marketId=%s, runnerId=%s]".format(betId,userId,betSize,betPrice,betType,betStatus,marketId,runnerId)
 }
 
