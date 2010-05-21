@@ -800,6 +800,118 @@ class MarketTest {
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).selectionId)
 
+	}
 
+	/** 
+	 *  Tests for getRunnerPrices.
+	 * 
+	 * */
+
+	@Test def testGetRunnerPricesNoBets {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		assertEquals(0,market.getRunnerPrices(11).size)
+	}
+
+	@Test  def testGetRunnerPricesForUnmatchedBetsOnly {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		market.placeBet(100,122,13,2.1,LAY,11)
+		market.placeBet(101,121,3,2.2,LAY,11)
+		market.placeBet(102,122,5,2.2,LAY,11)
+		market.placeBet(103,121,8,2.4,BACK,11)
+		market.placeBet(104,122,25,2.5,BACK,11)
+
+		val runnerPrices = market.getRunnerPrices(11)
+
+		assertEquals(4,runnerPrices.size)
+
+		assertEquals(2.1, runnerPrices(0).price,0)
+		assertEquals(13, runnerPrices(0).totalToBack,0)
+		assertEquals(0, runnerPrices(0).totalToLay,0)
+
+		assertEquals(2.2, runnerPrices(1).price,0)
+		assertEquals(8, runnerPrices(1).totalToBack,0)
+		assertEquals(0, runnerPrices(1).totalToLay,0)
+
+		assertEquals(2.4, runnerPrices(2).price,0)
+		assertEquals(0, runnerPrices(2).totalToBack,0)
+		assertEquals(8, runnerPrices(2).totalToLay,0)
+
+		assertEquals(2.5, runnerPrices(3).price,0)
+		assertEquals(0, runnerPrices(3).totalToBack,0)
+		assertEquals(25, runnerPrices(3).totalToLay,0)
+	}
+
+	@Test  def testGetRunnerPricesForUnmatchedBetsOnMoreThanOneRunner {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		/**Unmatched bets on runner 11.*/
+		market.placeBet(100,122,13,2.1,LAY,11)
+		market.placeBet(101,121,3,2.2,LAY,11)
+		market.placeBet(102,122,5,2.2,LAY,11)
+		market.placeBet(103,121,8,2.4,BACK,11)
+		market.placeBet(104,122,25,2.5,BACK,11)
+
+		/**Unmatched bets on runner 12.*/
+		market.placeBet(100,122,13,2.1,LAY,12)
+
+		val runnerPrices = market.getRunnerPrices(11)
+
+		assertEquals(4,runnerPrices.size)
+
+		assertEquals(2.1, runnerPrices(0).price,0)
+		assertEquals(13, runnerPrices(0).totalToBack,0)
+		assertEquals(0, runnerPrices(0).totalToLay,0)
+
+		assertEquals(2.2, runnerPrices(1).price,0)
+		assertEquals(8, runnerPrices(1).totalToBack,0)
+		assertEquals(0, runnerPrices(1).totalToLay,0)
+
+		assertEquals(2.4, runnerPrices(2).price,0)
+		assertEquals(0, runnerPrices(2).totalToBack,0)
+		assertEquals(8, runnerPrices(2).totalToLay,0)
+
+		assertEquals(2.5, runnerPrices(3).price,0)
+		assertEquals(0, runnerPrices(3).totalToBack,0)
+		assertEquals(25, runnerPrices(3).totalToLay,0)
+	}
+
+	@Test  def testGetRunnerPricesForUnmatchedAndMatchedBets {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		/**Unmatched bets.*/
+		market.placeBet(100,122,13,2.1,LAY,11)
+		market.placeBet(104,122,25,2.5,BACK,11)
+
+		/**Matching bets.*/
+		market.placeBet(104,122,10,2.5,LAY,11)
+
+		val runnerPrices = market.getRunnerPrices(11)
+
+		assertEquals(2,runnerPrices.size)
+
+		assertEquals(2.1, runnerPrices(0).price,0)
+		assertEquals(13, runnerPrices(0).totalToBack,0)
+		assertEquals(0, runnerPrices(0).totalToLay,0)
+
+		assertEquals(2.5, runnerPrices(1).price,0)
+		assertEquals(0, runnerPrices(1).totalToBack,0)
+		assertEquals(15, runnerPrices(1).totalToLay,0)
+	}
+
+	@Test  def testGetRunnerLayAndBackBetsonTheSamePrice {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+
+		market.placeBet(100,122,5,2.4,BACK,11)
+		market.placeBet(101,122,8,2.4,LAY,11)
+
+		val runnerPrices = market.getRunnerPrices(11)
+
+		assertEquals(1,runnerPrices.size)
+
+		assertEquals(2.4, runnerPrices(0).price,0)
+		assertEquals(3, runnerPrices(0).totalToBack,0)
+		assertEquals(0, runnerPrices(0).totalToLay,0)
 	}
 }

@@ -2,7 +2,7 @@ package dk.bettingai.marketsimulator.betex.api
 
 import java.util.Date
 import IBet.BetTypeEnum._
-
+import IMarket._
 /**This trait represents a market on a betting exchange. Market is a place that bets can be placed on, for example football match between Man Utd and Arsenal.
  * 
  * @author korzekwad
@@ -13,6 +13,13 @@ object IMarket {
 		val selectionId:Long
 		val selectionName:String
 	}
+	
+	/**This trait represents total unmatched volume to back and to lay at a given price.*/ 
+	trait IRunnerPrice {
+		val price:Double
+		val totalToBack:Double
+		val totalToLay: Double
+	}
 }
 trait IMarket {
 	
@@ -21,7 +28,7 @@ trait IMarket {
 	val eventName:String
 	val numOfWinners:Int
 	val marketTime:Date
-	val selections:List[IMarket.ISelection]
+	val selections:List[ISelection]
 	
 	/** Places a bet on a betting exchange market.
 	 * 
@@ -33,6 +40,14 @@ trait IMarket {
 	* @param selectionId
 	*/
 	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, selectionId:Long)
+	
+	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
+	 *  Prices with zero volume are not returned by this method.
+   * 
+   * @param runnerId Unique runner id that runner prices are returned for.
+   * @return
+   */
+	def getRunnerPrices(selectionId:Long):List[IRunnerPrice]
 	
 	/**Returns all bets placed by user on that market.
 	 *

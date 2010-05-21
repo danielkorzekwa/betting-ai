@@ -6,6 +6,7 @@ import dk.bettingai.marketsimulator.betex.api.IBet._
 import scala.collection.mutable.ListBuffer
 import IBet.BetStatusEnum._
 import IBet.BetTypeEnum._
+import Market._
 
 /**This class represents a market on a betting exchange.
  * @author korzekwad
@@ -14,6 +15,10 @@ import IBet.BetTypeEnum._
 object Market {
 	class Selection(val selectionId:Long, val selectionName:String) extends IMarket.ISelection {
 		override def toString = "Selection [selectionId=%s, selectionName=%s]".format(selectionId, selectionName)
+	}
+	
+	class RunnerPrice(	val price:Double,val totalToBack:Double,val totalToLay: Double) extends IMarket.IRunnerPrice {
+		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s".format(price,totalToBack,totalToLay)
 	}
 }
 
@@ -70,6 +75,19 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			}
 		}
 		}
+	}
+	
+	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
+	 *  Prices with zero volume are not returned by this method.
+   * 
+   * @param selectionId Unique runner id that runner prices are returned for.
+   * @return
+   */
+	def getRunnerPrices(selectionId:Long):List[IMarket.IRunnerPrice] = {
+		val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.selectionId==selectionId).groupBy(b => b.betPrice) 
+		
+		def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).map(b => b.betSize).foldLeft(0d)(_ + _)
+		betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
 	}
 
 	/**Returns all bets placed by user on that market.
