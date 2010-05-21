@@ -25,12 +25,12 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 
 		eventMap("eventType") match {
 		case "CREATE_MARKET" => {
-			val selections = eventMap("selections").asInstanceOf[List[Map[String,String]]].map(s => new Market.Selection(s("selectionId").asInstanceOf[Double].toLong,s("selectionName")))
-			betex.createMarket(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),selections)
+			val runners = eventMap("runners").asInstanceOf[List[Map[String,String]]].map(s => new Market.Runner(s("runnerId").asInstanceOf[Double].toLong,s("runnerName")))
+			betex.createMarket(eventMap("marketId").asInstanceOf[Double].toLong,eventMap("marketName").asInstanceOf[String],eventMap("eventName").asInstanceOf[String],eventMap("numOfWinners").asInstanceOf[Double].toInt,df.parse(eventMap("marketTime").asInstanceOf[String]),runners)
 		}
 		case "PLACE_BET" => {	
 			val market = betex.findMarket( eventMap("marketId").asInstanceOf[Double].toLong)
-			market.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], IBet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get,eventMap("selectionId").asInstanceOf[Double].toLong)
+			market.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], IBet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get,eventMap("runnerId").asInstanceOf[Double].toLong)
 		}
 		case _ =>	throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
 		}

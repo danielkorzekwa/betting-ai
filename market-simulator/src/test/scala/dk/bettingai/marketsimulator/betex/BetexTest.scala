@@ -14,7 +14,7 @@ class BetexTest {
 	 * */
 
 	@Test def testCreateMarket {
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		assertEquals(1,betex.getMarkets.size)
 
 		val marketFromBetex = betex.getMarkets()(0)
@@ -24,15 +24,15 @@ class BetexTest {
 		assertEquals(1,marketFromBetex.numOfWinners)
 		assertEquals(new Date(2000),marketFromBetex.marketTime)
 
-		assertEquals(11,marketFromBetex.selections(0).selectionId)
-		assertEquals("Man Utd",marketFromBetex.selections(0).selectionName)
-		assertEquals(12,marketFromBetex.selections(1).selectionId)
-		assertEquals("Arsenal",marketFromBetex.selections(1).selectionName)
+		assertEquals(11,marketFromBetex.runners(0).runnerId)
+		assertEquals("Man Utd",marketFromBetex.runners(0).runnerName)
+		assertEquals(12,marketFromBetex.runners(1).runnerId)
+		assertEquals("Arsenal",marketFromBetex.runners(1).runnerName)
 	}
 
 	@Test def testCreateTwoMarkets {
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
-		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Selection(31,"Fulham"),new Market.Selection(42,"Wigan")))
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
 		assertEquals(2,betex.getMarkets.size)
 
 		val marketFromBetex1 = betex.getMarkets()(0)
@@ -42,10 +42,10 @@ class BetexTest {
 		assertEquals(1,marketFromBetex1.numOfWinners)
 		assertEquals(new Date(2000),marketFromBetex1.marketTime)
 
-		assertEquals(31,marketFromBetex1.selections(0).selectionId)
-		assertEquals("Fulham",marketFromBetex1.selections(0).selectionName)
-		assertEquals(42,marketFromBetex1.selections(1).selectionId)
-		assertEquals("Wigan",marketFromBetex1.selections(1).selectionName)
+		assertEquals(31,marketFromBetex1.runners(0).runnerId)
+		assertEquals("Fulham",marketFromBetex1.runners(0).runnerName)
+		assertEquals(42,marketFromBetex1.runners(1).runnerId)
+		assertEquals("Wigan",marketFromBetex1.runners(1).runnerName)
 
 		val marketFromBetex2 = betex.getMarkets()(1)
 		assertEquals(10,marketFromBetex2.marketId)
@@ -54,16 +54,16 @@ class BetexTest {
 		assertEquals(1,marketFromBetex2.numOfWinners)
 		assertEquals(new Date(2000),marketFromBetex2.marketTime)
 
-		assertEquals(11,marketFromBetex2.selections(0).selectionId)
-		assertEquals("Man Utd",marketFromBetex2.selections(0).selectionName)
-		assertEquals(12,marketFromBetex2.selections(1).selectionId)
-		assertEquals("Arsenal",marketFromBetex2.selections(1).selectionName)
+		assertEquals(11,marketFromBetex2.runners(0).runnerId)
+		assertEquals("Man Utd",marketFromBetex2.runners(0).runnerName)
+		assertEquals(12,marketFromBetex2.runners(1).runnerId)
+		assertEquals("Arsenal",marketFromBetex2.runners(1).runnerName)
 	}
 
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testCreateMarketAlreadyExist {
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 	}
 
 	/**Tests for findMarket*/
@@ -74,8 +74,8 @@ class BetexTest {
 
 	@Test def testFindMarket() {
 
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
-		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Selection(31,"Fulham"),new Market.Selection(42,"Wigan")))
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
 		
 		assertEquals(10,betex.findMarket(10).marketId)
 		assertEquals("Man Utd vs Arsenal",betex.findMarket(10).eventName)

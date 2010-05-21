@@ -29,10 +29,10 @@ class MarketEventProcessorImplTest {
 
 	@Test def testProcessCreateMarketEvent() {
 
-		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))
+		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
-				one(betex).createMarket(withArg(10),withArg("Match Odds"),withArg("Man Utd vs Arsenal"),withArg(1),withArg(df.parse("2010-04-15 14:00:00")),withArg(new SelectionsMatcher(List(new Market.Selection(11,"Man Utd"),new Market.Selection(12,"Arsenal")))))
+				one(betex).createMarket(withArg(10),withArg("Match Odds"),withArg("Man Utd vs Arsenal"),withArg(1),withArg(df.parse("2010-04-15 14:00:00")),withArg(new RunnersMatcher(List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))))
 			}
 		})
 
@@ -44,10 +44,10 @@ class MarketEventProcessorImplTest {
 				"numOfWinners":1, 
 				"marketTime":
 				"2010-04-15 14:00:00", 
-				"selections": [{"selectionId":11,
-				"selectionName":"Man Utd"},
-				{"selectionId":12, 
-				"selectionName":"Arsenal"}]
+				"runners": [{"runnerId":11,
+				"runnerName":"Man Utd"},
+				{"runnerId":12, 
+				"runnerName":"Arsenal"}]
 				}
 		"""))
 	}
@@ -62,10 +62,10 @@ class MarketEventProcessorImplTest {
 				"numOfWinners":1, 
 				"marketTime":
 				"2010-04-15 14:00:00", 
-				"selections": [{"selectionId":11,
-				"selectionName":"Man Utd"},
-				{"selectionId":12, 
-				"selectionName":"Arsenal"}]
+				"runners": [{"runnerId":11,
+				"runnerName":"Man Utd"},
+				{"runnerId":12, 
+				"runnerName":"Arsenal"}]
 				}
 		"""))
 	}
@@ -79,10 +79,10 @@ class MarketEventProcessorImplTest {
 				"numOfWinners":1, 
 				"marketTime":
 				"2010-04-15 14:00:00", 
-				"selections": [{"selectionId":11,
-				"selectionName":"Man Utd"},
-				{"selectionId":12, 
-				"selectionName":"Arsenal"}]
+				"runners": [{"runnerId":11,
+				"runnerName":"Man Utd"},
+				{"runnerId":12, 
+				"runnerName":"Arsenal"}]
 				}
 		"""))
 	}
@@ -108,7 +108,7 @@ class MarketEventProcessorImplTest {
 				"betPrice":3,
 				"betType":"LAY",
 				"marketId":1,
-				"selectionId":11
+				"runnerId":11
 				}
 		"""))
 	}
@@ -130,7 +130,7 @@ class MarketEventProcessorImplTest {
 				"betPrice":3,
 				"betType":"BACK",
 				"marketId":1,
-				"selectionId":11
+				"runnerId":11
 				}
 		"""))
 	}
@@ -150,7 +150,7 @@ class MarketEventProcessorImplTest {
 				"betPrice":3,
 				"betType":"NOT_SUPPORTED",
 				"marketId":1,
-				"selectionId":11
+				"runnerId":11
 				}
 		"""))
 	}
@@ -171,21 +171,21 @@ class MarketEventProcessorImplTest {
 		"""))
 	}
 
-	/**Check if both market selection lists are the same.*/
-	private class SelectionsMatcher(selections:List[Market.Selection]) extends TypeSafeMatcher[List[Market.Selection]] {
+	/**Check if both market runners lists are the same.*/
+	private class RunnersMatcher(runners:List[Market.Runner]) extends TypeSafeMatcher[List[Market.Runner]] {
 
-		def matchesSafely(s:List[Market.Selection]):Boolean = {
+		def matchesSafely(s:List[Market.Runner]):Boolean = {
 
-				if(s.length!=selections.length) return false
+				if(s.length!=runners.length) return false
 				for(i <- 0 until s.length) {
-					if(s(i).selectionId!=selections(i).selectionId) return false
-					if(s(i).selectionName!=selections(i).selectionName)return false
+					if(s(i).runnerId!=runners(i).runnerId) return false
+					if(s(i).runnerName!=runners(i).runnerName)return false
 				}
 				return true
 		}
 
 		def describeTo(description:Description) = {
-			description.appendText("market equals to").appendValue(selections);
+			description.appendText("market equals to").appendValue(runners);
 		}
 	}
 

@@ -46,7 +46,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -55,7 +55,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -74,7 +74,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -83,7 +83,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -102,7 +102,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(10,matchResult(1).betId)
 		assertEquals(122,matchResult(1).userId)
@@ -111,7 +111,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -120,7 +120,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(2).betType)
 		assertEquals(M,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -139,7 +139,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(10,matchResult(1).betId)
 		assertEquals(122,matchResult(1).userId)
@@ -148,7 +148,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -157,7 +157,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(2).betType)
 		assertEquals(M,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -176,7 +176,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 			assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -185,7 +185,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -194,7 +194,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(2).betType)
 		assertEquals(U,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -213,7 +213,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 			assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -222,7 +222,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -231,7 +231,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(2).betType)
 		assertEquals(U,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -250,7 +250,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -259,7 +259,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -278,7 +278,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -287,7 +287,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -306,7 +306,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(10,matchResult(1).betId)
 		assertEquals(122,matchResult(1).userId)
@@ -315,7 +315,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -324,7 +324,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(2).betType)
 		assertEquals(M,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -343,7 +343,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(10,matchResult(1).betId)
 		assertEquals(122,matchResult(1).userId)
@@ -352,7 +352,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -361,7 +361,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(2).betType)
 		assertEquals(M,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -380,7 +380,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -389,7 +389,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -398,7 +398,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(2).betType)
 		assertEquals(U,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -417,7 +417,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -426,7 +426,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 		assertEquals(11,matchResult(2).betId)
 		assertEquals(123,matchResult(2).userId)
@@ -435,7 +435,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(2).betType)
 		assertEquals(U,matchResult(2).betStatus)
 		assertEquals(1,matchResult(2).marketId)
-		assertEquals(11,matchResult(2).selectionId)
+		assertEquals(11,matchResult(2).runnerId)
 		
 	}
 	
@@ -459,7 +459,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -468,7 +468,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -487,7 +487,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -496,7 +496,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -515,7 +515,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -524,11 +524,11 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(2,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
-	@Test def testMatchBetDifferentSelectionId {
+	@Test def testMatchBetDifferentRunnerId {
 		val firstBet = new Bet(10,122,10,2,LAY,U,1,11)
 		val secondBet = new Bet(11,123,10,2,BACK,U,1,12)
 		
@@ -543,7 +543,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -552,7 +552,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(12,matchResult(1).selectionId)
+		assertEquals(12,matchResult(1).runnerId)
 		
 	}
 	@Test def testMatchBetFirstBackSecondLayPriceNotMatching {
@@ -570,7 +570,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -579,7 +579,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -598,7 +598,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -607,7 +607,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -626,7 +626,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -635,7 +635,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(U,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -654,7 +654,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(U,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -663,7 +663,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 	
@@ -682,7 +682,7 @@ class BetTest {
 		assertEquals(LAY,matchResult(0).betType)
 		assertEquals(M,matchResult(0).betStatus)
 		assertEquals(1,matchResult(0).marketId)
-		assertEquals(11,matchResult(0).selectionId)
+		assertEquals(11,matchResult(0).runnerId)
 		
 		assertEquals(11,matchResult(1).betId)
 		assertEquals(123,matchResult(1).userId)
@@ -691,7 +691,7 @@ class BetTest {
 		assertEquals(BACK,matchResult(1).betType)
 		assertEquals(M,matchResult(1).betStatus)
 		assertEquals(1,matchResult(1).marketId)
-		assertEquals(11,matchResult(1).selectionId)
+		assertEquals(11,matchResult(1).runnerId)
 		
 	}
 }
