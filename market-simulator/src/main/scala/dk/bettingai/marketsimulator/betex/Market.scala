@@ -89,6 +89,9 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).map(b => b.betSize).foldLeft(0d)(_ + _)
 		betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
 	}
+	
+	/**Returns total traded volume for all prices on all runners in a market.*/
+	def getRunnerTradedVolume(selectionId:Long): List[IMarket.IPriceTradedVolume] = throw new UnsupportedOperationException("Not implemented")
 
 	/**Returns all bets placed by user on that market.
 	 *

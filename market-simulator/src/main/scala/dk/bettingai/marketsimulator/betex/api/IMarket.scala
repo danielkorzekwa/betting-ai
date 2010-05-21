@@ -20,6 +20,12 @@ object IMarket {
 		val totalToBack:Double
 		val totalToLay: Double
 	}
+	
+	/**This trait represents total amount matched for the given odds.*/
+	trait IPriceTradedVolume {
+		val price: Double
+		val totalMatchedAmount:Double
+	}
 }
 trait IMarket {
 	
@@ -48,6 +54,9 @@ trait IMarket {
    * @return
    */
 	def getRunnerPrices(selectionId:Long):List[IRunnerPrice]
+	
+	/**Returns total traded volume for all prices on all runners in a market.*/
+	def getRunnerTradedVolume(selectionId:Long): List[IPriceTradedVolume]
 	
 	/**Returns all bets placed by user on that market.
 	 *
