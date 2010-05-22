@@ -1,13 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>dk.bettingai</groupId>
+	
+	<parent>
+    	<groupId>dk.bettingai</groupId>
+    	<artifactId>betting-ai</artifactId>
+    	<version>1.0-SNAPSHOT</version>   
+  	</parent>		
+	
 	<artifactId>betting-oracle</artifactId>
-	<version>1.0-SNAPSHOT</version>
 	<inceptionYear>2008</inceptionYear>
-	<properties>
-		<scala.version>2.8.0.Beta1-RC8</scala.version>
-	</properties>
 
 	<repositories>
 		<repository>
@@ -21,7 +23,6 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
-
 	</repositories>
 
 	<pluginRepositories>
@@ -35,21 +36,21 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
+			<artifactId>scala-library</artifactId>		
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.specs</groupId>
-			<artifactId>specs</artifactId>
-			<version>1.2.5</version>
+			<artifactId>specs</artifactId>		
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- For now dependencies below are only used by betting oracle.
+		     They are not in parent pom dependencyManagement -->
 		<dependency>
 			<groupId>org.encog</groupId>
 			<artifactId>encog-core</artifactId>
@@ -112,7 +113,6 @@
 					</classpathContainers>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -123,15 +123,6 @@
 							<classpathPrefix></classpathPrefix>
 						</manifest>
 					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/src.xml</descriptor>
-					</descriptors>
 				</configuration>
 			</plugin>
 		</plugins>
