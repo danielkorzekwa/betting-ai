@@ -20,9 +20,9 @@ object Market {
 	class RunnerPrice(val price:Double,val totalToBack:Double,val totalToLay: Double) extends IMarket.IRunnerPrice {
 		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s".format(price,totalToBack,totalToLay)
 	}
-	
+
 	class PriceTradedVolume(val price:Double, val totalMatchedAmount:Double) extends IMarket.IPriceTradedVolume {
-		
+
 		override def toString = "PriceTradedVolume [price=%s, totalMatchedAmount=%s]".format(price,totalMatchedAmount)
 	}
 }
@@ -82,6 +82,20 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		}
 	}
 
+	/** Cancels a bet on a betting exchange market.
+	 * 
+	 * @param userId Unique id of a user that cancels a bet.
+	 * @param betId Unique id of a bet to be cancelled.
+	 * 
+	 * @return amount cancelled
+	 * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
+	 */
+	def cancelBet(userId: Int, betId:Long):Double = {
+		val betToBeCancelled = bets.find(b => b.betId==betId && b.userId==userId && b.betStatus==U).get
+		bets -=  betToBeCancelled
+		betToBeCancelled.betSize
+	}
+
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
 	 *  Prices with zero volume are not returned by this method.
 	 * 
@@ -100,9 +114,9 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
-			
+
 			val betsByPrice = bets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
-			
+
 			/**Map betsByPrice to list of PriceTradedVolume.*/
 			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.map(b =>b.betSize).foldLeft(0d)(_ + _))).toList
 	}

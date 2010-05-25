@@ -7,7 +7,7 @@ import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 
-class MarketTest {
+class MarketPlaceBetTest {
 
 	/** 
 	 *  Tests for placeBet and matching.

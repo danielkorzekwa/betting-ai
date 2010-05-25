@@ -31,13 +31,6 @@ class Betex extends IBetex{
 	 */
 	def findMarket(marketId: Long):IMarket = markets(marketId)
 
-	/** Cancels a bet on a betting exchange.
-	 * 
-	 * @param userId Unique id of a user that cancels a bet.
-	 * @param betId Unique id of a bet to be cancelled.
-	 */
-	def cancelBet(userId: Int, betId:Long) = throw new UnsupportedOperationException("Not implemented")
-
 /**Returns all markets.*/
 	def getMarkets(): List[IMarket] = markets.values.toList
 
