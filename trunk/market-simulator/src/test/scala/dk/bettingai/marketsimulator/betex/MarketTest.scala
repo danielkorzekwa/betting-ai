@@ -158,7 +158,63 @@ class MarketTest {
 		assertEquals(1,bets122(2).marketId)
 		assertEquals(11,bets122(2).runnerId)
 	}
+	
+		@Test def testPlaceLayThenPlaceBackOnDifferentRunner {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
+		market.placeBet(100,122,2,5,LAY,11)
+		market.placeBet(101,122,2,4,BACK,12)
+		
+		val bets122 = market.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(5,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).runnerId)
+
+		assertEquals(101,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(2,bets122(1).betSize,0)
+		assertEquals(4,bets122(1).betPrice,0)
+		assertEquals(BACK,bets122(1).betType)
+		assertEquals(U,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(12,bets122(1).runnerId)
+		}
+		
+			@Test def testPlaceBackThenPlaceLayOnDifferentRunner {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		market.placeBet(100,122,2,5,BACK,11)
+		market.placeBet(101,122,2,6,LAY,12)
+		
+		val bets122 = market.getBets(122)
+		assertEquals(2, bets122.size)
+
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(5,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).runnerId)
+
+		assertEquals(101,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(2,bets122(1).betSize,0)
+		assertEquals(6,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(U,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(12,bets122(1).runnerId)
+		}
+		
 	@Test def testMatchLayBetWithBackBet {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
@@ -812,6 +868,13 @@ class MarketTest {
 
 		assertEquals(0,market.getRunnerPrices(11).size)
 	}
+	
+	@Test(expected=classOf[IllegalArgumentException])
+	def testGetRunnerPricesForNotExistingRunner {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		assertEquals(0,market.getRunnerPrices(1234).size)
+	}
 
 	@Test  def testGetRunnerPricesForUnmatchedBetsOnly {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
@@ -914,4 +977,79 @@ class MarketTest {
 		assertEquals(3, runnerPrices(0).totalToBack,0)
 		assertEquals(0, runnerPrices(0).totalToLay,0)
 	}
+	
+	/** 
+	 *  Tests for getRunnerTradedVolume.
+	 * 
+	 * */
+	@Test def testRunnerTradedVolumeNoBets {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		assertEquals(0,market.getRunnerTradedVolume(11).size)
+	}
+	@Test def testRunnerTradedVolumeNoMatchedBets {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+	  market.placeBet(100,122,5,2.4,BACK,11)
+		market.placeBet(101,122,8,2.3,LAY,11)
+		
+		assertEquals(0,market.getRunnerTradedVolume(11).size)
+	}
+	
+	@Test(expected=classOf[IllegalArgumentException])
+	def testRunnerTradedVolumeForNotExistingRunner {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		assertEquals(0,market.getRunnerPrices(1234).size)
+	}
+	
+	@Test def testRunnerTradedVolumeOneMatchedBet {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+	  market.placeBet(100,122,5,2.4,BACK,11)
+		market.placeBet(101,122,8,2.6,LAY,11)
+		
+		val tradedVolume = market.getRunnerTradedVolume(11)
+		assertEquals(1,tradedVolume.size)
+		assertEquals(2.4,tradedVolume(0).price,0)
+		assertEquals(5,tradedVolume(0).totalMatchedAmount,0)
+	}
+	
+	@Test def testRunnerTradedVolumeThreeMatchedBet {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+	  market.placeBet(100,122,5,2.4,BACK,11)
+		market.placeBet(101,122,8,2.6,LAY,11)
+		market.placeBet(100,122,4,2.5,BACK,11)
+		market.placeBet(100,122,2,2.8,LAY,11)
+		
+		val tradedVolume = market.getRunnerTradedVolume(11)
+		assertEquals(3,tradedVolume.size)
+		assertEquals(2.4,tradedVolume(0).price,0)
+		assertEquals(5,tradedVolume(0).totalMatchedAmount,0)
+		
+		assertEquals(2.6,tradedVolume(1).price,0)
+		assertEquals(3,tradedVolume(1).totalMatchedAmount,0)
+		
+		assertEquals(2.5,market.getRunnerTradedVolume(11)(2).price,0)
+		assertEquals(1,tradedVolume(2).totalMatchedAmount,0)
+	}
+	
+	
+	@Test def testRunnerTradedVolumeMatchedBetsOnTwoRunners {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+	  market.placeBet(100,122,5,2.4,BACK,11)
+		market.placeBet(101,122,8,2.6,LAY,11)
+		market.placeBet(102,122,4,2.5,BACK,12)
+		market.placeBet(103,122,2,2.8,LAY,12)
+		
+		val tradedVolume11 = market.getRunnerTradedVolume(11)
+		assertEquals(1,tradedVolume11.size)
+		assertEquals(2.4,tradedVolume11(0).price,0)
+		assertEquals(5,tradedVolume11(0).totalMatchedAmount,0)
+		
+		val tradedVolume12 = market.getRunnerTradedVolume(12)
+		assertEquals(1,tradedVolume12.size)
+		assertEquals(2.5,tradedVolume12(0).price,0)
+		assertEquals(2,tradedVolume12(0).totalMatchedAmount,0)
+			
+	}
+	
 }

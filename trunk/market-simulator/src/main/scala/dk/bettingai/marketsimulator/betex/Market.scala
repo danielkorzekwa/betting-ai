@@ -16,9 +16,14 @@ object Market {
 	class Runner(val runnerId:Long, val runnerName:String) extends IMarket.IRunner {
 		override def toString = "Runner [runnerId=%s, runnerName=%s]".format(runnerId, runnerName)
 	}
-	
-	class RunnerPrice(	val price:Double,val totalToBack:Double,val totalToLay: Double) extends IMarket.IRunnerPrice {
+
+	class RunnerPrice(val price:Double,val totalToBack:Double,val totalToLay: Double) extends IMarket.IRunnerPrice {
 		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s".format(price,totalToBack,totalToLay)
+	}
+	
+	class PriceTradedVolume(val price:Double, val totalMatchedAmount:Double) extends IMarket.IPriceTradedVolume {
+		
+		override def toString = "PriceTradedVolume [price=%s, totalMatchedAmount=%s]".format(price,totalMatchedAmount)
 	}
 }
 
@@ -46,7 +51,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		if(betType==LAY) {
 			var newBet:IBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
 		while(newBet.betSize>0) {
-			val betsToBeMatched = bets.filter(b => b.betStatus == U && b.betType ==BACK && b.betPrice<= newBet.betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
+			val betsToBeMatched = bets.filter(b => b.runnerId==newBet.runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= newBet.betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
 			if(betsToBeMatched.size>0) {
 				val matchingResult = newBet.matchBet(betsToBeMatched(0))
 				matchingResult.filter(b => b.betStatus ==M || b.betId!=newBet.betId).foreach(b => bets += b)
@@ -62,7 +67,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		else if(betType==BACK){
 			var newBet:IBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
 		while(newBet.betSize>0) {
-			val betsToBeMatched = bets.filter(b => b.betStatus == U && b.betType ==LAY && b.betPrice>= newBet.betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
+			val betsToBeMatched = bets.filter(b => b.runnerId==newBet.runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= newBet.betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
 			if(betsToBeMatched.size>0) {
 				val matchingResult = newBet.matchBet(betsToBeMatched(0))
 				matchingResult.filter(b => b.betStatus ==M || b.betId!=newBet.betId).foreach(b => bets += b)
@@ -76,22 +81,31 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		}
 		}
 	}
-	
+
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
 	 *  Prices with zero volume are not returned by this method.
-   * 
-   * @param runnerId Unique runner id that runner prices are returned for.
-   * @return
-   */
+	 * 
+	 * @param runnerId Unique runner id that runner prices are returned for.
+	 * @return
+	 */
 	def getRunnerPrices(runnerId:Long):List[IMarket.IRunnerPrice] = {
-		val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.runnerId==runnerId).groupBy(b => b.betPrice) 
-		
-		def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).map(b => b.betSize).foldLeft(0d)(_ + _)
-		betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
+			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
+
+			val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.runnerId==runnerId).groupBy(b => b.betPrice) 
+
+			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).map(b => b.betSize).foldLeft(0d)(_ + _)
+			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
 	}
-	
+
 	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = throw new UnsupportedOperationException("Not implemented")
+	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
+			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
+			
+			val betsByPrice = bets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
+			
+			/**Map betsByPrice to list of PriceTradedVolume.*/
+			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.map(b =>b.betSize).foldLeft(0d)(_ + _))).toList
+	}
 
 	/**Returns all bets placed by user on that market.
 	 *
