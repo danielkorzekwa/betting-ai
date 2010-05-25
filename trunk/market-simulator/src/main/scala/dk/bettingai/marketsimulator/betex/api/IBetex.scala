@@ -23,13 +23,6 @@ trait IBetex {
 	 */
 	def findMarket(marketId: Long):IMarket
 	
-	/** Cancels a bet on a betting exchange.
-	 * 
-	 * @param userId Unique id of a user that cancels a bet.
-	 * @param betId Unique id of a bet to be cancelled.
-	*/
-	def cancelBet(userId: Int, betId:Long)
-	
 	/**Returns all markets on a betting exchange.*/
 	def getMarkets(): List[IMarket]
 	
