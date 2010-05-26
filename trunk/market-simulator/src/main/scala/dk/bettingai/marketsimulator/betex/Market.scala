@@ -83,15 +83,14 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	}
 
 	/** Cancels a bet on a betting exchange market.
-	 * 
-	 * @param userId Unique id of a user that cancels a bet.
+	 *
 	 * @param betId Unique id of a bet to be cancelled.
 	 * 
 	 * @return amount cancelled
 	 * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
 	 */
-	def cancelBet(userId: Int, betId:Long):Double = {
-		val betToBeCancelled = bets.find(b => b.betId==betId && b.userId==userId && b.betStatus==U).get
+	def cancelBet(betId:Long):Double = {
+		val betToBeCancelled = bets.find(b => b.betId==betId && b.betStatus==U).get
 		bets -=  betToBeCancelled
 		betToBeCancelled.betSize
 	}
