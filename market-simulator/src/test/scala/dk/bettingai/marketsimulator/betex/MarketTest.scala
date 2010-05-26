@@ -32,19 +32,11 @@ class MarketTest {
 	 *Tests for cancel bet.
 	 */
 	@Test(expected=classOf[NoSuchElementException]) 
-	def testCancelBetForNotExistingUser {
-		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
-		market.placeBet(100,123,2,3,BACK,11)
-
-		market.cancelBet(124,100)
-	}
-
-	@Test(expected=classOf[NoSuchElementException]) 
 	def testCancelBetForNotExistingBetId {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,2,3,BACK,11)
 
-		market.cancelBet(123,101)
+		market.cancelBet(101)
 	}
 
 	@Test(expected=classOf[NoSuchElementException]) 
@@ -54,7 +46,7 @@ class MarketTest {
 		market.placeBet(101,123,2,3,LAY,11)
 
 		assertEquals(2,market.getBets(123).size)
-		market.cancelBet(123,100)
+		market.cancelBet(100)
 	}
 
 	@Test def testCancelUnsettledBet {
@@ -62,7 +54,7 @@ class MarketTest {
 		market.placeBet(100,123,2,3,BACK,11)
 
 		assertEquals(1,market.getBets(123).size)
-		assertEquals(2,market.cancelBet(123,100),0)
+		assertEquals(2,market.cancelBet(100),0)
 		assertEquals(0,market.getBets(123).size)
 	}
 
@@ -72,7 +64,7 @@ class MarketTest {
 		market.placeBet(101,123,2,3,LAY,11)
 
 		assertEquals(3,market.getBets(123).size)
-		assertEquals(1,market.cancelBet(123,100),0)
+		assertEquals(1,market.cancelBet(100),0)
 		assertEquals(2,market.getBets(123).size)
 	}
 
@@ -82,7 +74,7 @@ class MarketTest {
 		market.placeBet(101,123,3,3,LAY,11)
 
 		assertEquals(3,market.getBets(123).size)
-		assertEquals(1,market.cancelBet(123,101),0)
+		assertEquals(1,market.cancelBet(101),0)
 		assertEquals(2,market.getBets(123).size)
 	}
 
