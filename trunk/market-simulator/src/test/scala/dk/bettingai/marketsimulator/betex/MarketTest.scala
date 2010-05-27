@@ -186,7 +186,7 @@ class MarketTest {
 		market.placeBet(104,122,25,2.5,BACK,11)
 
 		/**Matching bets.*/
-		market.placeBet(104,122,10,2.5,LAY,11)
+		market.placeBet(105,122,10,2.5,LAY,11)
 
 		val runnerPrices = market.getRunnerPrices(11)
 

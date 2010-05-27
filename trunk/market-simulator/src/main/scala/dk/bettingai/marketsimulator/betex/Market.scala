@@ -34,6 +34,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	require(numOfWinners>0,"numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
 	require(runners.size>1,"Number of market runners should be bigger than 1, numOfRunners=" + runners.size)
 
+
 	/** Places a bet on a betting exchange market.
 	 * 
 	 * @param betId
@@ -47,38 +48,35 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		require(betSize>=2, "Bet size must be >=2, betSize=" + 2)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-		/**This is a spike implementation only, will be improved very soon.*/
-		if(betType==LAY) {
-			var newBet:IBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
-		while(newBet.betSize>0) {
-			val betsToBeMatched = bets.filter(b => b.runnerId==newBet.runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= newBet.betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
-			if(betsToBeMatched.size>0) {
-				val matchingResult = newBet.matchBet(betsToBeMatched(0))
-				matchingResult.filter(b => b.betStatus ==M || b.betId!=newBet.betId).foreach(b => bets += b)
-				bets -= betsToBeMatched(0)
-				newBet = if(matchingResult.filter(b => b.betId==newBet.betId && b.betStatus==U).size>0) matchingResult.filter(b => b.betId==newBet.betId && b.betStatus==U)(0) else new Bet(betId,userId, 0, betPrice, betType, U,marketId,runnerId)
-			}
-			else {				
+		val betsToBeMatched =  
+			betType match {
+			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice).toList
+			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice).toList
+		}
+		
+		matchBet(betSize,0)
+
+		/**Match bet recursively until fully matched or nothing is to match with.*/
+		def matchBet(unmatchedSize:Double, betToMatchIndex:Int):Unit = {
+      val newBet = new Bet(betId,userId, unmatchedSize, betPrice, betType, U,marketId,runnerId)
+			/**Nothing to match with.*/
+			if(betToMatchIndex>=betsToBeMatched.size) {
 				bets += newBet
-				newBet=new Bet(betId,userId, 0, betPrice, betType, U,marketId,runnerId)
 			}
-		}
-		}
-		else if(betType==BACK){
-			var newBet:IBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
-		while(newBet.betSize>0) {
-			val betsToBeMatched = bets.filter(b => b.runnerId==newBet.runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= newBet.betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
-			if(betsToBeMatched.size>0) {
-				val matchingResult = newBet.matchBet(betsToBeMatched(0))
-				matchingResult.filter(b => b.betStatus ==M || b.betId!=newBet.betId).foreach(b => bets += b)
-				bets -= betsToBeMatched(0)
-				newBet = if(matchingResult.filter(b => b.betId==newBet.betId && b.betStatus==U).size>0) matchingResult.filter(b => b.betId==newBet.betId && b.betStatus==U)(0) else new Bet(betId,userId, 0, betPrice, betType, U,marketId,runnerId)
+			/**Do matching.*/
+			else if(betToMatchIndex<betsToBeMatched.size) {
+				/**Get bet to be matched and remove it from the main list of bets - it will be added later as a result of matching.*/
+				val betToBeMatched = betsToBeMatched(betToMatchIndex)
+				bets -= betToBeMatched
+
+				/**Do the bets matching.*/
+				val matchingResult = newBet.matchBet(betToBeMatched)
+				/**Add all matched portions of bets to the main bets list.*/
+				matchingResult.filter(b => b.betStatus ==M || b.betId!=betId).foreach(b => bets += b)
+
+				/**Find unmatched portion for a bet being placed.*/
+				matchingResult.find(b => b.betId==betId && b.betStatus==U).foreach(unmatchedPortion => matchBet(unmatchedPortion.betSize,betToMatchIndex+1))
 			}
-			else {
-				bets += newBet
-				newBet=new Bet(betId,userId, 0, betPrice, betType, U,marketId,runnerId)
-			}
-		}
 		}
 	}
 
@@ -90,9 +88,9 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
 	 */
 	def cancelBet(betId:Long):Double = {
-		val betToBeCancelled = bets.find(b => b.betId==betId && b.betStatus==U).get
-		bets -=  betToBeCancelled
-		betToBeCancelled.betSize
+			val betToBeCancelled = bets.find(b => b.betId==betId && b.betStatus==U).get
+			bets -=  betToBeCancelled
+			betToBeCancelled.betSize
 	}
 
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
