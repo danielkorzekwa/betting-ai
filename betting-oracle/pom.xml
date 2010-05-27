@@ -11,12 +11,8 @@
 	<artifactId>betting-oracle</artifactId>
 	<inceptionYear>2008</inceptionYear>
 
+	<!-- Repositories used only by this module (betting-oracle) -->
 	<repositories>
-		<repository>
-			<id>scala-tools.org</id>
-			<name>Scala-Tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
-		</repository>
 		<repository>
 			<id>maven2-repository.dev.java.net</id>
 			<name>Java.net Repository for Maven</name>
@@ -25,14 +21,7 @@
 		</repository>
 	</repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>scala-tools.org</id>
-			<name>Scala-Tools Maven2 Repository</name>
-			<url>http://scala-tools.org/repo-releases</url>
-		</pluginRepository>
-	</pluginRepositories>
-
+	<!-- dependencies -->
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
