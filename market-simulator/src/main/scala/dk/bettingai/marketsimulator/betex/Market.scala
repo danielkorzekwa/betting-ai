@@ -105,7 +105,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 
 			val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.runnerId==runnerId).groupBy(b => b.betPrice) 
 
-			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).map(b => b.betSize).foldLeft(0d)(_ + _)
+			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).foldLeft(0d)(_ + _.betSize)
 			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
 	}
 
@@ -116,7 +116,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			val betsByPrice = bets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
-			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.map(b =>b.betSize).foldLeft(0d)(_ + _))).toList
+			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList
 	}
 
 	/**Returns all bets placed by user on that market.

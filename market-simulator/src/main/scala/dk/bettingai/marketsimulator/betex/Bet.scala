@@ -9,6 +9,24 @@ import dk.bettingai.marketsimulator.betex.api.IBet.BetStatusEnum._
  * @author korzekwad
  *
  */
+object Bet {
+	
+	
+	/**Creates unsettled bet.
+	 * 
+	 * @param betId
+	 * @param userId
+	 * @param betSize
+	 * @param betPrice
+	 * @param betType
+	 * @param marketId
+	 * @param runnerId
+	 * @return
+	 */
+	def apply(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, marketId:Long,runnerId:Long):IBet = 
+		new Bet(betId,userId,betSize, betPrice, betType,  U,marketId,runnerId)
+}
+
 class Bet(val betId:Long,val userId: Long, val betSize:Double, val betPrice:Double, val betType:BetTypeEnum, val betStatus:BetStatusEnum,val marketId:Long,val runnerId:Long) extends IBet{
 	require(betPrice>=1.01 && betPrice<=1000,"Bet price must be between 1.01 and 1000, betPrice=" + betPrice)
 
