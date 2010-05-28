@@ -47,7 +47,8 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long) {
 		require(betSize>=2, "Bet size must be >=2, betSize=" + 2)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
-
+		require(!bets.map(b=>b.betId).contains(betId),"Bet for betId=%s already exists".format(betId))
+		
 		val betsToBeMatched =  
 			betType match {
 			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice).toList
