@@ -26,6 +26,13 @@ class MarketPlaceBetTest {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		market.placeBet(100,123,2,1.01,BACK,13)
 	}
+	
+	@Test(expected=classOf[IllegalArgumentException])
+	def testPlaceBetDuplicateBetId {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		market.placeBet(100,123,2,1.01,BACK,11)
+		market.placeBet(100,123,2,1.01,BACK,11)
+	}
 
 	@Test def testPlaceBackBet {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
