@@ -3,7 +3,7 @@ package dk.bettingai.marketsimulator.risk
 import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 
-/**This class represents a function that calculates market expected profit from bets and probabilities.
+/**This object represents a function that calculates market expected profit from bets and probabilities.
  * 
  * @author korzekwad
  *
