@@ -109,6 +109,22 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
 	}
 
+	/**Returns best toBack/toLay prices for market runner.
+	 * Element 1 - best price to back, element 2 - best price to lay
+	 * Double.NaN is returned if price is not available.
+	 * @return 
+	 * */
+	def getBestPrices(runnerId: Long):Tuple2[Double,Double] = {
+			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
+	
+			val layBets = bets.toList.filter(b => b.betStatus==U && b.betType==LAY && b.runnerId==runnerId)
+			val backBets = bets.toList.filter(b => b.betStatus==U && b.betType==BACK && b.runnerId==runnerId)
+			val bestPriceToBack = if(layBets.isEmpty) Double.NaN else layBets.reduceLeft((a,b) => if(a.betPrice>b.betPrice) a else b).betPrice
+			val bestPriceToLay = if(backBets.isEmpty) Double.NaN else backBets.reduceLeft((a,b) => if(a.betPrice<b.betPrice) a else b).betPrice
+		
+			new Tuple2(bestPriceToBack,bestPriceToLay)
+	}
+	
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)

@@ -63,6 +63,13 @@ trait IMarket {
    */
 	def getRunnerPrices(runnerId:Long):List[IRunnerPrice]
 	
+	/**Returns best toBack/toLay prices for market runner.
+	 * Element 1 - best price to back, element 2 - best price to lay
+	 * Double.NaN is returned if price is not available.
+	 * @return 
+	 * */
+	def getBestPrices(runnerId: Long): Tuple2[Double,Double]
+	
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume]
 	
