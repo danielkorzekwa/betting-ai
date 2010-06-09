@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator.trader
 import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
+import ITrader._
 
 /** Place back bet if priceToBack>2, place lay bet if priceToLay<2.
  * 
@@ -11,31 +12,18 @@ import IBet.BetTypeEnum._
  */
 class SimpleTrader extends ITrader{
 
-	/**Executes trader implementation so it can analyse markets on a betting exchange and take appropriate bet placement decisions.
+	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
-	 * @param betex
-	 * @param userId
-	 * @param nextAvailableBetId
+	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
 	 */
-	def execute(betex:IBetex,userId:Long,nextAvailableBetId:Long) = {
+	def execute(ctx: ITraderContext) = {
 
-		var betId = nextAvailableBetId
+		for(runner <- ctx.runners) {
+			val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-		def placeBet(market:IMarket) = {
-			for(runner <- market.runners) {
-				val bestPrices = market.getBestPrices(runner.runnerId)
+			if(bestPrices._1>2) ctx.placeBet(2,bestPrices._1,BACK,runner.runnerId)
+			if(bestPrices._2<2) ctx.placeBet(2,bestPrices._2,LAY,runner.runnerId)
+		}	
 
-				if(bestPrices._1>2) {
-					market.placeBet(betId,userId,2,bestPrices._1,BACK,runner.runnerId)
-					betId = betId+1
-				}
-				if(bestPrices._2<2) {
-					market.placeBet(betId,userId,2,bestPrices._2,LAY,runner.runnerId)
-					betId = betId+1
-				}
-			}	
-		}
-
-		val markets = betex.getMarkets.foreach(placeBet)
 	}
 }
