@@ -20,7 +20,7 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 		
 		/**Check input parameters.*/
 		bets.foreach(bet => {
-			require(bet.betId == bets(0).betId,"All bets have to be on the same market:  marketId %s != marketId %s".format(bet.betId,bets(0)))
+			require(bet.marketId == bets(0).marketId,"All bets have to be on the same market:  marketId %s != marketId %s".format(bet.marketId,bets(0).marketId))
 			require(probabilities.contains(bet.runnerId),"Runner probability doesn't exist for runnerId=" + bet.runnerId)
 		})
 		
