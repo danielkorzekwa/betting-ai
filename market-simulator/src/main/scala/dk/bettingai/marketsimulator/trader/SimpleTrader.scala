@@ -5,7 +5,7 @@ import IMarket._
 import IBet.BetTypeEnum._
 import ITrader._
 
-/** Place back bet if priceToBack>2, place lay bet if priceToLay<2.
+/** Place back bet if priceToBack>2, place lay bet if priceToLay<2.2. I addition to that trading bets are placed.
  * 
  * @author korzekwad
  *
@@ -21,8 +21,14 @@ class SimpleTrader extends ITrader{
 		for(runner <- ctx.runners) {
 			val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-			if(bestPrices._1>2) ctx.placeBet(2,bestPrices._1,BACK,runner.runnerId)
-			if(bestPrices._2<2) ctx.placeBet(2,bestPrices._2,LAY,runner.runnerId)
+			if(bestPrices._1>2) {
+				ctx.placeBet(2,bestPrices._1,BACK,runner.runnerId)
+				ctx.placeBet(2,bestPrices._1 - 0.02,LAY,runner.runnerId)
+			}
+			if(bestPrices._2<2.2) {
+				ctx.placeBet(2,bestPrices._2,LAY,runner.runnerId)
+				ctx.placeBet(2,bestPrices._2 + 0.02,BACK,runner.runnerId)
+			}
 		}	
 
 	}

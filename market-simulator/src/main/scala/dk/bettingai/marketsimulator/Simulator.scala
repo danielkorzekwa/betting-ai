@@ -7,6 +7,8 @@ import dk.bettingai.marketsimulator.trader._
 import ITrader._
 import Simulator._
 import IBet.BetTypeEnum._
+import IBet.BetStatusEnum._
+import dk.bettingai.marketsimulator.risk._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -46,10 +48,10 @@ object Simulator {
 		def getBestPrices(runnerId: Long): Tuple2[Double,Double] = market.getBestPrices(runnerId)
 	}
 }
-class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderUserId:Long,firstTraderBetId:Long,betex:IBetex) extends ISimulator{
+class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderUserId:Int,firstTraderBetId:Long,betex:IBetex) extends ISimulator{
 
-	var nextBetId=firstTraderBetId
-
+	var nextBetIdValue=firstTraderBetId
+	val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue} 
 	/** Processes market event in a json format and calls appropriate method on a betting exchange.
 	 * 
 	 * @param marketEvent 
@@ -61,7 +63,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderU
 	 */
 	def callTrader = {
 		for(market <- betex.getMarkets) {
-			val traderContext = new TraderContext( () => {nextBetId = nextBetId +1;nextBetId},traderUserId,market)
+			val traderContext = new TraderContext(nextBetId,traderUserId,market)
 			trader.execute(traderContext)
 		}
 	}
@@ -72,7 +74,16 @@ class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderU
 	 */
 	def calculateRiskReport:List[IMarketRiskReport] = {
 
-			def calculateMarketReport(market:IMarket):IMarketRiskReport =  new MarketRiskReport(market.marketId,market.marketName,market.eventName, 0,0,0)
+			def calculateMarketReport(market:IMarket):IMarketRiskReport =  {
+				val marketPrices = Map(market.runners.map(r => r.runnerId -> market.getBestPrices(r.runnerId)) : _*)
+				val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
+				val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
+				val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
+				val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
+				
+				new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)
+			}
+			
 			betex.getMarkets.map(calculateMarketReport)
 	}
 }
