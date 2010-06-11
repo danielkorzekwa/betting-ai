@@ -20,41 +20,29 @@ object SimulatorApp  {
 
 		printHeader(console)
 
-		/**Parse input parameters.*/
-		val argsMap:Map[String,String] = argsToMap(args)
-
-		/**Check if required parameters are present.*/
-		require(argsMap.contains("marketData") && argsMap.contains("traderImpl"),{printHelpMessage(console);return})
-
-		/**Load market data file.*/
-		require(new File(argsMap("marketData")).exists,{console.println("Market data file not found: " + argsMap("marketData"));return})
-
-		val marketDataFile = Source.fromFile(new File(argsMap("marketData")))
-
-		/**Load trader implementation class.*/
-		val traderImpl = 
-			try {
-				Class.forName(argsMap("traderImpl")).newInstance()
-			}
-		catch{
-		case e:Exception => console.println("Can't load trader implementation class: " + argsMap("traderImpl") + ". Details: " + e); return
+		/**Element 1 - marketDataFile, element 2 - traderImplClass*/
+		val inputData:Tuple2[Source,ITrader] = try {
+			UserInputParser.parse(args)
 		}
-
+		catch {
+			case e:Exception => printHelpMessage(console);console.println("\n" + e);return
+		}
+		
 		console.print("Simulation is started.")
 
 		val betex = new Betex()
 		val marketEventProcessor = new MarketEventProcessorImpl(betex)
 		val traderUserId=100
 		val firstBetId=1000
-		val simulator = new Simulator(marketEventProcessor,traderImpl.asInstanceOf[ITrader],traderUserId,firstBetId,betex)
+		val simulator = new Simulator(marketEventProcessor,inputData._2.asInstanceOf[ITrader],traderUserId,firstBetId,betex)
 
 		console.print(" Simulation progress:")
 
 		val time = System.currentTimeMillis
-		val marketDataFileSize = marketDataFile.size
+		val marketDataFileSize = inputData._1.size
 		var marketDataFileSizeRead=0
 		var currentProgress=0
-		for(marketEvent <- marketDataFile.reset.getLines()) {
+		for(marketEvent <- inputData._1.reset.getLines()) {
 			marketDataFileSizeRead = marketDataFileSizeRead + marketEvent.size
 			currentProgress=(marketDataFileSizeRead*100)/marketDataFileSize
 			console.print(" " + currentProgress + "%")
@@ -68,38 +56,24 @@ object SimulatorApp  {
 		if(currentProgress<100) console.print(" 100%")
 
 		console.print("\nSimulation is finished in %s seconds.".format((System.currentTimeMillis-time)/1000))
-		console.print("\n\nExpected profit report for trader " + argsMap("traderImpl") + ":")
-
-		var expAggrProfit=0d
-		for(r <- marketRiskReports) {
-			expAggrProfit = expAggrProfit	+ r.expectedProfit
-			console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(r.marketName,r.eventName,round(r.expectedProfit,2),round(expAggrProfit,2),r.matchedBetsNumber,r.unmatchedBetsNumber))
+		console.print("\n\nExpected profit report for trader " + inputData._2 + ":")
+		
+		def printMarketReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
+				if(marketReportIndex < marketRiskReports.size) {
+					val marketRiskReport = marketRiskReports(marketReportIndex)
+					val newExpAggrProfit = expAggrProfit	+ marketRiskReport.expectedProfit
+					console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.expectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
+					printMarketReport(marketReportIndex+1,newExpAggrProfit)
+				}
 		}
+		printMarketReport(0,0)
+
 		console.print("\n------------------------------------------------------------------------------------")
 
 		val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.expectedProfit)
 		val aggrMatchedBets = marketRiskReports.foldLeft(0l)(_ + _.matchedBetsNumber)
 		val aggrUnmatchedBets = marketRiskReports.foldLeft(0l)(_ + _.unmatchedBetsNumber)
 		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit,2),aggrMatchedBets,aggrUnmatchedBets))
-	}
-
-	/**Map list of arguments to map, 
-	 * 
-	 * @param args
-	 * @return key - arg name, value - arg value, empty map is returned if can't parse input parameters.
-	 */
-	private def argsToMap(args:Array[String]):Map[String,String] = {
-			try {
-				if(args.length==2) {
-					Map(args.map(arg => (arg.split("=")(0),arg.split("=")(1))): _*)
-				}
-				else {
-					Map()
-				}
-			}
-			catch{
-			case e:Exception => Map()
-			}
 	}
 
 	private def printHeader(console:PrintStream) {
@@ -113,7 +87,6 @@ object SimulatorApp  {
 	}
 
 	private def printHelpMessage(console:PrintStream) {
-		console.println("Wrong input parameters.\n")
 		console.println("Usage:")
 		console.println("market_simulator marketData=[market_data_file] traderImpl=[trader_impl_class]\n")
 		console.println("marketData - Text file with market data that will be used for the simulation.")
