@@ -5,4 +5,4 @@
 ***********************************************************************************
 
 To execute market simulation run the following command:
-start marketData=./marketdata/example_twomarkets.csv traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader
+simulator marketData=./marketdata/example_twomarkets.csv traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader

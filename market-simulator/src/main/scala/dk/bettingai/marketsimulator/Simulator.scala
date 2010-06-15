@@ -18,7 +18,6 @@ import scala.io._
  */
 object Simulator {
 	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val expectedProfit:Double,val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
-
 		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, expectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,expectedProfit,matchedBetsNumber,unmatchedBetsNumber)
 	}
 
@@ -48,37 +47,45 @@ object Simulator {
 		 * */
 		def getBestPrices(runnerId: Long): Tuple2[Double,Double] = market.getBestPrices(runnerId)
 	}
-	
-}
-class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderUserId:Int,firstTraderBetId:Long,betex:IBetex) extends ISimulator{
 
-	var nextBetIdValue=firstTraderBetId
-	val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
+}
+
+class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends ISimulator{
 
 	/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
+	 * 
 	 * @param Contains market events that the market simulation is executed for.
+	 * @param trader
+	 * @param traderUserId
+	 * @param firstTraderBetId
 	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
 	 */
-	def runSimulation(marketData:Source, p: (Int) => Unit):List[IMarketRiskReport]= {
+	def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,firstTraderBetId:Long,p: (Int) => Unit):List[IMarketRiskReport]= {
 
-			val marketDataFileSize = marketData.reset.size
-			var marketDataFileSizeRead=0
+			var nextBetIdValue=firstTraderBetId
+			val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
 
-			var currentProgress=0
-			for(marketEvent <- marketData.reset.getLines()) {
-				marketDataFileSizeRead = marketDataFileSizeRead + marketEvent.size
-				currentProgress=(marketDataFileSizeRead*100)/marketDataFileSize
-				p(currentProgress)
-				marketEventProcessor.process(marketEvent)
+			val marketEventsNumber = marketData.reset.getLines().size
+			val iterator = marketData.reset.getLines();
 
-				/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-				for(market <- betex.getMarkets) {
-					val traderContext = new TraderContext(nextBetId(),traderUserId,market)
-					trader.execute(traderContext)
-				}
+			def process(marketEventIndex:Int):Unit = {
+					val marketEvent = iterator.next
+					val progress=(marketEventIndex*100)/marketEventsNumber
+					p(progress)
+					marketEventProcessor.process(marketEvent)
+
+					/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
+					for(market <- betex.getMarkets) {
+						val traderContext = new TraderContext(nextBetId(),traderUserId,market)
+						trader.execute(traderContext)
+					}
+
+					/**Recursive  call.*/
+					if(iterator.hasNext) process(marketEventIndex+1)
 			}
-			val riskReport = calculateRiskReport
-			if(currentProgress<100) p(100)
+
+			if(iterator.hasNext) process(1)	
+			val riskReport = 	betex.getMarkets.map(calculateRiskReport(traderUserId,_))
 			riskReport
 	}
 
@@ -86,18 +93,14 @@ class Simulator(marketEventProcessor:MarketEventProcessor,trader:ITrader,traderU
 	 * 
 	 * @return
 	 */
-	def calculateRiskReport:List[IMarketRiskReport] = {
+	private def calculateRiskReport(traderUserId:Int,market:IMarket):IMarketRiskReport = {
 
-					def calculateMarketReport(market:IMarket):IMarketRiskReport =  {
-							val marketPrices = Map(market.runners.map(r => r.runnerId -> market.getBestPrices(r.runnerId)) : _*)
-							val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
-							val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
-							val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
-							val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
+			val marketPrices = Map(market.runners.map(r => r.runnerId -> market.getBestPrices(r.runnerId)) : _*)
+			val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
+			val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
+			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
+			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
 
-							new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)
-					}
-
-					betex.getMarkets.map(calculateMarketReport)
-			}
+			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
+	}
 }

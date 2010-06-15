@@ -22,7 +22,7 @@ object UserInputParser {
 		val argsMap:Map[String,String] = argsToMap(args)
 
 		/**Check if required parameters are present.*/
-		require(argsMap.contains("marketData") && argsMap.contains("traderImpl"),"The marketData argument not found.")
+		require(argsMap.contains("marketData") && argsMap.contains("traderImpl"),"The marketData and traderImpl arguments must be provided.")
 
 		/**Load market data file.*/
 		require(new File(argsMap("marketData")).exists,"The marketData file not found:" + argsMap("marketData"))

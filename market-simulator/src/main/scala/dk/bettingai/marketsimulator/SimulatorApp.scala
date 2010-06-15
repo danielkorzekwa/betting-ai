@@ -21,7 +21,7 @@ object SimulatorApp  {
 
 		printHeader(console)
 
-		/**Element 1 - marketDataFile, element 2 - traderImplClass*/
+		/**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass*/
 		val inputData:Tuple2[Source,ITrader] = try {
 			UserInputParser.parse(args)
 		}
@@ -31,34 +31,41 @@ object SimulatorApp  {
 
 		console.print("Simulation is started.")
 
+		/**Create market simulator.*/
 		val betex = new Betex()
 		val marketEventProcessor = new MarketEventProcessorImpl(betex)
-		val traderUserId=100
-		val firstBetId=1000
-		val simulator = new Simulator(marketEventProcessor,inputData._2.asInstanceOf[ITrader],traderUserId,firstBetId,betex)
+		val simulator = new Simulator(marketEventProcessor,betex)
 
+		/**Run market simulator.*/
 		console.print(" Simulation progress:")
 		val time = System.currentTimeMillis
+		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],100,1000,p => console.print(" " + p + "%"))
 
-		/**Calculate analysis report.*/
-		val marketRiskReports = simulator.runSimulation(inputData._1,p => console.print(" " + p + "%"))
-
+		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s seconds.".format((System.currentTimeMillis-time)/1000))
-		console.print("\n\nExpected profit report for trader " + inputData._2.getClass + ":")
-
-		def printMarketReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
+		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
+		printMarketReport(marketRiskReports,console)
+		console.print("\n------------------------------------------------------------------------------------")
+		printMarketReportSummary(marketRiskReports, console)
+		console.println("")
+	}
+	
+	private def printMarketReport(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
+		printMarketRiskReport(0,0)
+			def printMarketRiskReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
 			if(marketReportIndex < marketRiskReports.size) {
 				val marketRiskReport = marketRiskReports(marketReportIndex)
 				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.expectedProfit
 				console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.expectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
-				printMarketReport(marketReportIndex+1,newExpAggrProfit)
+				
+				/**Recursive call.*/
+				printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
 			}
 		}
-		printMarketReport(0,0)
-
-		console.print("\n------------------------------------------------------------------------------------")
-
-		val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.expectedProfit)
+	}
+	
+	private def printMarketReportSummary(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
+			val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.expectedProfit)
 		val aggrMatchedBets = marketRiskReports.foldLeft(0l)(_ + _.matchedBetsNumber)
 		val aggrUnmatchedBets = marketRiskReports.foldLeft(0l)(_ + _.unmatchedBetsNumber)
 		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit,2),aggrMatchedBets,aggrUnmatchedBets))
