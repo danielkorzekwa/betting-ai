@@ -8,6 +8,7 @@ import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import org.apache.commons.math.util.MathUtils._
+import ISimulator._
 
 /** Main class for the market simulator.
  * 
@@ -25,9 +26,9 @@ object SimulatorApp  {
 			UserInputParser.parse(args)
 		}
 		catch {
-			case e:Exception => printHelpMessage(console);console.println("\n" + e);return
+		case e:Exception => printHelpMessage(console);console.println("\n" + e);return
 		}
-		
+
 		console.print("Simulation is started.")
 
 		val betex = new Betex()
@@ -37,34 +38,21 @@ object SimulatorApp  {
 		val simulator = new Simulator(marketEventProcessor,inputData._2.asInstanceOf[ITrader],traderUserId,firstBetId,betex)
 
 		console.print(" Simulation progress:")
-
 		val time = System.currentTimeMillis
-		val marketDataFileSize = inputData._1.size
-		var marketDataFileSizeRead=0
-		var currentProgress=0
-		for(marketEvent <- inputData._1.reset.getLines()) {
-			marketDataFileSizeRead = marketDataFileSizeRead + marketEvent.size
-			currentProgress=(marketDataFileSizeRead*100)/marketDataFileSize
-			console.print(" " + currentProgress + "%")
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
 
 		/**Calculate analysis report.*/
-		val marketRiskReports = simulator.calculateRiskReport
-
-		if(currentProgress<100) console.print(" 100%")
+		val marketRiskReports = simulator.runSimulation(inputData._1,p => console.print(" " + p + "%"))
 
 		console.print("\nSimulation is finished in %s seconds.".format((System.currentTimeMillis-time)/1000))
-		console.print("\n\nExpected profit report for trader " + inputData._2 + ":")
-		
+		console.print("\n\nExpected profit report for trader " + inputData._2.getClass + ":")
+
 		def printMarketReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
-				if(marketReportIndex < marketRiskReports.size) {
-					val marketRiskReport = marketRiskReports(marketReportIndex)
-					val newExpAggrProfit = expAggrProfit	+ marketRiskReport.expectedProfit
-					console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.expectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
-					printMarketReport(marketReportIndex+1,newExpAggrProfit)
-				}
+			if(marketReportIndex < marketRiskReports.size) {
+				val marketRiskReport = marketRiskReports(marketReportIndex)
+				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.expectedProfit
+				console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.expectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
+				printMarketReport(marketReportIndex+1,newExpAggrProfit)
+			}
 		}
 		printMarketReport(0,0)
 
