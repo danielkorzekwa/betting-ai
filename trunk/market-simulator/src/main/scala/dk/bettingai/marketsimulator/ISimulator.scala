@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator
 
 import ISimulator._
 import scala.io._
+import dk.bettingai.marketsimulator.trader._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -24,8 +25,11 @@ trait ISimulator {
 		/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
 		 * 
 		 * @param Contains market events that the market simulation is executed for.
+		 * @param trader
+		 * @param traderUserId
+		 * @param firstTraderBetId
 		 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
 		 */
-		def runSimulation(marketData:Source, p: (Int) => Unit):List[IMarketRiskReport]
+		def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,firstTraderBetId:Long,p: (Int) => Unit):List[IMarketRiskReport]
 
 }
