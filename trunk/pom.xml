@@ -11,7 +11,7 @@
 
 	<!-- Define the sub-components -->
 	<modules>
-		<module>betting-oracle</module>
+		<!-- <module>betting-oracle</module> -->
 		<module>market-simulator</module>
 	</modules>
 
