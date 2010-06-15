@@ -15,10 +15,9 @@ class SimulatorAppTest {
 		val consoleStream = new ByteArrayOutputStream()
 		SimulatorApp.main(Array("incorrect parameters"),new PrintStream(consoleStream))
 
-		println(new String(consoleStream.toByteArray))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Market Simulator Copyright 2010 Daniel Korzekwa(http://danmachine.com)"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Usage"))
-			assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("java.lang.IllegalArgumentException: requirement failed: The marketData argument not found."))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("java.lang.IllegalArgumentException: requirement failed: The marketData argument not found."))
 	}
 
 	@Test def testCorrectInputParametersEmptyEventData() {
@@ -44,7 +43,7 @@ class SimulatorAppTest {
 	@Test def testSimpleTraderAndBetsForTwoMarkets() {
 		val consoleStream = new ByteArrayOutputStream()
 		SimulatorApp.main(Array("marketData=src/test/resources/marketDataPlaceBackBetOnTwoMarkets.csv","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
-
+		println(new String(consoleStream.toByteArray))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Fulham vs Wigan expProfit=1.8 expAggrProfit=1.8 mBets=3 uBets=3"))

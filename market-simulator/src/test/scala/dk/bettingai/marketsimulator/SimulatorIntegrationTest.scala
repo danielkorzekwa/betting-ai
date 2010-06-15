@@ -19,28 +19,16 @@ class SimulatorIntegrationTest {
 	@Test def testNoMarketEvents {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataEmpty.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(0,marketRiskReport.size)
 	}
 
 	@Test def testCreateMarketEventOnly {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataCreateMarketOnly.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -54,14 +42,8 @@ class SimulatorIntegrationTest {
 	@Test def testOneMatchedBackBetNegativeExpectedProfit {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceLayBet.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -75,14 +57,8 @@ class SimulatorIntegrationTest {
 	@Test def testOneMatchedLayBetPositiveExpectedProfit {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceBackBet.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -96,20 +72,14 @@ class SimulatorIntegrationTest {
 	@Test def testThreeMatchedBackBetsNegativeExpectedProfit {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceAndCancelLayBet.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-	//	assertEquals(-0.607,marketRiskReport(0).expectedProfit,0.001)
+		assertEquals(-0.607,marketRiskReport(0).expectedProfit,0.001)
 		assertEquals(3,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -117,14 +87,8 @@ class SimulatorIntegrationTest {
 	@Test def testOneMatchedBetAFewMatchedBets {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceAFewBets.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -134,18 +98,12 @@ class SimulatorIntegrationTest {
 		assertEquals(12,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(12,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
-	
+
 	@Test def testOneMatchedBetsOnTwoMarkets {
 		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceBackBetOnTwoMarkets.csv"))
 
-		/**Process market events.*/
-		for(marketEvent <- marketEventsFile.getLines()) {
-			simulator.process(marketEvent)
-			simulator.callTrader
-		}
-
-		/**Calculate analysis report.*/
-		val marketRiskReport = simulator.calculateRiskReport
+		/**Run market simulation.*/
+		val marketRiskReport = simulator.runSimulation(marketEventsFile,p => {})
 		assertEquals(2,marketRiskReport.size)
 
 		assertEquals(20,marketRiskReport(0).marketId)
@@ -154,7 +112,7 @@ class SimulatorIntegrationTest {
 		assertEquals(1.8,marketRiskReport(0).expectedProfit,0.001)
 		assertEquals(3,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(3,marketRiskReport(0).unmatchedBetsNumber,0)
-		
+
 		assertEquals(10,marketRiskReport(1).marketId)
 		assertEquals("Match Odds",marketRiskReport(1).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(1).eventName)
