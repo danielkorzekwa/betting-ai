@@ -1,13 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<!-- Project information -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dk.bettingai</groupId>
 	<artifactId>betting-ai</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<name>betting-ai</name>
+	<version>1.0</version>
 	<inceptionYear>2008</inceptionYear>
 	<packaging>pom</packaging>
+
+	<scm>
+		<connection>scm:svn:http://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</connection>
+		<developerConnection>scm:svn:https://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</developerConnection>
+		<url>http://code.google.com/p/betting-ai/tags/betting-ai-1.0</url>
+	</scm>
+
 
 	<!-- Define the sub-components -->
 	<modules>
