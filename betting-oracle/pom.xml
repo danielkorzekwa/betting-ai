@@ -9,6 +9,7 @@
   	</parent>		
 	
 	<artifactId>betting-oracle</artifactId>
+	<name>betting-oracle</name>
 	<inceptionYear>2008</inceptionYear>
 
 	<!-- Repositories used only by this module (betting-oracle) -->
