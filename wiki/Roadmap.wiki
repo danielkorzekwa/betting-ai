@@ -1,0 +1,13 @@
+Version 1.0 ( RELEASED on 16 June 2010)
+
+    * Goal - Proof of concept. Run market simulation for very simple market data that contains a few events to create market and place/cancel bets. Simulation will be executed for simple trader implementation that places a bet if price is bigger than 2. 
+
+    * Scope - http://code.google.com/p/betting-ai/issues/list?can=1&q=milestone%3DRelease1.0&colspec=ID+Type+Status+Priority+Complexity+Milestone+Owner+Component+Summary&cells=tiles 
+
+Version 1.1
+
+    * Goal - Run market simulation for simple trader implementation (place bet if price>2) and real market data. 
+
+Version 1.2
+
+    * Goal - Run market simulation for simple AI trader and real market data. 
