@@ -5,14 +5,14 @@
 	<groupId>dk.bettingai</groupId>
 	<artifactId>betting-ai</artifactId>
 	<name>betting-ai</name>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<inceptionYear>2008</inceptionYear>
 	<packaging>pom</packaging>
 
 	<scm>
-		<connection>scm:svn:http://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</connection>
-		<developerConnection>scm:svn:https://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</developerConnection>
-		<url>http://code.google.com/p/betting-ai/tags/betting-ai-1.0</url>
+		<connection>scm:svn:http://betting-ai.googlecode.com/svn/trunk</connection>
+		<developerConnection>scm:svn:https://betting-ai.googlecode.com/svn/trunk</developerConnection>
+		<url>http://code.google.com/p/betting-ai</url>
 	</scm>
 
 
