@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<!-- Project information -->
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>dk.bettingai</groupId>
+	<artifactId>betting-ai</artifactId>
+	<name>betting-ai</name>
+	<version>1.0</version>
+	<inceptionYear>2008</inceptionYear>
+	<packaging>pom</packaging>
+
+	<scm>
+		<connection>scm:svn:http://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</connection>
+		<developerConnection>scm:svn:https://betting-ai.googlecode.com/svn/tags/betting-ai-1.0</developerConnection>
+		<url>http://code.google.com/p/betting-ai/tags/betting-ai-1.0</url>
+	</scm>
+
+
+	<!-- Define the sub-components -->
+	<modules>
+		<!-- <module>betting-oracle</module> -->
+		<module>market-simulator</module>
+	</modules>
+
+	<!-- Properties -->
+	<properties>
+		<scala.version>2.8.0.RC1</scala.version>
+		<junit.version>4.4</junit.version>
+		<specs.version>1.2.5</specs.version>
+		<jmock.version>2.5.1</jmock.version>
+		<hamcrest.version>1.1</hamcrest.version>
+	</properties>
+
+	<!-- Repositories -->
+	<repositories>
+		<repository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<!-- Dependency management -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-math</artifactId>
+				<version>2.1</version>
+			</dependency>
+
+			<!-- Test dependencies -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.specs</groupId>
+				<artifactId>specs</artifactId>
+				<version>${specs.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jmock</groupId>
+				<artifactId>jmock</artifactId>
+				<version>${jmock.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jmock</groupId>
+				<artifactId>jmock-junit4</artifactId>
+				<version>${jmock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-library</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>
