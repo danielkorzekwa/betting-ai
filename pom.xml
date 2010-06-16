@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<!-- Project information -->
 	<modelVersion>4.0.0</modelVersion>
@@ -14,6 +15,26 @@
 		<developerConnection>scm:svn:https://betting-ai.googlecode.com/svn/trunk</developerConnection>
 		<url>http://code.google.com/p/betting-ai</url>
 	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>dk-maven2-repo-releases</id>
+			<name>dk-maven2 maven repository (releases)</name>
+			<url>
+                                svn:https://dk-maven2-repo.googlecode.com/svn/maven-repo/releases
+                        </url>
+			<uniqueVersion>false</uniqueVersion>
+		</repository>
+		<snapshotRepository>
+			<id>dk-maven2-repo-snapshots</id>
+			<name>dk-maven2 maven repository (snapshots)</name>
+			<url>
+                                svn:https://dk-maven2-repo.googlecode.com/svn/maven-repo/snapshots
+                        </url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement>
+
 
 
 	<!-- Define the sub-components -->
@@ -48,6 +69,16 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.jvnet.wagon-svn</groupId>
+				<artifactId>wagon-svn</artifactId>
+				<version>1.9</version>
+			</extension>
+		</extensions>
+	</build>
+	
 	<!-- Dependency management -->
 	<dependencyManagement>
 		<dependencies>
