@@ -38,7 +38,7 @@
 			<scope>test</scope>
 		</dependency>
 		
-		<!-- For now dependencies below are only used by betting oracle.
+		<!-- t For now dependencies below are only used by betting oracle.
 		     They are not in parent pom dependencyManagement -->
 		<dependency>
 			<groupId>org.encog</groupId>
