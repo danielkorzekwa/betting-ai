@@ -178,6 +178,21 @@
 	<!-- Dependency management -->
 	<dependencyManagement>
 		<dependencies>
+			<!-- Internal dependencies -->
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>market-simulator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>market-data-collector</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- External dependencies -->
+
 			<dependency>
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
