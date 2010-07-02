@@ -30,20 +30,42 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 		} yield runnerPriceDelta
 
 		/**Get all runner prices that are in a previous market data and are not in a new market data.*/
-		val deltaForRemovedPrices = previousMarketData._1.filter(prevPrice => !newMarketData._1.exists(newPrice => newPrice.price==prevPrice.price))
+		val deltaForRemovedPrices = previousMarketData._1.filter(prevRunnerPrice => !newMarketData._1.exists(newPrice => newPrice.price==prevRunnerPrice.price))
 
 		val deltaForAllMarketPrices = deltaForUpdatedAndNewPrices ::: deltaForRemovedPrices.map(runnerPrice => new RunnerPrice(runnerPrice.price,-runnerPrice.totalToBack,-runnerPrice.totalToLay))
 
+		/**Get delta between new and previous prices traded volume.*/
+		val deltaForUpdatedAndNewTradedVolume = for {
+			newTradedVolume <- newMarketData._2
+			val previousTradedVolume = previousMarketData._2.find(_.price==newTradedVolume.price).getOrElse(new PriceTradedVolume(newTradedVolume.price,0))
+			val tradedVolumeDelta = new PriceTradedVolume(newTradedVolume.price,newTradedVolume.totalMatchedAmount-previousTradedVolume.totalMatchedAmount)
+			if(tradedVolumeDelta.totalMatchedAmount != 0)
+		} yield tradedVolumeDelta
+		
+			/**Get all runner traded volumes that are in a previous market data and are not in a new market data.*/
+		val deltaForRemovedTradedVolume = previousMarketData._2.filter(prevTradedVolume => !newMarketData._2.exists(newTradedVolume => newTradedVolume.price==prevTradedVolume.price))
+
+		val deltaForAllTradedVolume = deltaForUpdatedAndNewTradedVolume ::: deltaForRemovedTradedVolume.map(tradedVolume => new PriceTradedVolume(tradedVolume.price,-tradedVolume.totalMatchedAmount))
+		
+		val allPrices = (deltaForAllTradedVolume.map(_.price) ::: deltaForAllMarketPrices.map(_.price)).toSet.toList
+		
+		val totalDelta = for {
+			price <- allPrices
+			deltaTradedVolume = deltaForAllTradedVolume.find(_.price==price).getOrElse(new PriceTradedVolume(price,0))
+			deltaRunnerPrice = deltaForAllMarketPrices.find(_.price==deltaTradedVolume.price).getOrElse(new RunnerPrice(deltaTradedVolume.price,0,0))
+			val totalRunnerPriceDelta = new RunnerPrice(deltaRunnerPrice.price,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToBack,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToLay)
+		} yield totalRunnerPriceDelta
+		println(totalDelta)
 		/**Create bet placement events for delta between new and previous market prices.*/
 		val placeLayBetEvents:List[String] = for {
-			deltaMarketPrice <- deltaForAllMarketPrices 
+			deltaMarketPrice <- totalDelta 
 			
 			if(deltaMarketPrice.totalToBack > 0) 
 					val placeLayBetEvent = """{"eventType":"PLACE_BET","userId":%s,"betId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(123,100,deltaMarketPrice.totalToBack,deltaMarketPrice.price,"LAY",marketId,runnerId)
 			
 		} yield placeLayBetEvent
 		val placeBackBetEvents:List[String] = for {
-			deltaMarketPrice <- deltaForAllMarketPrices 
+			deltaMarketPrice <- totalDelta 
 			
 			if(deltaMarketPrice.totalToLay > 0) 
 						val placeBackBetEvent = """{"eventType":"PLACE_BET","userId":%s,"betId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(123,100,deltaMarketPrice.totalToLay,deltaMarketPrice.price,"BACK",marketId,runnerId)
