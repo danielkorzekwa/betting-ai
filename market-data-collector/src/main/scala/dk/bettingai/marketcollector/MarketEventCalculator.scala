@@ -47,7 +47,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 		val deltaForAllTradedVolume = deltaForUpdatedAndNewTradedVolume ::: deltaForRemovedTradedVolume.map(tradedVolume => new PriceTradedVolume(tradedVolume.price,-tradedVolume.totalMatchedAmount))
 		
-		val allPrices = (deltaForAllTradedVolume.map(_.price) ::: deltaForAllMarketPrices.map(_.price)).toSet.toList
+		val allPrices = (deltaForAllTradedVolume.map(_.price) :::deltaForAllMarketPrices.map(_.price)).distinct
 		
 		val totalDelta = for {
 			price <- allPrices
@@ -55,7 +55,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			deltaRunnerPrice = deltaForAllMarketPrices.find(_.price==deltaTradedVolume.price).getOrElse(new RunnerPrice(deltaTradedVolume.price,0,0))
 			val totalRunnerPriceDelta = new RunnerPrice(deltaRunnerPrice.price,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToBack,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToLay)
 		} yield totalRunnerPriceDelta
-		println(totalDelta)
+
 		/**Create bet placement events for delta between new and previous market prices.*/
 		val placeLayBetEvents:List[String] = for {
 			deltaMarketPrice <- totalDelta 
