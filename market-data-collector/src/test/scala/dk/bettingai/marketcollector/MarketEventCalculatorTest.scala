@@ -116,10 +116,10 @@ class MarketEventCalculatorTest {
 		assertEquals(-100,tradedVolumeDelta(0).totalMatchedAmount,0)
 	}
 
-
 	/**
-	 * Tests scenarios for calculateRunnerDelta.
+	 * Tests scenarios for calculateRunnerDelta - Edge cases
 	 * */
+	
 	@Test def testCalculateRunnerDeltaBothRunnerStatesAreEmpty {
 		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(List(),List())
 		assertEquals(0, marketEvents.size)
@@ -133,6 +133,11 @@ class MarketEventCalculatorTest {
 		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
 	}
 
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsTheSame - PLACE BET.
+	 * */
+	
+	
 	@Test def testCalculateRunnerDeltaTradedVolumeIsTheSameLayBetPlacementEventsAreGenerated {
 		val newRunnerPricesDelta = new RunnerPrice(1.85,20,0) :: new RunnerPrice(1.9,2,0) :: Nil
 		val newTradedVolumesDelta = Nil
@@ -164,6 +169,175 @@ class MarketEventCalculatorTest {
 		assertEquals(expectedEvents(0),marketEvents(0))
 		assertEquals(expectedEvents(1),marketEvents(1))
 	}
+
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsNotTheSame - Matched on priceToBack - PLACE BET.
+	 * */
+
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameBackBetIsGenerated{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,-3,0) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+				Nil
+
+				assertEquals(1, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+	}
+
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameBackBetAndLayBetAreGenerated{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,-2,0) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":1.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameBackBetAndLayBetAreGenerated2{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,1,0) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":4.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameBackBetAndLayBetAreGenerated3{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,-3,0) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,6) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":6.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsNotTheSame - Matched on priceToLay - PLACE BET.
+	 * */
+	
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameLayBetIsGenerated{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,0,-3) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+				Nil
+
+				assertEquals(1, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+	}
+
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameLayBetAndBackBetAreGenerated{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,0,-2) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":1.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameLayBetAndBackBetAreGenerated2{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,0,1) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":4.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameLayBetAndBackBetAreGenerated3{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,0,-3) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,6) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":6.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+					Nil
+
+		assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsNotTheSame - Matched on emptyPrice - PLACE BET.
+	 * */
+	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameEqualBackAndLayBetsAreGenerated{
+
+		val newRunnerPricesDelta = new RunnerPrice(1.85,0,0) :: Nil
+		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+				Nil
+
+				assertEquals(2, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+	}
+	
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsTheSame - CANCEL BET.
+	 * */
+	
+	/**
+	 * Tests scenarios for calculateRunnerDelta - DeltaTradedVolumeIsNotTheSame - CANCEL BET.
+	 * */
+	
 	//
 	//	@Test def testCalculateRunnerDeltaTradedVolumeAreTheSameNewMarketPriceWasRemoved {
 	//		val newRunnerPrices =  new RunnerPrice(1.85,20,0) :: new RunnerPrice(1.95,0,20) :: Nil
@@ -183,19 +357,6 @@ class MarketEventCalculatorTest {
 	//	}
 	//
 	
-	@Test def testCalculateRunnerDeltaTradedVolumeIsNotTheSameLayBetPlacementEventsAreGenerated{
-
-		val newRunnerPricesDelta = new RunnerPrice(1.85,-3,0) :: Nil
-		val newTradedVolumesDelta = new PriceTradedVolume(1.85,3) :: Nil
-
-		val marketEvents = MarketEventCalculator.calculateRunnerDelta(123,10,1000)(newRunnerPricesDelta,newTradedVolumesDelta)
-
-		val expectedEvents = 
-			"""{"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
-				Nil
-
-				assertEquals(1, marketEvents.size)
-		assertEquals(expectedEvents(0),marketEvents(0))
-	}
+	
 
 }
