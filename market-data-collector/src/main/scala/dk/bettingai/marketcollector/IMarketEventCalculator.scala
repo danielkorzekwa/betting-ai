@@ -14,12 +14,23 @@ trait IMarketEventCalculator {
 	 * @param userId The user Id that the bet placement events are calculated for.
 	 * @param marketId The market id that the bet placement events are calculated for. 
 	 * @param runnerId The market runner id that the bet placement events are calculated for. 
-	 * @param runnerPricesDelta Delta between the new and the previous state of the runner prices.
-	 * @param runnerTradedVolumeDelta Delta between the new and the previous state of the runner traded volume.
+	 * @param marketRunnerDelta Delta between the new and the previous state of the market runner (both runner prices and traded volume combined to runner prices).
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
-	def calculateRunnerDelta(userId:Long,marketId:Long,runnerId:Long)(runnerPricesDelta:List[IRunnerPrice], runnerTradedVolumeDelta:List[IPriceTradedVolume]): List[String]
+	def calculateMarketEvents(userId:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String]
 
+	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
+	 * 
+	 * @param  runnerPricesDelta
+	 * @param runnerTradedVolumeDelta
+	 * 
+	 * Example:
+	 * runner price[price,toBack,toLay] = 1.9,2,0
+	 * traded volume [price,volume] = 1.9,5
+	 * runner price + traded volume = [price,toBack+volume,toLay+volume] = 1.9,7,5
+	 * */
+	def combine(runnerPricesDelta:List[IRunnerPrice], runnerTradedVolumeDelta:List[IPriceTradedVolume]):List[IRunnerPrice]
+	
 	/**Calculates delta between the new and the previous state of the runner prices.
 	 * 
 	 * @param newRunnerPrices
@@ -27,7 +38,7 @@ trait IMarketEventCalculator {
 	 * @return Delta between the new and the previous state of the runner prices.
 	 */
 	def calculateRunnerPricesDelta(newRunnerPrices:List[IRunnerPrice],previousRunnerPrices:List[IRunnerPrice]):List[IRunnerPrice]
-	
+		
 	/**Calculates delta between the new and the previous state of the runner traded volume.
 	 * 
 	 * @param newTradedVolumes
