@@ -22,23 +22,30 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	def calculateMarketEvents(userId:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
 
 		/**Create lay bet events for delta between the new and the previous runner states.*/
-		val placeLayBetEvents:List[String] = for {
-			deltaMarketPrice <- marketRunnerDelta 
-			if(deltaMarketPrice.totalToBack > 0) 
-				val placeLayBetEvent = """{"eventType":"PLACE_BET","userId":%s,"betId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(123,100,deltaMarketPrice.totalToBack,deltaMarketPrice.price,"LAY",marketId,runnerId)
+		val layBetEvents:List[String] = for {
+			deltaRunnerPrice <- marketRunnerDelta 
+			if(deltaRunnerPrice.totalToBack != 0) 
+				val placeLayBetEvent = if(deltaRunnerPrice.totalToBack>0)
+					"""{"eventType":"PLACE_BET","userId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
+					else 
+						"""{"eventType":"CANCEL_BETS","userId":%s,"betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 		} yield placeLayBetEvent
 
 		/**Create back bet events for delta between the new and the previous runner states.*/
-		val placeBackBetEvents:List[String] = for {
-			deltaMarketPrice <- marketRunnerDelta 
-			if(deltaMarketPrice.totalToLay > 0) 
-				val placeBackBetEvent = """{"eventType":"PLACE_BET","userId":%s,"betId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(123,100,deltaMarketPrice.totalToLay,deltaMarketPrice.price,"BACK",marketId,runnerId)
+		val backBetEvents:List[String] = for {
+			deltaRunnerPrice <- marketRunnerDelta 
+			if(deltaRunnerPrice.totalToLay != 0) 
+				val placeBackBetEvent = if(deltaRunnerPrice.totalToLay >0)
+					"""{"eventType":"PLACE_BET","userId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+					else 
+						"""{"eventType":"CANCEL_BETS","userId":%s,"betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+
 		} yield placeBackBetEvent
 
-		placeLayBetEvents ::: placeBackBetEvents
+		layBetEvents ::: backBetEvents
 	}
 
-		/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
+	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
 	 * 
 	 * @param  runnerPricesDelta
 	 * @param runnerTradedVolumeDelta
@@ -49,7 +56,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	 * runner price + traded volume = [price,toBack+volume,toLay+volume] = 1.9,7,5
 	 * */
 	def combine(runnerPricesDelta:List[IRunnerPrice], runnerTradedVolumeDelta:List[IPriceTradedVolume]):List[IRunnerPrice] = {
-			val allPrices = (runnerPricesDelta.map(_.price) :::runnerTradedVolumeDelta.map(_.price)).distinct
+		val allPrices = (runnerPricesDelta.map(_.price) :::runnerTradedVolumeDelta.map(_.price)).distinct
 
 		/**Total delta represents both runnerPricesDelta and tradedVolumeDelta in a form of runner prices.*/
 		val totalDelta = for {
@@ -58,7 +65,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			val deltaTradedVolume = runnerTradedVolumeDelta.find(_.price==price).getOrElse(new PriceTradedVolume(price,0))
 			val totalRunnerPriceDelta = new RunnerPrice(deltaRunnerPrice.price,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToBack,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToLay)
 		} yield totalRunnerPriceDelta
-		
+
 		totalDelta
 	}
 	/**Calculates delta between the new and the previous state of the runner prices.
@@ -82,7 +89,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 		deltaForRunnerPrices
 	}
-	
+
 	/**Calculates delta between the new and the previous state of the runner traded volume.
 	 * 
 	 * @param newTradedVolumes
