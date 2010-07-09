@@ -48,18 +48,18 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		require(betSize>=2, "Bet size must be >=2, betSize=" + 2)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 		require(!bets.map(b=>b.betId).contains(betId),"Bet for betId=%s already exists".format(betId))
-		
+
 		val betsToBeMatched =  
 			betType match {
 			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice).toList
 			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice).toList
 		}
-		
+
 		matchBet(betSize,0)
 
 		/**Match bet recursively until fully matched or nothing is to match with.*/
 		def matchBet(unmatchedSize:Double, betToMatchIndex:Int):Unit = {
-      val newBet = new Bet(betId,userId, unmatchedSize, betPrice, betType, U,marketId,runnerId)
+			val newBet = new Bet(betId,userId, unmatchedSize, betPrice, betType, U,marketId,runnerId)
 			/**Nothing to match with.*/
 			if(betToMatchIndex>=betsToBeMatched.size) {
 				bets += newBet
@@ -94,6 +94,38 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			betToBeCancelled.betSize
 	}
 
+	/** Cancels bets on a betting exchange market.
+	 * 
+	 * @param userId 
+	 * @param betsSize Total size of bets to be cancelled.
+	 * @param betPrice The price that bets are cancelled on.
+	 * @param betType
+	 * @param runnerId 
+	 * 
+	 * @return Amount cancelled. Zero is returned if nothing is available to cancel.
+	 */
+	def cancelBets(userId:Long,betsSize:Double,betPrice:Double,betType:BetTypeEnum,runnerId:Long):Double = {
+			val betsToBeCancelled = bets.filter(b => b.userId==userId && b.betPrice==betPrice && b.betType==betType && b.betStatus==U).reverseIterator
+
+			def cancelRecursively(amountToCancel:Double,amountCancelled:Double):Double = {
+				val betToCancel = betsToBeCancelled.next
+				val betCanceledAmount = if(amountToCancel>=betToCancel.betSize) 
+					cancelBet(betToCancel.betId)
+					else {
+						val updatedBet = Bet(betToCancel.betId,betToCancel.userId,betToCancel.betSize - amountToCancel,betToCancel.betPrice,betToCancel.betType,betToCancel.marketId,betToCancel.runnerId)
+						bets.update(bets.indexOf(betToCancel,0),updatedBet)
+						amountToCancel
+					}
+				val newAmountToCancel = amountToCancel-betCanceledAmount
+				val newAmountCancelled = amountCancelled+betCanceledAmount
+				if(betsToBeCancelled.hasNext && newAmountToCancel>0) cancelRecursively(newAmountToCancel,newAmountCancelled)
+				else newAmountCancelled
+			}
+
+			val totalCancelled = if(betsToBeCancelled.hasNext) cancelRecursively(betsSize,0) else 0
+			totalCancelled
+	}
+
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
 	 *  Prices with zero volume are not returned by this method.
 	 * 
@@ -116,15 +148,15 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * */
 	def getBestPrices(runnerId: Long):Tuple2[Double,Double] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
-	
+
 			val layBets = bets.toList.filter(b => b.betStatus==U && b.betType==LAY && b.runnerId==runnerId)
 			val backBets = bets.toList.filter(b => b.betStatus==U && b.betType==BACK && b.runnerId==runnerId)
 			val bestPriceToBack = if(layBets.isEmpty) Double.NaN else layBets.reduceLeft((a,b) => if(a.betPrice>b.betPrice) a else b).betPrice
 			val bestPriceToLay = if(backBets.isEmpty) Double.NaN else backBets.reduceLeft((a,b) => if(a.betPrice<b.betPrice) a else b).betPrice
-		
+
 			new Tuple2(bestPriceToBack,bestPriceToLay)
 	}
-	
+
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
