@@ -55,6 +55,18 @@ trait IMarket {
 	*/
 	def cancelBet(betId:Long):Double
 	
+	/** Cancels bets on a betting exchange market.
+	 * 
+	 * @param userId 
+	 * @param betsSize Total size of bets to be cancelled.
+	 * @param betPrice The price that bets are cancelled on.
+	 * @param betType
+	 * @param runnerId 
+	 * 
+	 * @return Amount cancelled. Zero is returned if nothing is available to cancel.
+	*/
+	def cancelBets(userId:Long,betsSize:Double,betPrice:Double,betType:BetTypeEnum,runnerId:Long):Double
+	
 	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
 	 *  Prices with zero volume are not returned by this method.
    * 
