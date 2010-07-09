@@ -156,23 +156,18 @@ class MarketEventProcessorImplTest {
 	}
 
 	/**
-	 * Tests for CANCEL_BET event.
+	 * Tests for CANCEL_BETS event.
 	 */
-	@Test def testProcessCancelBet {
+	@Test def testProcessCancelLayBets {
 		val market = mockery.mock(classOf[IMarket])
 		mockery.checking(new SExpectations(){
 			{
-				one(betex).findMarket(1);will(returnValue(market))
-				one(market).cancelBet(100)
+				one(betex).findMarket(10);will(returnValue(market))
+				one(market).cancelBets(124,3,1.85,IBet.BetTypeEnum.LAY,1000)
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"CANCEL_BET",
-				"marketId":1,
-				"betId":100
-				}
-		"""))
+		new MarketEventProcessorImpl(betex).process("""{"eventType":"CANCEL_BETS","userId":124,"betsSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""")
 	}
 
 	/**
