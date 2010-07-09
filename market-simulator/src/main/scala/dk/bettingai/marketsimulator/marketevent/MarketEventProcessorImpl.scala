@@ -32,9 +32,9 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 			val market = betex.findMarket( eventMap("marketId").asInstanceOf[Double].toLong)
 			market.placeBet(eventMap("betId").asInstanceOf[Double].toLong,eventMap("userId").asInstanceOf[Double].toInt,eventMap("betSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double], IBet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get,eventMap("runnerId").asInstanceOf[Double].toLong)
 		}
-		case "CANCEL_BET" => {
+		case "CANCEL_BETS" => {
 			val market = betex.findMarket( eventMap("marketId").asInstanceOf[Double].toLong)
-			market.cancelBet(eventMap("betId").asInstanceOf[Double].toLong)
+			market.cancelBets(eventMap("userId").asInstanceOf[Double].toLong,eventMap("betsSize").asInstanceOf[Double],eventMap("betPrice").asInstanceOf[Double],IBet.BetTypeEnum.valueOf(eventMap("betType").asInstanceOf[String]).get,eventMap("runnerId").asInstanceOf[Double].toLong)
 		}
 		case _ =>	throw new IllegalArgumentException("Event type is not supported: " + eventMap("eventType"))
 		}
