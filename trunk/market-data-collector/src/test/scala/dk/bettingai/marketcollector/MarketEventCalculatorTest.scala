@@ -12,18 +12,18 @@ class MarketEventCalculatorTest {
 	 * */
 
 	@Test def testCalculateMarketEventsDeltaIsEmpty {
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(123,10,1000)(List())
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(List())
 		assertEquals(0, marketEvents.size)
 	}
 
 	@Test def testCalculateMarketEventsLayBetsAreGenerated {
 		val marketRunnerDelta = new RunnerPrice(1.85,20,0) :: new RunnerPrice(1.9,2,0) :: Nil
 
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(121,10,1000)(marketRunnerDelta)
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
 
 		val expectedEvents = 
-			"""{"eventType":"PLACE_BET","userId":121,"betSize":20.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
-				"""{"eventType":"PLACE_BET","userId":121,"betSize":2.0,"betPrice":1.9,"betType":"LAY","marketId":10,"runnerId":1000}""" :: 
+			"""{"eventType":"PLACE_BET","betSize":20.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+				"""{"eventType":"PLACE_BET","betSize":2.0,"betPrice":1.9,"betType":"LAY","marketId":10,"runnerId":1000}""" :: 
 					Nil
 
 		assertEquals(2, marketEvents.size)
@@ -34,11 +34,11 @@ class MarketEventCalculatorTest {
 	@Test def testCalculateMarketEventsBackBetsAreGenerated {
 		val marketRunnerDelta = new RunnerPrice(1.95,0,3) :: new RunnerPrice(2,0,30) :: Nil
 
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(122,10,1000)(marketRunnerDelta)
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
 
 		val expectedEvents = 
-			"""{"eventType":"PLACE_BET","userId":122,"betSize":3.0,"betPrice":1.95,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
-				"""{"eventType":"PLACE_BET","userId":122,"betSize":30.0,"betPrice":2.0,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":3.0,"betPrice":1.95,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+				"""{"eventType":"PLACE_BET","betSize":30.0,"betPrice":2.0,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
 					Nil
 
 		assertEquals(2, marketEvents.size)
@@ -49,13 +49,13 @@ class MarketEventCalculatorTest {
 	@Test def testCalculateMarketEventsBothBackAndLayBetsAreGenerated {
 		val marketRunnerDelta = new RunnerPrice(1.95,7,3) :: new RunnerPrice(2,5,30) :: Nil
 
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(123,10,1000)(marketRunnerDelta)
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
 
 		val expectedEvents = 
-			"""{"eventType":"PLACE_BET","userId":123,"betSize":7.0,"betPrice":1.95,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"PLACE_BET","userId":123,"betSize":5.0,"betPrice":2.0,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"PLACE_BET","userId":123,"betSize":3.0,"betPrice":1.95,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"PLACE_BET","userId":123,"betSize":30.0,"betPrice":2.0,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":7.0,"betPrice":1.95,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":5.0,"betPrice":2.0,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":3.0,"betPrice":1.95,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":30.0,"betPrice":2.0,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
 			Nil
 
 		assertEquals(4, marketEvents.size)
@@ -68,11 +68,11 @@ class MarketEventCalculatorTest {
 @Test def testCalculateMarketEventsLayBetsAreCancelled {
 		val marketRunnerDelta = new RunnerPrice(1.85,-20,0) :: new RunnerPrice(1.9,-2,0) :: Nil
 
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(124,10,1000)(marketRunnerDelta)
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
 
 		val expectedEvents = 
-			"""{"eventType":"CANCEL_BETS","userId":124,"betsSize":20.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"CANCEL_BETS","userId":124,"betsSize":2.0,"betPrice":1.9,"betType":"LAY","marketId":10,"runnerId":1000}""" :: 
+			"""{"eventType":"CANCEL_BETS","betsSize":20.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"CANCEL_BETS","betsSize":2.0,"betPrice":1.9,"betType":"LAY","marketId":10,"runnerId":1000}""" :: 
 			Nil
 
 		assertEquals(2, marketEvents.size)
@@ -83,11 +83,11 @@ class MarketEventCalculatorTest {
 @Test def testCalculateMarketEventsBackBetsAreCancelled {
 		val marketRunnerDelta = new RunnerPrice(1.85,0,-3) :: new RunnerPrice(1.9,0,-7) :: Nil
 
-		val marketEvents = MarketEventCalculator.calculateMarketEvents(124,10,1000)(marketRunnerDelta)
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
 
 		val expectedEvents = 
-			"""{"eventType":"CANCEL_BETS","userId":124,"betsSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"CANCEL_BETS","userId":124,"betsSize":7.0,"betPrice":1.9,"betType":"BACK","marketId":10,"runnerId":1000}""" :: 
+			"""{"eventType":"CANCEL_BETS","betsSize":3.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"CANCEL_BETS","betsSize":7.0,"betPrice":1.9,"betType":"BACK","marketId":10,"runnerId":1000}""" :: 
 			Nil
 
 		assertEquals(2, marketEvents.size)

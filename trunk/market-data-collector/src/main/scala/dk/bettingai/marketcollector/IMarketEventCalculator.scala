@@ -11,13 +11,12 @@ trait IMarketEventCalculator {
 
 	/**Calculates market events for the delta between the previous and the current state of the market runner.
 	 * 
-	 * @param userId The user Id that the bet placement events are calculated for.
 	 * @param marketId The market id that the bet placement events are calculated for. 
 	 * @param runnerId The market runner id that the bet placement events are calculated for. 
 	 * @param marketRunnerDelta Delta between the new and the previous state of the market runner (both runner prices and traded volume combined to runner prices).
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
-	def calculateMarketEvents(userId:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String]
+	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String]
 
 	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
 	 * 
