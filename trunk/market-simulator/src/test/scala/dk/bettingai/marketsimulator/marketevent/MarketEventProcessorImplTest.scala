@@ -49,7 +49,7 @@ class MarketEventProcessorImplTest {
 				{"runnerId":12, 
 				"runnerName":"Arsenal"}]
 				}
-		"""))
+		"""),0,123)
 	}
 
 	@Test(expected=classOf[ClassCastException])
@@ -67,7 +67,7 @@ class MarketEventProcessorImplTest {
 				{"runnerId":12, 
 				"runnerName":"Arsenal"}]
 				}
-		"""))
+		"""),0,123)
 	}
 
 	@Test(expected=classOf[NoSuchElementException])
@@ -84,7 +84,7 @@ class MarketEventProcessorImplTest {
 				{"runnerId":12, 
 				"runnerName":"Arsenal"}]
 				}
-		"""))
+		"""),0,123)
 	}
 
 	/**
@@ -101,16 +101,14 @@ class MarketEventProcessorImplTest {
 		})
 
 		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"PLACE_BET",
-				"userId":123,
-				"betId":100,	
+				{"eventType":"PLACE_BET",	
 				"betSize":10,
 				"betPrice":3,
 				"betType":"LAY",
 				"marketId":1,
 				"runnerId":11
 				}
-		"""))
+		"""),100,123)
 	}
 
 	@Test def testProcessPlaceBetEventBack() {
@@ -118,21 +116,19 @@ class MarketEventProcessorImplTest {
 		mockery.checking(new SExpectations(){
 			{
 				one(betex).findMarket(1);will(returnValue(market))
-				one(market).placeBet(100,345,10,3, IBet.BetTypeEnum.BACK, 11)
+				one(market).placeBet(101,345,10,3, IBet.BetTypeEnum.BACK, 11)
 			}
 		})
 
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
-				"userId":345,
-				"betId":100,	
 				"betSize":10,
 				"betPrice":3,
 				"betType":"BACK",
 				"marketId":1,
 				"runnerId":11
 				}
-		"""))
+		"""),101,345)
 	}
 
 	@Test(expected=classOf[NoSuchElementException]) 
@@ -145,14 +141,13 @@ class MarketEventProcessorImplTest {
 		})
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"PLACE_BET",
-				"userId":345,
 				"betSize":10,
 				"betPrice":3,
 				"betType":"NOT_SUPPORTED",
 				"marketId":1,
 				"runnerId":11
 				}
-		"""))
+		"""),0,123)
 	}
 
 	/**
@@ -167,7 +162,7 @@ class MarketEventProcessorImplTest {
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process("""{"eventType":"CANCEL_BETS","userId":124,"betsSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""")
+		new MarketEventProcessorImpl(betex).process("""{"eventType":"CANCEL_BETS","betsSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""",0,124)
 	}
 
 	/**
@@ -175,15 +170,15 @@ class MarketEventProcessorImplTest {
 	 */
 
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessEventNotInJSONFormat() {
-		new MarketEventProcessorImpl(betex).process(new String(""))
+		new MarketEventProcessorImpl(betex).process(new String(""),0,123)
 	}
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessNoEventTypeAttribute() {
-		new MarketEventProcessorImpl(betex).process(new String("{}"))
+		new MarketEventProcessorImpl(betex).process(new String("{}"),0,123)
 	}
 	@Test(expected=classOf[IllegalArgumentException]) def testProcessNotSupportedEventType() {
 		new MarketEventProcessorImpl(betex).process(new String("""
 				{"eventType":"NOT_SUPPORTED_EVENT_NAME"}
-		"""))
+		"""),0,123)
 	}
 
 	/**Check if both market runners lists are the same.*/

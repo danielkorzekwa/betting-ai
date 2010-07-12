@@ -10,7 +10,7 @@ import IBet.BetStatusEnum._
 class MarketCancelBetsTest {
 
 	/**
-	 *Tests for cancel bets.
+	 *Nothing is cancelled.
 	 */
 
 	@Test def testCancelBackBetNothingToCancel {
@@ -27,11 +27,51 @@ class MarketCancelBetsTest {
 		assertEquals(0,market.cancelBets(123,10,1.95,BACK,11),0)
 		assertEquals(2,market.getBets(123).size)
 	}
+	
+	@Test def testCancelUnmatchedBackBetWrongUserId {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
+		market.placeBet(100,123,10,1.95,BACK,11)
+
+		assertEquals(1,market.getBets(123).size)
+		assertEquals(0,market.cancelBets(1234,10,1.95,BACK,11),0)
+		assertEquals(1,market.getBets(123).size)
+	}
+	
+	@Test def testCancelUnmatchedBackBetWrongPrice {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
+		market.placeBet(100,123,10,1.95,BACK,11)
+
+		assertEquals(1,market.getBets(123).size)
+		assertEquals(0,market.cancelBets(1234,10,1.95,BACK,11),0)
+		assertEquals(1,market.getBets(123).size)
+	}
+
+	@Test def testCancelUnmatchedBackBetWrongBetType {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
+		market.placeBet(100,123,10,1.95,BACK,11)
+
+		assertEquals(1,market.getBets(123).size)
+		assertEquals(0,market.cancelBets(1234,10,1.95,LAY,11),0)
+		assertEquals(1,market.getBets(123).size)
+	}
+	
+	@Test def testCancelUnmatchedBackBetWrongRunnerId {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
+		market.placeBet(100,123,10,1.95,BACK,11)
+
+		assertEquals(1,market.getBets(123).size)
+		assertEquals(0,market.cancelBets(1234,10,1.95,BACK,12),0)
+		assertEquals(1,market.getBets(123).size)
+	}
+	
+	/**
+	 * One bet is cancelled.
+	 * */
 
 	@Test def testCancelUnmatchedBackBetIsCancelled {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,10,1.95,BACK,11)
-	
+
 		assertEquals(1,market.getBets(123).size)
 		assertEquals(10,market.cancelBets(123,10,1.95,BACK,11),0)
 		assertEquals(0,market.getBets(123).size)
@@ -44,7 +84,7 @@ class MarketCancelBetsTest {
 		assertEquals(10,market.cancelBets(123,20,1.95,BACK,11),0)
 		assertEquals(0,market.getBets(123).size)
 	}
-	
+
 	@Test def testCancelUnmatchedLayBetIsCancelled {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,10,1.95,LAY,11)
@@ -92,6 +132,10 @@ class MarketCancelBetsTest {
 		assertEquals(2,market.getBets(123).size)
 	}
 
+	/**
+	 * More than one bet is cancelled.
+	 * */
+
 	@Test def testCancelUnsettledBackBetWhenTwoBetsExists {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,3,1.95,BACK,11)
@@ -133,14 +177,14 @@ class MarketCancelBetsTest {
 		assertEquals(3,market.getBets(123).size)
 		assertEquals(4,market.cancelBets(123,4,1.95,BACK,11),0)
 		assertEquals(2,market.getBets(123).size)
-		
+
 		assertEquals(100,market.getBets(123)(0).betId)
 		assertEquals(4,market.getBets(123)(0).betSize,1)
-		
+
 		assertEquals(101,market.getBets(123)(1).betId)
 		assertEquals(1,market.getBets(123)(1).betSize,1)
 	}
-	
+
 	@Test def testCancelAllUnsettledBackBetsWhenThreeBetsExists {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,4,1.95,BACK,11)
