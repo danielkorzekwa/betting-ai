@@ -13,22 +13,21 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 	/**Calculates market events for the delta between the previous and the current state of the market runner.
 	 * 
-	 * @param userId The user Id that the bet placement events are calculated for.
 	 * @param marketId The market id that the bet placement events are calculated for. 
 	 * @param runnerId The market runner id that the bet placement events are calculated for. 
 	 * @param marketRunnerDelta Delta between the new and the previous state of the market runner (both runner prices and traded volume combined to runner prices).
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
-	def calculateMarketEvents(userId:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
+	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
 
 		/**Create lay bet events for delta between the new and the previous runner states.*/
 		val layBetEvents:List[String] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack != 0) 
 				val placeLayBetEvent = if(deltaRunnerPrice.totalToBack>0)
-					"""{"eventType":"PLACE_BET","userId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
+					"""{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
 					else 
-						"""{"eventType":"CANCEL_BETS","userId":%s,"betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+						"""{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 		} yield placeLayBetEvent
 
 		/**Create back bet events for delta between the new and the previous runner states.*/
@@ -36,9 +35,9 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToLay != 0) 
 				val placeBackBetEvent = if(deltaRunnerPrice.totalToLay >0)
-					"""{"eventType":"PLACE_BET","userId":%s,"betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+					"""{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
 					else 
-						"""{"eventType":"CANCEL_BETS","userId":%s,"betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(userId,-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+						"""{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
 
 		} yield placeBackBetEvent
 
