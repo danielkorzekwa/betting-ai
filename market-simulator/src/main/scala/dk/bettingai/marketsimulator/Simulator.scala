@@ -57,12 +57,12 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 	 * @param Contains market events that the market simulation is executed for.
 	 * @param trader
 	 * @param traderUserId
-	 * @param firstTraderBetId
+	 * @param historicalDataUserId
 	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
 	 */
-	def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,firstTraderBetId:Long,p: (Int) => Unit):List[IMarketRiskReport]= {
+	def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]= {
 
-			var nextBetIdValue=firstTraderBetId
+			var nextBetIdValue=1
 			val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
 
 			val marketEventsNumber = marketData.reset.getLines().size
@@ -72,7 +72,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 					val marketEvent = iterator.next
 					val progress=(marketEventIndex*100)/marketEventsNumber
 					p(progress)
-					marketEventProcessor.process(marketEvent)
+					marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
 
 					/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
 					for(market <- betex.getMarkets) {
