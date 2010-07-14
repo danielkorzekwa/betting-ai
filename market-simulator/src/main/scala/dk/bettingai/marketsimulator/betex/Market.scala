@@ -138,7 +138,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.runnerId==runnerId).groupBy(b => b.betPrice) 
 
 			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).foldLeft(0d)(_ + _.betSize)
-			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList
+			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList.sortWith(_.price<_.price)
 	}
 
 	/**Returns best toBack/toLay prices for market runner.
