@@ -29,10 +29,9 @@ class MarketEventProcessorImplTest {
 
 	@Test def testProcessCreateMarketEvent() {
 
-		val market = new Market(10,"Match Odds","Man Utd vs Arsenal",1,df.parse("2010-04-15 14:00:00"),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		mockery.checking(new SExpectations() {
 			{
-				one(betex).createMarket(withArg(10),withArg("Match Odds"),withArg("Man Utd vs Arsenal"),withArg(1),withArg(df.parse("2010-04-15 14:00:00")),withArg(new RunnersMatcher(List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))))
+				one(betex).createMarket(withArg(10l),withArg("Match Odds"),withArg("Man Utd vs Arsenal"),withArg(1),withArg(df.parse("2010-04-15 14:00:00")),withArg(new RunnersMatcher(List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))))
 			}
 		})
 
