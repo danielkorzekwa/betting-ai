@@ -53,8 +53,8 @@ class MarketEventCalculatorTest {
 
 		val expectedEvents = 
 			"""{"eventType":"PLACE_BET","betSize":7.0,"betPrice":1.95,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
-			"""{"eventType":"PLACE_BET","betSize":5.0,"betPrice":2.0,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
 			"""{"eventType":"PLACE_BET","betSize":3.0,"betPrice":1.95,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"PLACE_BET","betSize":5.0,"betPrice":2.0,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
 			"""{"eventType":"PLACE_BET","betSize":30.0,"betPrice":2.0,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
 			Nil
 

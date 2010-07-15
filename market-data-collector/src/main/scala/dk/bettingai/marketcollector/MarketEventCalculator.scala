@@ -21,27 +21,28 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
 
 		/**Create lay bet events for delta between the new and the previous runner states.*/
-		val layBetEvents:List[String] = for {
+		val layBetEvents:List[Tuple2[Double,String]] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack != 0) 
 				val placeLayBetEvent = if(deltaRunnerPrice.totalToBack>0)
-					"""{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
-					else 
-						"""{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+					deltaRunnerPrice.price -> """{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
+					else	
+						deltaRunnerPrice.price -> """{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 		} yield placeLayBetEvent
 
 		/**Create back bet events for delta between the new and the previous runner states.*/
-		val backBetEvents:List[String] = for {
+		val backBetEvents:List[Tuple2[Double,String]] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToLay != 0) 
 				val placeBackBetEvent = if(deltaRunnerPrice.totalToLay >0)
-					"""{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+					deltaRunnerPrice.price -> """{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
 					else 
-						"""{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+						deltaRunnerPrice.price -> """{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
 
 		} yield placeBackBetEvent
 
-		layBetEvents ::: backBetEvents
+		/**Sort all tuples by price and map them to events.*/
+		(layBetEvents ::: backBetEvents).sortWith((a,b) => a._1<b._1).map(_._2)
 	}
 
 	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
