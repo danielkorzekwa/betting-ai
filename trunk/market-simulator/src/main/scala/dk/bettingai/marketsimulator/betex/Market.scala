@@ -45,7 +45,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * @param runnerId
 	 */
 	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long) {
-		require(betSize>=2, "Bet size must be >=2, betSize=" + 2)
+		require(betSize>0, "Bet size must be >0, betSize=" + betSize)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 		require(!bets.map(b=>b.betId).contains(betId),"Bet for betId=%s already exists".format(betId))
 
