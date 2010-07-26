@@ -18,7 +18,7 @@ object Market {
 	}
 
 	class RunnerPrice(val price:Double,val totalToBack:Double,val totalToLay: Double) extends IMarket.IRunnerPrice {
-		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s".format(price,totalToBack,totalToLay)
+		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s]".format(price,totalToBack,totalToLay)
 	}
 
 	class PriceTradedVolume(val price:Double, val totalMatchedAmount:Double) extends IMarket.IPriceTradedVolume {
@@ -105,7 +105,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * @return Amount cancelled. Zero is returned if nothing is available to cancel.
 	 */
 	def cancelBets(userId:Long,betsSize:Double,betPrice:Double,betType:BetTypeEnum,runnerId:Long):Double = {
-			val betsToBeCancelled = bets.filter(b => b.userId==userId && b.betPrice==betPrice && b.betType==betType && b.betStatus==U).reverseIterator
+			val betsToBeCancelled = bets.filter(b => b.userId==userId && b.betPrice==betPrice && b.betType==betType && b.betStatus==U && b.runnerId==runnerId).reverseIterator
 
 			def cancelRecursively(amountToCancel:Double,amountCancelled:Double):Double = {
 				val betToCancel = betsToBeCancelled.next
