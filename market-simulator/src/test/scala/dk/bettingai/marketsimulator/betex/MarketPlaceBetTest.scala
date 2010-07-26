@@ -826,4 +826,42 @@ class MarketPlaceBetTest {
 		assertEquals(11,bets123(0).runnerId)
 
 	}
+	
+	/**Test scenarios for rounding issues.*/
+	@Test def testMatchRoundingLayBetWithBackBet {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		market.placeBet(100,122,2.26,5,BACK,11)
+		market.placeBet(101,123,2.26,6,LAY,11)
+
+		/**Check bets for user 122.*/
+		val bets122 = market.getBets(122)
+		assertEquals(1, bets122.size)
+
+	
+		assertEquals(100,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(2.26,bets122(0).betSize,0)
+		assertEquals(5.0,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
+		assertEquals(M,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).runnerId)
+
+		/**Check bets for user 123.*/
+		val bets123 = market.getBets(123)
+		assertEquals(1, bets123.size)
+
+		assertEquals(101,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(2.26,bets123(0).betSize,0)
+		assertEquals(5.0,bets123(0).betPrice,0)
+		assertEquals(LAY,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).runnerId)
+		
+		println(market.getRunnerPrices(11))
+	}
+	
 }
