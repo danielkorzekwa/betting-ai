@@ -45,4 +45,11 @@ trait IMarketEventCalculator {
 	 * @return Delta between the new and the previous state of the runner traded volume.
 	 */
 	def calculateTradedVolumeDelta(newTradedVolumes:List[IPriceTradedVolume],previousTradedVolumes:List[IPriceTradedVolume]):List[IPriceTradedVolume]
+	
+	/**This function transforms runner from state A to B. 
+	 * State A is represented by runner prices in state A and traded volume delta between states B and A. 
+	 * The state B is represented the list of market events that reflect traded volume delta between states B and A
+	 *  and by runner prices in state B.
+	 * */
+	def calculateMarketEventsForTradedVolume(marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]]
 }
