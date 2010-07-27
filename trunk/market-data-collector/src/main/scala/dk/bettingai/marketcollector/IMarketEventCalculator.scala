@@ -8,7 +8,13 @@ import dk.bettingai.marketsimulator.betex.api.IMarket._
  *
  */
 trait IMarketEventCalculator {
-
+  
+	/**Transforms delta between two states of market runner into the stream of events.
+	 * 	
+	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
+	 * */
+	def produce(marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String]
+	
 	/**Calculates market events for the delta between the previous and the current state of the market runner.
 	 * 
 	 * @param marketId The market id that the bet placement events are calculated for. 
