@@ -1,4 +1,4 @@
-package dk.bettingai.marketcollector
+package dk.bettingai.marketcollector.eventcalculator
 
 import dk.bettingai.marketsimulator.betex.api.IMarket._
 import dk.bettingai.marketsimulator.betex.Market._
