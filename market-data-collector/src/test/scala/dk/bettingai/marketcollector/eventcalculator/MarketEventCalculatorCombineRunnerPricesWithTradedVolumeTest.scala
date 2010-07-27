@@ -1,4 +1,4 @@
-package dk.bettingai.marketcollector
+package dk.bettingai.marketcollector.eventcalculator
 
 import org.junit._
 import Assert._
