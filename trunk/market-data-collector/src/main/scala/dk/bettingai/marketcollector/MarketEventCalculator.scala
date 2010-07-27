@@ -2,7 +2,6 @@ package dk.bettingai.marketcollector
 
 import dk.bettingai.marketsimulator.betex.api.IMarket._
 import dk.bettingai.marketsimulator.betex.Market._
-import org.apache.commons.math.util.MathUtils._
 import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
 /**This trait represents a function that calculates market events for the delta between the previous and the current state of the market runner.
  * 
@@ -46,21 +45,21 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 		/**Create lay bet events for delta between the new and the previous runner states.*/
 		val layBetEvents:List[Tuple2[Double,String]] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
-			if(deltaRunnerPrice.totalToBack > 0.01 || deltaRunnerPrice.totalToBack < -0.01) 
-				val placeLayBetEvent = if(round(deltaRunnerPrice.totalToBack,2)>0)
-					deltaRunnerPrice.price -> placeBetEvent(round(deltaRunnerPrice.totalToBack,2),deltaRunnerPrice.price,"LAY",marketId,runnerId)
+			if(deltaRunnerPrice.totalToBack != 0) 
+				val placeLayBetEvent = if(deltaRunnerPrice.totalToBack>0)
+					deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
 					else	
-						deltaRunnerPrice.price -> cancelBetsEvent(round(-deltaRunnerPrice.totalToBack,2),deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 		} yield placeLayBetEvent
 
 		/**Create back bet events for delta between the new and the previous runner states.*/
 		val backBetEvents:List[Tuple2[Double,String]] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
-			if(deltaRunnerPrice.totalToLay > 0.01 || deltaRunnerPrice.totalToLay < -0.01) 
-				val placeBackBetEvent = if(round(deltaRunnerPrice.totalToLay,2) >0)
-					deltaRunnerPrice.price -> placeBetEvent(round(deltaRunnerPrice.totalToLay,2),deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+			if(deltaRunnerPrice.totalToLay!=0) 
+				val placeBackBetEvent = if(deltaRunnerPrice.totalToLay >0)
+					deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
 					else 
-						deltaRunnerPrice.price -> cancelBetsEvent(round(-deltaRunnerPrice.totalToLay,2),deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
 
 		} yield placeBackBetEvent
 
@@ -142,11 +141,9 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	 * */
 	def calculateMarketEventsForTradedVolume(marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]] = {
 
-		val validatedTradedVolumeDelta = runnerTradedVolumeDelta.map(tv => new PriceTradedVolume(tv.price,Math.floor(tv.totalMatchedAmount+0.001)))
-
 		require(previousRunnerPrices.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
 		require(previousRunnerPrices.find(p => p.totalToBack==0 && p.totalToLay==0).isEmpty,"Price with both totalToBack and totalToLay to be 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
-		require(validatedTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. TradedVolumeDelta=" + validatedTradedVolumeDelta)
+		require(runnerTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. TradedVolumeDelta=" + runnerTradedVolumeDelta)
 
 		val bestPriceToBack =previousRunnerPrices.filter(p => p.totalToBack>0).foldLeft(1.01)((a,b) => if(b.price>a) b.price else a)
 		val bestPriceToLay = previousRunnerPrices.filter(p => p.totalToLay>0).foldLeft(1000d)((a,b) => if(b.price<a) b.price else a)
@@ -156,13 +153,13 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 			val runnerTradedVolume = runnerTradedVolumes.next
 			val runnerPrice = updatedRunnerPrices.find(p => p.price==runnerTradedVolume.price).getOrElse(new RunnerPrice(runnerTradedVolume.price,0,0))
-			val toBackDelta = (runnerTradedVolume.totalMatchedAmount - runnerPrice.totalToBack).max(0).floor
-			val toLayDelta = (runnerTradedVolume.totalMatchedAmount - runnerPrice.totalToLay).max(0).floor
-			val newTotalToBack = (runnerPrice.totalToBack - toLayDelta).max(0).floor
-			val newTotalToLay=(runnerPrice.totalToLay - toBackDelta).max(0).floor
+			val toBackDelta = (runnerTradedVolume.totalMatchedAmount - runnerPrice.totalToBack).max(0)
+			val toLayDelta = (runnerTradedVolume.totalMatchedAmount - runnerPrice.totalToLay).max(0)
+			val newTotalToBack = (runnerPrice.totalToBack - toLayDelta).max(0)
+			val newTotalToLay=(runnerPrice.totalToLay - toBackDelta).max(0)
 
-			val placeBackBetEvents:List[String] = if(round(toLayDelta,2)>0) placeBetEvent(round(toLayDelta,2),runnerTradedVolume.price,"BACK",marketId,runnerId) :: Nil else Nil
-			val placeLayBetEvents = if(round(toBackDelta,2)>0) placeBetEvent(round(toBackDelta,2),runnerTradedVolume.price,"LAY",marketId,runnerId)  :: Nil else Nil
+			val placeBackBetEvents:List[String] = if(toLayDelta>0) placeBetEvent(toLayDelta,runnerTradedVolume.price,"BACK",marketId,runnerId) :: Nil else Nil
+			val placeLayBetEvents = if(toBackDelta>0) placeBetEvent(toBackDelta,runnerTradedVolume.price,"LAY",marketId,runnerId)  :: Nil else Nil
 
 			val newUpdateRunnerPrices = if(newTotalToBack>0 || newTotalToLay>0) new RunnerPrice(runnerTradedVolume.price,newTotalToBack,newTotalToLay) :: updatedRunnerPrices.filterNot(p => p.price==runnerTradedVolume.price)
 			else updatedRunnerPrices.filterNot(p => p.price==runnerTradedVolume.price)
@@ -174,8 +171,8 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			}
 
 			val cancelBetsEvents = betType match {
-			case BACK => partition._2.map(p =>cancelBetsEvent(round(p.totalToBack,2),p.price,"LAY",marketId,runnerId))
-			case LAY => partition._2.map(p =>cancelBetsEvent(round(p.totalToLay,2),p.price,"BACK",marketId,runnerId))
+			case BACK => partition._2.map(p =>cancelBetsEvent(p.totalToBack,p.price,"LAY",marketId,runnerId))
+			case LAY => partition._2.map(p =>cancelBetsEvent(p.totalToLay,p.price,"BACK",marketId,runnerId))
 			}
 
 			val newEvents = cancelBetsEvents ::: placeLayBetEvents ::: placeBackBetEvents
@@ -184,14 +181,14 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 		}
 
 		/**Process traded volume on pricesToBack moving from the highest price to the lowest.*/
-		val tradedVolumeOnPricesToBack = validatedTradedVolumeDelta.filter(tv => tv.price<bestPriceToLay && tv.totalMatchedAmount>0).sortWith((a,b) => a.price>b.price).iterator
+		val tradedVolumeOnPricesToBack = runnerTradedVolumeDelta.filter(tv => tv.price<bestPriceToLay && tv.totalMatchedAmount>0).sortWith((a,b) => a.price>b.price).iterator
 		val pricesToBack = previousRunnerPrices.filter(p => p.price<bestPriceToLay)
 		val resultForPricesToBack = if(!tradedVolumeOnPricesToBack.isEmpty)
 			calculateRecursive(BACK,pricesToBack,tradedVolumeOnPricesToBack,List())
 			else Tuple2(pricesToBack,List())
 
 			/**Process traded volume on pricesToLay moving from the highest price to the lowest.*/
-			val tradedVolumeOnPricesToLay = validatedTradedVolumeDelta.filter(tv => tv.price >=bestPriceToLay && tv.totalMatchedAmount>0 ).sortWith((a,b) => a.price<b.price).iterator
+			val tradedVolumeOnPricesToLay = runnerTradedVolumeDelta.filter(tv => tv.price >=bestPriceToLay && tv.totalMatchedAmount>0 ).sortWith((a,b) => a.price<b.price).iterator
 			val pricesToLay = previousRunnerPrices.filter(p => p.price>=bestPriceToLay)
 			val resultForPricesToLay = if(!tradedVolumeOnPricesToLay.isEmpty)
 				calculateRecursive(LAY,pricesToLay,tradedVolumeOnPricesToLay,List())

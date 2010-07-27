@@ -4,7 +4,7 @@ import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.betex.Market._
 
-class MarketEventCalculatorRunnerPricesMarketEventsTest {
+class MarketEventCalculatorMarketRunnerMarketEventsTest {
 
 
 	@Test def testEmptyData {
