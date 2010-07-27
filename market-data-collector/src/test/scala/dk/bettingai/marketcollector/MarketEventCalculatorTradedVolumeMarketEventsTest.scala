@@ -180,26 +180,6 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 		assertEquals(0,marketEvents.size)
 	}
 
-	@Test def testTradedVolumeAlmostZeroOnSecondToBackPrice {
-		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,0.00001) :: Nil
-
-		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(2,22)(previousRunnerPrices,tradedVolumeDelta)
-
-		val runnerPrices = result._1
-		assertEquals(2,runnerPrices.size)
-		assertEquals(2.0,runnerPrices(0).price,0)
-		assertEquals(4,runnerPrices(0).totalToBack,0)
-		assertEquals(0,runnerPrices(0).totalToLay,0)
-
-		assertEquals(2.1,runnerPrices(1).price,0)
-		assertEquals(100,runnerPrices(1).totalToBack,0)
-		assertEquals(0,runnerPrices(1).totalToLay,0)
-
-		val marketEvents = result._2
-		assertEquals(0,marketEvents.size)
-	}
-
 	/**Test scenarios for priceToLay available only.*/
 
 	@Test def testOnePriceToLayNothingIsMatched {
@@ -338,27 +318,6 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 		val marketEvents = result._2
 		assertEquals(0,marketEvents.size)
 	}
-
-	@Test def testTradedVolumeAlmostZeroOnSecondToLayPrice {
-		val previousRunnerPrices = new RunnerPrice(2.0,0,100) :: new RunnerPrice(2.1,0,4) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.1,0.00001) :: Nil
-
-		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(2,22)(previousRunnerPrices,tradedVolumeDelta)
-
-		val runnerPrices = result._1
-		assertEquals(2,runnerPrices.size)
-		assertEquals(2.0,runnerPrices(0).price,0)
-		assertEquals(0,runnerPrices(0).totalToBack,0)
-		assertEquals(100,runnerPrices(0).totalToLay,0)
-
-		assertEquals(2.1,runnerPrices(1).price,0)
-		assertEquals(0,runnerPrices(1).totalToBack,0)
-		assertEquals(4,runnerPrices(1).totalToLay,0)
-
-		val marketEvents = result._2
-		assertEquals(0,marketEvents.size)
-	}
-
 
 	/**Test scenarios for traded volume on not available price.*/
 	@Test def testTradedVolumeOnNotAvailablePrices {
