@@ -263,11 +263,11 @@ class MarketTest {
 		assertEquals(2.4,tradedVolume(0).price,0)
 		assertEquals(5,tradedVolume(0).totalMatchedAmount,0)
 
-		assertEquals(2.6,tradedVolume(1).price,0)
-		assertEquals(3,tradedVolume(1).totalMatchedAmount,0)
+		assertEquals(2.5,tradedVolume(1).price,0)
+		assertEquals(1,tradedVolume(1).totalMatchedAmount,0)
 
-		assertEquals(2.5,market.getRunnerTradedVolume(11)(2).price,0)
-		assertEquals(1,tradedVolume(2).totalMatchedAmount,0)
+		assertEquals(2.6,market.getRunnerTradedVolume(11)(2).price,0)
+		assertEquals(3,tradedVolume(2).totalMatchedAmount,0)
 	}
 
 

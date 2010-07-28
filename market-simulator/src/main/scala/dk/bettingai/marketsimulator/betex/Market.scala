@@ -164,7 +164,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			val betsByPrice = bets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
-			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList
+			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
 	}
 
 	/**Returns all bets placed by user on that market.
