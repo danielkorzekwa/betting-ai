@@ -23,7 +23,7 @@ object EventProducer {
 
 	class EventProducerVerificationError(val message:String,val prevRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],
 			val newRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],
-			val toVerifyRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],events:List[String]) extends RuntimeException(message)
+			val toVerifyRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],val events:List[String]) extends RuntimeException(message)
 }
 
 class EventProducer extends IEventProducer{
@@ -81,9 +81,7 @@ class EventProducer extends IEventProducer{
 	 * */
 	private def generateMarketEvents(marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):Iterable[Tuple2[Long,List[String]]] = {
 			val betexMarket = betex.findMarket(marketId)	
-			val marketEvents = for{marketRunner <- validatedMarketRunners
-				val runnerId = marketRunner._1
-				val runnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]] = marketRunner._2
+			val marketEvents = for{(runnerId,runnerData) <- validatedMarketRunners
 
 				val previousRunnerPrices = betexMarket.getRunnerPrices(runnerId)
 				val previousTradedVolume = betexMarket.getRunnerTradedVolume(runnerId)
@@ -107,9 +105,7 @@ class EventProducer extends IEventProducer{
 		
 		val betexMarket = betex.findMarket(marketId)		
 
-		for(runnerEventsTuple <- marketEvents) {
-			val runnerId = runnerEventsTuple._1
-			val runnerEvents = runnerEventsTuple._2
+		for((runnerId,runnerEvents) <- marketEvents) {
 			val previousRunnerPrices = betexMarket.getRunnerPrices(runnerId)
 			val previousTradedVolume = betexMarket.getRunnerTradedVolume(runnerId)
 
@@ -128,15 +124,15 @@ class EventProducer extends IEventProducer{
 
 			/**Verify of runner events represents delta between two runner states.*/
 			if(validatedMarketRunners(runnerId)._1.size != toVerifyRunnerPrices.size) throwVerificationError("Runner prices sizes are not the same: " + validatedMarketRunners(runnerId)._1.size + "!=" + toVerifyRunnerPrices.size)
-			for(entry <-validatedMarketRunners(runnerId)._1.zip(toVerifyRunnerPrices)) {
-				if(entry._1.price!=entry._2.price) throwVerificationError("Price is not the same=" + entry)
-				if(entry._1.totalToBack!=entry._2.totalToBack) throwVerificationError("TotalToBack is not the same=" + entry)
-				if(entry._1.totalToLay!=entry._2.totalToLay) throwVerificationError("TotalToLay is not the same=" + entry)
+			for((newRunnerPrice,toVerifyRunnerPrice) <- validatedMarketRunners(runnerId)._1.zip(toVerifyRunnerPrices)) {
+				if(newRunnerPrice.price!=toVerifyRunnerPrice.price) throwVerificationError("Price is not the same=" + (newRunnerPrice,toVerifyRunnerPrice))
+				if(newRunnerPrice.totalToBack!=toVerifyRunnerPrice.totalToBack) throwVerificationError("TotalToBack is not the same=" + (newRunnerPrice,toVerifyRunnerPrice))
+				if(newRunnerPrice.totalToLay!=toVerifyRunnerPrice.totalToLay) throwVerificationError("TotalToLay is not the same=" + (newRunnerPrice,toVerifyRunnerPrice))
 			}
 			if(validatedMarketRunners(runnerId)._2.size != toVerifyTradedVolume.size) throwVerificationError("Traded volume sizes are not the same: " + validatedMarketRunners(runnerId)._2.size + "!=" + toVerifyTradedVolume.size)
-			for(entry <-validatedMarketRunners(runnerId)._2.zip(toVerifyTradedVolume)) {
-				if(entry._1.price!=entry._2.price) throwVerificationError("Price is not the same=" + entry)
-				if(entry._1.totalMatchedAmount!=entry._2.totalMatchedAmount) throwVerificationError("TotalAmountMatched is not the same=" + entry)
+			for((newTradedVolume,toVerifyTradedVolume) <-validatedMarketRunners(runnerId)._2.zip(toVerifyTradedVolume)) {
+				if(newTradedVolume.price!=toVerifyTradedVolume.price) throwVerificationError("Price is not the same=" + (newTradedVolume,toVerifyTradedVolume))
+				if(newTradedVolume.totalMatchedAmount!=toVerifyTradedVolume.totalMatchedAmount) throwVerificationError("TotalAmountMatched is not the same=" + (newTradedVolume,toVerifyTradedVolume))
 			}
 		}
 	}
