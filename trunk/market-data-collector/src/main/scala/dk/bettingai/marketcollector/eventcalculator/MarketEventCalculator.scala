@@ -23,7 +23,7 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			val validatedPrevTradedVolumeDelta = prevMarketRunner._2.map(tv => new PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor))
 			val validatedMarketRunner = (validatedMarketPrices,validatedTradedVolumeDelta)
 			val validatedPrevMarketRunner = (validatedPrevMarketPrices,validatedPrevTradedVolumeDelta)
-			
+
 			val tradedVolumeDelta = MarketEventCalculator.calculateTradedVolumeDelta(validatedMarketRunner._2.toList,validatedPrevMarketRunner._2)
 			val intermediatePrices = MarketEventCalculator.calculateMarketEventsForTradedVolume(marketId, runnerId)(validatedPrevMarketRunner._1, tradedVolumeDelta)
 			val runnerPricesDelta = MarketEventCalculator.calculateRunnerPricesDelta(validatedMarketRunner._1.toList,intermediatePrices._1)
@@ -41,30 +41,31 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
 	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
+		require(marketRunnerDelta.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + marketRunnerDelta);
+require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"Price with both totalToBack and totalToLay less than 0 is not allowed. RunnerPrices=" + marketRunnerDelta);
 
-		/**Create lay bet events for delta between the new and the previous runner states.*/
-		val layBetEvents:List[Tuple2[Double,String]] = for {
+		/**Create cancel events.*/
+		val cancelBetEvents:List[Tuple2[Double,String]] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
-			if(deltaRunnerPrice.totalToBack != 0) 
-				val placeLayBetEvent = if(deltaRunnerPrice.totalToBack>0)
+			if(deltaRunnerPrice.totalToBack < 0 || deltaRunnerPrice.totalToLay<0) 
+				val cancelBetEvent = if(deltaRunnerPrice.totalToBack<0)
+					deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+					else	
+						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+		} yield cancelBetEvent
+
+		/**Create bet events.*/
+		val placeBetEvents:List[Tuple2[Double,String]] = for {
+			deltaRunnerPrice <- marketRunnerDelta 
+			if(deltaRunnerPrice.totalToBack > 0 || deltaRunnerPrice.totalToLay>0) 
+				val betEvent = if(deltaRunnerPrice.totalToBack>0)
 					deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
 					else	
-						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
-		} yield placeLayBetEvent
-
-		/**Create back bet events for delta between the new and the previous runner states.*/
-		val backBetEvents:List[Tuple2[Double,String]] = for {
-			deltaRunnerPrice <- marketRunnerDelta 
-			if(deltaRunnerPrice.totalToLay!=0) 
-				val placeBackBetEvent = if(deltaRunnerPrice.totalToLay >0)
-					deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
-					else 
-						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
-
-		} yield placeBackBetEvent
+						deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+		} yield betEvent
 
 		/**Sort all tuples by price and map them to events.*/
-		(layBetEvents ::: backBetEvents).sortWith((a,b) => a._1<b._1).map(_._2)
+		(cancelBetEvents ::: placeBetEvents).sortWith((a,b) => a._1<b._1).map(_._2)
 	}
 
 	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
