@@ -8,7 +8,7 @@ import org.apache.commons.io._
 import java.io.File
 import org.slf4j.LoggerFactory
 
-class EventCollectorTaskTest {
+class EventCollectorTaskIntegrationTest {
 
 	val log = LoggerFactory.getLogger(getClass)
 
@@ -26,7 +26,7 @@ class EventCollectorTaskTest {
 		/**Create betfair service and login to betfair account.*/
 		betfairServiceFactoryBean.setUser(System.getenv("bfUser"))
 		betfairServiceFactoryBean.setPassword(System.getenv("bfPassword"))
-		betfairServiceFactoryBean.setProductId(82)
+		betfairServiceFactoryBean.setProductId(204)
 		val loginResponse = betfairServiceFactoryBean.login
 		betfairService = (betfairServiceFactoryBean.getObject.asInstanceOf[BetFairService])
 

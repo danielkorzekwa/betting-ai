@@ -6,6 +6,7 @@ import scala.collection.JavaConversions._
 import dk.bettingai.marketsimulator.betex._
 import Market._
 import dk.bot.betfairservice.model._
+import IMarketService._
 
 /**Betfair service adapter.
  * 
@@ -63,7 +64,13 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 				marketRunnersMap
 			}
 			else throw new IllegalStateException("Market is closed/suspended/inplay. MarketId=" + marketId)
-
-
+	}
+	
+	def getMarketDetails(marketId:Long):IMarketService.MarketDetails = {
+		val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
+		
+		val runners = bfMarketDetails.getRunners.map(r => new RunnerDetails(r.getSelectionId,r.getSelectionName)).toList
+		val marketDetails = new MarketDetails(bfMarketDetails.getMarketId,bfMarketDetails.getMarketName(), bfMarketDetails.getMenuPath(),bfMarketDetails.getNumOfWinners, bfMarketDetails.getMarketTime, runners)
+		marketDetails
 	}
 }
