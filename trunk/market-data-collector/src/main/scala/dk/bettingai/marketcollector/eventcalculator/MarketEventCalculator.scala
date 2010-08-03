@@ -146,8 +146,8 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 		require(previousRunnerPrices.find(p => p.totalToBack==0 && p.totalToLay==0).isEmpty,"Price with both totalToBack and totalToLay to be 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
 		require(runnerTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. TradedVolumeDelta=" + runnerTradedVolumeDelta)
 
-		val bestPriceToBack =previousRunnerPrices.filter(p => p.totalToBack>0).foldLeft(1.01)((a,b) => if(b.price>a) b.price else a)
-		val bestPriceToLay = previousRunnerPrices.filter(p => p.totalToLay>0).foldLeft(1000d)((a,b) => if(b.price<a) b.price else a)
+		val bestPriceToBack =previousRunnerPrices.filter(p => p.totalToBack>0).foldLeft(1.0)((a,b) => if(b.price>a) b.price else a)
+		val bestPriceToLay = previousRunnerPrices.filter(p => p.totalToLay>0).foldLeft(1001d)((a,b) => if(b.price<a) b.price else a)
 		require(bestPriceToBack<bestPriceToLay,"Best price to back is on higher price than best price to lay. Runner prices=" + previousRunnerPrices)
 
 		def calculateRecursive(betType:BetTypeEnum,updatedRunnerPrices:List[IRunnerPrice],runnerTradedVolumes: Iterator[IPriceTradedVolume],marketEvents:List[String]):Tuple2[List[IRunnerPrice],List[String]] = {
