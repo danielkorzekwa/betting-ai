@@ -23,7 +23,7 @@ object MarketCollectorApp {
 		}
 
 		println("Market data collection is started.\n")
-		
+
 		/**Create betfair service and login to betfair account.*/
 		val betfairServiceFactoryBean = new dk.bot.betfairservice.DefaultBetFairServiceFactoryBean();
 		betfairServiceFactoryBean.setUser(inputData("bfUser"))
@@ -39,7 +39,13 @@ object MarketCollectorApp {
 		val collectionInterval = inputData("collectionInterval").toLong		
 		while(true) {
 			log.info("EventCollectorTask is running.")
-			eventCollectorTask.execute()
+			try {
+				eventCollectorTask.execute()
+			}
+			catch {
+			case e: IllegalArgumentException => log.error(e.getLocalizedMessage)
+			case e: IllegalStateException => log.error(e.getLocalizedMessage)
+			}
 			Thread.sleep(collectionInterval*1000)
 		}
 
