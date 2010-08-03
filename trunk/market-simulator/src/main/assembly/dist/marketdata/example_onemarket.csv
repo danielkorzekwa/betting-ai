@@ -1,3 +1,0 @@
-{"eventType":"CREATE_MARKET","marketId":10,"marketName":"Match Odds","eventName":"Man Utd vs Arsenal","numOfWinners":1,"marketTime":"2010-04-15 14:00:00","runners": [{"runnerId":11,"runnerName":"Man Utd"},{"runnerId":12,"runnerName":"Arsenal"}]}
-{"eventType":"PLACE_BET","betSize":10,"betPrice":2.2,"betType":"LAY","marketId":10,"runnerId":11}
-{"eventType":"CANCEL_BETS","betsSize":10.0,"betPrice":2.2,"betType":"LAY","marketId":10,"runnerId":11}
