@@ -40,6 +40,21 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
+	
+	/**Price to back is 1000, toLay is not available - it's a valid data, not exception should be thrown.*/
+	@Test def testTotalToBackis1000ToLayNotAvailable {
+		val previousRunnerPrices = new RunnerPrice(1000.0,20,0) :: Nil
+		val tradedVolumeDelta = Nil
+
+		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(2,22)(previousRunnerPrices,tradedVolumeDelta)
+	}
+	/**Price to back is not available, toLay is 1.01 - it's a valid data, not exception should be thrown.*/
+	@Test def testTotalToBackisNotAvailableToLayIs1_01 {
+		val previousRunnerPrices = new RunnerPrice(1.01,0,20) :: Nil
+		val tradedVolumeDelta = Nil
+
+		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(2,22)(previousRunnerPrices,tradedVolumeDelta)
+	}
 
 	/**Test scenarios for priceToBack available only.*/
 
