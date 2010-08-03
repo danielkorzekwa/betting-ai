@@ -81,7 +81,6 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 				printWriter.flush()
 			} catch {
 			case e:EventProducerVerificationError => printError(e)
-			case e: IllegalStateException => log.error(e.getLocalizedMessage)
 			}
 		}
 	}
