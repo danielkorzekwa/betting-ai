@@ -32,7 +32,7 @@ class EventCollectorTaskIntegrationTest {
 
 		/**Create event collector task.*/
 		marketService = new MarketService(betfairService)
-		eventCollectorTask = new EventCollectorTask(marketService,240,8*60,marketDataDir,5)
+		eventCollectorTask = new EventCollectorTask(marketService,-60,8*60,marketDataDir,5)
 
 		/**Delete old market files.*/
 		FileUtils.forceMkdir(new File(marketDataDir))

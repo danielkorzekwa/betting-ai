@@ -7,12 +7,17 @@ import dk.bettingai.marketsimulator.betex._
 import Market._
 import dk.bot.betfairservice.model._
 import IMarketService._
+import MarketService._
 
 /**Betfair service adapter.
  * 
  * @author KorzekwaD
  *
  */
+object MarketService {
+	class MarketClosedOrSuspendedException(message:String) extends RuntimeException(message)
+}
+
 class MarketService(betfairService: BetFairService) extends IMarketService {
 
 	/**Returns markets from betfair betting exchange that fulfil the following criteria:
@@ -39,18 +44,19 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 	/** Returns runner prices and price traded volumes for market runner.
 	 * 
 	 * @param marketId
-	 * @return key - runnerId, value Tuple[runner prices, price traded volume]
+	 * @return market runners
+	 * @throw 
 	 */
-	def getMarketRunners(marketId:Long):Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] = {
+	def getMarketRunners(marketId:Long):MarketRunners = {
 			/**Get runner prices and runner traded volume*/
 			val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
 
-			if(bfMarketRunners!=null && bfMarketRunners.getInPlayDelay==0) {
+			if(bfMarketRunners!=null) {
 				val bfTradedVolume = betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
 
 				val runnerIds = (bfMarketRunners.getMarketRunners.map(_.getSelectionId).toList ::: bfMarketRunners.getMarketRunners.map(_.getSelectionId).toList).distinct
 
-				val marketRunners = for{
+				val marketRunnersList = for{
 					runnerId <- runnerIds
 					val bfMarketRunner=bfMarketRunners.getMarketRunners.find(r => r.getSelectionId==runnerId).getOrElse(new BFMarketRunner(runnerId,0,0,0,0,0,List()))
 					val runnerPrices = bfMarketRunner.getPrices.map(p => new RunnerPrice(p.getPrice,p.getTotalToBack,p.getTotalToLay)).filter(price => (price.totalToBack>0 || price.totalToLay>0)).toList
@@ -60,10 +66,11 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 				} yield (runnerId.asInstanceOf[Long], (runnerPrices,priceTradedVolume.toList))
 
 				/**key - selectionId, value - runner prices + price traded volume*/
-				val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] = Map(marketRunners : _*)
-				marketRunnersMap
+				val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] = Map(marketRunnersList : _*)
+				val marketRunners = new MarketRunners(bfMarketRunners.getInPlayDelay,marketRunnersMap)
+				marketRunners
 			}
-			else throw new IllegalStateException("Market is closed/suspended/inplay. MarketId=" + marketId)
+			else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
 	}
 	
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails = {
