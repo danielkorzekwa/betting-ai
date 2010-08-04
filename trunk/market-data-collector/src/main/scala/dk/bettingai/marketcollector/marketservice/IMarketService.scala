@@ -3,8 +3,17 @@ package dk.bettingai.marketcollector.marketservice
 import java.util.Date
 import dk.bettingai.marketsimulator.betex._
 import Market._
+import IMarketService._
 
 object IMarketService {
+	
+		/**
+	 * @param inPlayDelay if bigger than 0 then market is in play.
+	 * @param runnerPrices Key - runnerId, Value - Tuple[runner prices, price traded volume]
+	 */
+	class MarketRunners(val inPlayDelay:Int, val runnerPrices:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]]) {
+		override def toString = "MarketRunners [inPlayDelay=%s, runnerPrices=%s]".format(inPlayDelay,runnerPrices)
+	}
 	
 	class MarketDetails(val marketId:Long,val marketName:String, val menuPath:String,val numOfWinners:Int, val marketTime:java.util.Date, val runners:List[RunnerDetails]) {
 		override def toString = "MarketDetails [marketId=%s, marketName=%s, menuPath=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId,marketName,menuPath,numOfWinners,marketTime,runners)
@@ -38,9 +47,9 @@ trait IMarketService {
 	/** Returns runner prices and price traded volumes for market runner.
 	 * 
 	 * @param marketId
-	 * @return key - runnerId, value Tuple[runner prices, price traded volume]
+	 * @return marketRunners
 	 */
-	def getMarketRunners(marketId:Long):Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]]
+	def getMarketRunners(marketId:Long):MarketRunners
 	
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails
 }

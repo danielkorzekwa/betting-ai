@@ -3,6 +3,7 @@ package dk.bettingai.marketcollector.task
 import org.joda.time._
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
+import MarketService._
 import dk.bettingai.marketsimulator.betex._
 import Market._
 import dk.bettingai.marketcollector.eventproducer._
@@ -30,18 +31,18 @@ import java.text.SimpleDateFormat
 class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,startInMinutesTo:Int, marketDataDir:String,marketDiscoveryIntervalSec:Int) extends IEventCollectorTask{
 
 	private val log = LoggerFactory.getLogger(getClass)
-	
+
 	/**Calculate markets events for delta between two market states.*/
 	private val eventProducer = new EventProducer()
 
 	private val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+
 	/**Map of FileWriters for markets. Key - marketId.*/
 	private val marketFiles:scala.collection.mutable.Map[Long,FileWriter] = scala.collection.mutable.Map()
 
 	/**How often new markets are discovered, e.g. if it's set to 60, then new markets will be discovered every 60 seconds, even though this task is executed every 1 second.*/
 	private var discoveryTime:Long=0
-	
+
 	/**List of discovered markets that market data is collected for.*/
 	private var marketIds:List[Long]=Nil
 
@@ -50,7 +51,7 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 		/**Discover markets that the market events should be collected for.*/
 		val now = new DateTime()
 		if((now.getMillis-discoveryTime)/1000>marketDiscoveryIntervalSec) {
-			marketIds = marketService.getMarkets(now.minusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate)		
+			marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate)		
 			discoveryTime = now.getMillis
 			log.info("Market discovery: " + marketIds)
 		}
@@ -64,23 +65,29 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 						val fw = new FileWriter(file, false)
 						val marketDetails = marketService.getMarketDetails(marketId)
 						val createMarketEvent = buildCreateMarketEvent(marketDetails)
-							IOUtils.writeLines(createMarketEvent::Nil,null,fw)
-							fw
+						IOUtils.writeLines(createMarketEvent::Nil,null,fw)
+						fw
 				}
 				/**Create market file and add CREATE_MARKET event if market has not been processed yet.*/
 				val printWriter = marketFiles.getOrElseUpdate(marketId,createFileWriter)
 
 				/**Get marketRunners from betfair. Key - runnerId, value - runner prices + price traded volume*/
-				val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  marketService.getMarketRunners(marketId)
+				val marketRunners =  marketService.getMarketRunners(marketId)
 
-				/**Generate market events and add them to the file.*/
-				val events = eventProducer.produce(marketId,marketRunnersMap)
-				val eventsCheck = eventProducer.produce(marketId,marketRunnersMap)
-				if(!eventsCheck.isEmpty) throw new IllegalStateException("Events size should be 0 here.")
-				IOUtils.writeLines(events,null,printWriter)
-				printWriter.flush()
+				/**Collect data for not inplay markets only.*/
+				if(marketRunners.inPlayDelay==0) {
+					/**Generate market events and add them to the file.*/
+					val events = eventProducer.produce(marketId,marketRunners.runnerPrices)
+					val eventsCheck = eventProducer.produce(marketId,marketRunners.runnerPrices)
+					if(!eventsCheck.isEmpty) throw new IllegalStateException("Events size should be 0 here.")
+					IOUtils.writeLines(events,null,printWriter)
+					printWriter.flush()
+				}
+
 			} catch {
+			case e:MarketClosedOrSuspendedException => //do nothing
 			case e:EventProducerVerificationError => printError(e)
+			case e: IllegalArgumentException => log.error(e.getLocalizedMessage)
 			}
 		}
 	}
@@ -96,12 +103,12 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 		log.error("Ver traded volume =  " + e.toVerifyRunnerData._2)
 		log.error("Events = " + e.events)
 	}
-	
+
 	private def buildCreateMarketEvent(marketDetails:MarketDetails):String = {
-		import marketDetails._
-		val runners = marketDetails.runners.map(r => """{"runnerId":%s,"runnerName":"%s"}""".format(r.runnerId,r.runnerName)).mkString("[",",","]")
-		val createMarketEvent = """{"eventType":"CREATE_MARKET","marketId":%s,"marketName":"%s","eventName":"%s","numOfWinners":%s,"marketTime":"%s","runners": %s}""".
-		format(marketId,marketName,menuPath,numOfWinners,df.format(marketTime),runners)
-		createMarketEvent
+			import marketDetails._
+			val runners = marketDetails.runners.map(r => """{"runnerId":%s,"runnerName":"%s"}""".format(r.runnerId,r.runnerName)).mkString("[",",","]")
+			val createMarketEvent = """{"eventType":"CREATE_MARKET","marketId":%s,"marketName":"%s","eventName":"%s","numOfWinners":%s,"marketTime":"%s","runners": %s}""".
+			format(marketId,marketName,menuPath,numOfWinners,df.format(marketTime),runners)
+			createMarketEvent
 	}
 }
