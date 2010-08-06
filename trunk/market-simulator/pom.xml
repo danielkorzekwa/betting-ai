@@ -12,7 +12,7 @@
 	<name>market-simulator</name>
 
 	<dependencies>
-	
+
 		<!-- External dependencies -->
 
 		<dependency>
@@ -23,6 +23,15 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 
 		<!-- Test dependencies -->

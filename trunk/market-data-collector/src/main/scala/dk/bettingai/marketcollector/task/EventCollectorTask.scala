@@ -108,7 +108,7 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 			import marketDetails._
 			val runners = marketDetails.runners.map(r => """{"runnerId":%s,"runnerName":"%s"}""".format(r.runnerId,r.runnerName)).mkString("[",",","]")
 			val createMarketEvent = """{"eventType":"CREATE_MARKET","marketId":%s,"marketName":"%s","eventName":"%s","numOfWinners":%s,"marketTime":"%s","runners": %s}""".
-			format(marketId,marketName,menuPath,numOfWinners,df.format(marketTime),runners)
+			format(marketId,marketName,menuPath.replaceAll("\\\\", "/"),numOfWinners,df.format(marketTime),runners)
 			createMarketEvent
 	}
 }

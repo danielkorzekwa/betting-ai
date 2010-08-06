@@ -148,7 +148,7 @@
 					</classpathContainers>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -169,7 +169,7 @@
 						<descriptor>src/main/assembly/src.xml</descriptor>
 					</descriptors>
 				</configuration>
-			</plugin>	
+			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -238,6 +238,17 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>1.6.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-core-asl</artifactId>
+				<version>1.5.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-mapper-asl</artifactId>
+				<version>1.5.5</version>
 			</dependency>
 
 			<!-- Test dependencies -->
