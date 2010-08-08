@@ -860,8 +860,6 @@ class MarketPlaceBetTest {
 		assertEquals(M,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-		
-		println(market.getRunnerPrices(11))
 	}
 	
 }

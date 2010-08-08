@@ -30,6 +30,7 @@ object Market {
 class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val runners:List[IMarket.IRunner]) extends IMarket{
 
 	private val bets = ListBuffer[IBet]()
+private val betsIds = scala.collection.mutable.Set[Long]()
 
 	require(numOfWinners>0,"numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
 	require(runners.size>1,"Number of market runners should be bigger than 1, numOfRunners=" + runners.size)
@@ -47,22 +48,24 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long) {
 		require(betSize>0, "Bet size must be >0, betSize=" + betSize)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
-		require(!bets.map(b=>b.betId).contains(betId),"Bet for betId=%s already exists".format(betId))
+		require(!betsIds.contains(betId),"Bet for betId=%s already exists".format(betId))
 
 		val betsToBeMatched =  
 			betType match {
 			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice).toList
 			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice).toList
 		}
-
+			
 		matchBet(betSize,0)
 
 		/**Match bet recursively until fully matched or nothing is to match with.*/
 		def matchBet(unmatchedSize:Double, betToMatchIndex:Int):Unit = {
+
 			val newBet = new Bet(betId,userId, unmatchedSize, betPrice, betType, U,marketId,runnerId)
 			/**Nothing to match with.*/
 			if(betToMatchIndex>=betsToBeMatched.size) {
 				bets += newBet
+				betsIds += betId
 			}
 			/**Do matching.*/
 			else if(betToMatchIndex<betsToBeMatched.size) {
@@ -76,7 +79,10 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 				matchingResult.filter(b => b.betStatus ==M || b.betId!=betId).foreach(b => bets += b)
 
 				/**Find unmatched portion for a bet being placed.*/
-				matchingResult.find(b => b.betId==betId && b.betStatus==U).foreach(unmatchedPortion => matchBet(unmatchedPortion.betSize,betToMatchIndex+1))
+				val unmatchedPortion = matchingResult.find(b => b.betId==betId && b.betStatus==U)
+				if(!unmatchedPortion.isEmpty) {
+					matchBet(unmatchedPortion.get.betSize,betToMatchIndex+1)
+				}
 			}
 		}
 	}
