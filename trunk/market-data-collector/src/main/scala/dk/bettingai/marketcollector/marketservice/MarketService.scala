@@ -52,8 +52,11 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 			val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
 
 			if(bfMarketRunners!=null) {
-				val bfTradedVolume = betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
-
+				val bfTradedVolume = try {
+					betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
+				}catch {
+				case e: BetFairException => throw new MarketClosedOrSuspendedException("Market is probably closed/suspended (but not sure!). MarketId=" + marketId)
+				}
 				val runnerIds = (bfMarketRunners.getMarketRunners.map(_.getSelectionId).toList ::: bfMarketRunners.getMarketRunners.map(_.getSelectionId).toList).distinct
 
 				val marketRunnersList = for{
@@ -72,12 +75,12 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 			}
 			else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
 	}
-	
+
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails = {
-		val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
-		
-		val runners = bfMarketDetails.getRunners.map(r => new RunnerDetails(r.getSelectionId,r.getSelectionName)).toList
-		val marketDetails = new MarketDetails(bfMarketDetails.getMarketId,bfMarketDetails.getMarketName(), bfMarketDetails.getMenuPath(),bfMarketDetails.getNumOfWinners, bfMarketDetails.getMarketTime, runners)
-		marketDetails
+			val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
+
+			val runners = bfMarketDetails.getRunners.map(r => new RunnerDetails(r.getSelectionId,r.getSelectionName)).toList
+			val marketDetails = new MarketDetails(bfMarketDetails.getMarketId,bfMarketDetails.getMarketName(), bfMarketDetails.getMenuPath(),bfMarketDetails.getNumOfWinners, bfMarketDetails.getMarketTime, runners)
+			marketDetails
 	}
 }
