@@ -45,27 +45,27 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"Price with both totalToBack and totalToLay less than 0 is not allowed. RunnerPrices=" + marketRunnerDelta);
 
 		/**Create cancel events.*/
-		val cancelBetEvents:List[Tuple2[Double,String]] = for {
+		val cancelBetEvents:List[String] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack < 0 || deltaRunnerPrice.totalToLay<0) 
 				val cancelBetEvent = if(deltaRunnerPrice.totalToBack<0)
-					deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+					cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 					else	
-						deltaRunnerPrice.price -> cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+						cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
 		} yield cancelBetEvent
 
 		/**Create bet events.*/
-		val placeBetEvents:List[Tuple2[Double,String]] = for {
+		val placeBetEvents:List[String] = for {
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack > 0 || deltaRunnerPrice.totalToLay>0) 
 				val betEvent = if(deltaRunnerPrice.totalToBack>0)
-					deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
+					placeBetEvent(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
 					else	
-						deltaRunnerPrice.price -> placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+						placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
 		} yield betEvent
 
-		/**Sort all tuples by price and map them to events.*/
-		(cancelBetEvents ::: placeBetEvents).sortWith((a,b) => a._1<b._1).map(_._2)
+		/**Return events, cancelBet events must be returned first.*/
+		cancelBetEvents ::: placeBetEvents
 	}
 
 	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
@@ -144,7 +144,7 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 
 		require(previousRunnerPrices.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
 		require(previousRunnerPrices.find(p => p.totalToBack==0 && p.totalToLay==0).isEmpty,"Price with both totalToBack and totalToLay to be 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
-		require(runnerTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. TradedVolumeDelta=" + runnerTradedVolumeDelta)
+		require(runnerTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. MarketId=%s, RunnerId=%s, TradedVolumeDelta=%s".format(marketId,runnerId,runnerTradedVolumeDelta))
 
 		val bestPriceToBack =previousRunnerPrices.filter(p => p.totalToBack>0).foldLeft(1.0)((a,b) => if(b.price>a) b.price else a)
 		val bestPriceToLay = previousRunnerPrices.filter(p => p.totalToLay>0).foldLeft(1001d)((a,b) => if(b.price<a) b.price else a)
