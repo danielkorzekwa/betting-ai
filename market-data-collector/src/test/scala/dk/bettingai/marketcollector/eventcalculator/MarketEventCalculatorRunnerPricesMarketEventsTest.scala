@@ -125,4 +125,21 @@ class MarketEventCalculatorRunnerPricesMarketEventsTest {
 		assertEquals(expectedEvents(0),marketEvents(0))
 		assertEquals(expectedEvents(1),marketEvents(1))
 }
+
+@Test def testCalculateEventsForBackToLayChange2 {
+		val marketRunnerDelta = new RunnerPrice(1.85,-9,30) :: new RunnerPrice(1.9,-19,0) :: Nil
+
+		val marketEvents = MarketEventCalculator.calculateMarketEvents(10,1000)(marketRunnerDelta)
+
+		val expectedEvents = 
+			"""{"eventType":"CANCEL_BETS","betsSize":9.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""" ::
+			"""{"eventType":"CANCEL_BETS","betsSize":19.0,"betPrice":1.9,"betType":"LAY","marketId":10,"runnerId":1000}""" ::	
+			"""{"eventType":"PLACE_BET","betSize":30.0,"betPrice":1.85,"betType":"BACK","marketId":10,"runnerId":1000}""" ::
+		Nil
+
+		assertEquals(3, marketEvents.size)
+		assertEquals(expectedEvents(0),marketEvents(0))
+		assertEquals(expectedEvents(1),marketEvents(1))
+		assertEquals(expectedEvents(2),marketEvents(2))
+}
 }

@@ -54,5 +54,27 @@ def testProduce {
 	val events4 = eventProducer.produce(3,nextMarketRunnersMap)
 	assertEquals(12,events4.size)
 }
-
+	
+	@Test
+def testProduce2 {
+		
+	val runnerPrices = new RunnerPrice(20.0,11.0,0) :: new RunnerPrice(21,19.00,0) :: Nil 
+	val tradedVolume = Nil
+	val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((21,(Nil,Nil)),(22,(runnerPrices,tradedVolume)))
+	val events = eventProducer.produce(2,marketRunnersMap)
+	assertEquals(2,events.size)
+	assertEquals("""{"eventType":"PLACE_BET","betSize":11.0,"betPrice":20.0,"betType":"LAY","marketId":2,"runnerId":22}""",events(0))
+	assertEquals("""{"eventType":"PLACE_BET","betSize":19.0,"betPrice":21.0,"betType":"LAY","marketId":2,"runnerId":22}""",events(1))
+	
+	val nextRunnerPrices = new RunnerPrice(20.0,0,8) :: Nil 
+	val nextTradedVolume = Nil
+	val nextMarketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((21,(Nil,Nil)),(22,(nextRunnerPrices,nextTradedVolume)))
+	
+	val nextEvents = eventProducer.produce(2,nextMarketRunnersMap)
+	assertEquals(3,nextEvents.size)
+	assertEquals("""{"eventType":"CANCEL_BETS","betsSize":11.0,"betPrice":20.0,"betType":"LAY","marketId":2,"runnerId":22}""",nextEvents(0))
+	assertEquals("""{"eventType":"CANCEL_BETS","betsSize":19.0,"betPrice":21.0,"betType":"LAY","marketId":2,"runnerId":22}""",nextEvents(1))
+	assertEquals("""{"eventType":"PLACE_BET","betSize":8.0,"betPrice":20.0,"betType":"BACK","marketId":2,"runnerId":22}""",nextEvents(2))
+	
+	}
 }
