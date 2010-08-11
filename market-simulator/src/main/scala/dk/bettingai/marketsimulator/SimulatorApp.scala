@@ -42,7 +42,7 @@ object SimulatorApp  {
 		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],100,1000,p => console.print(" " + p + "%"))
 
 		/**Print market simulation report.*/
-		console.print("\nSimulation is finished in %s seconds.".format((System.currentTimeMillis-time)/1000))
+		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
 		printMarketReport(marketRiskReports,console)
 		console.print("\n------------------------------------------------------------------------------------")

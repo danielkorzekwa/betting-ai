@@ -399,19 +399,19 @@ class MarketPlaceBetTest {
 
 		assertEquals(101,bets123(0).betId)
 		assertEquals(123,bets123(0).userId)
-		assertEquals(2,bets123(0).betSize,0)
-		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(4,bets123(0).betSize,0)
+		assertEquals(3,bets123(0).betPrice,0)
 		assertEquals(BACK,bets123(0).betType)
-		assertEquals(M,bets123(0).betStatus)
+		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-
+		
 		assertEquals(101,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
-		assertEquals(4,bets123(1).betSize,0)
-		assertEquals(3,bets123(1).betPrice,0)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(5,bets123(1).betPrice,0)
 		assertEquals(BACK,bets123(1).betType)
-		assertEquals(U,bets123(1).betStatus)
+		assertEquals(M,bets123(1).betStatus)
 		assertEquals(1,bets123(1).marketId)
 		assertEquals(11,bets123(1).runnerId)
 	}
@@ -436,19 +436,19 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
 
-		assertEquals(102,bets122(1).betId)
+		assertEquals(101,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
-		assertEquals(3,bets122(1).betSize,0)
-		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(1,bets122(1).betSize,0)
+		assertEquals(4,bets122(1).betPrice,0)
 		assertEquals(LAY,bets122(1).betType)
-		assertEquals(M,bets122(1).betStatus)
+		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-
-		assertEquals(101,bets122(2).betId)
+		
+		assertEquals(102,bets122(2).betId)
 		assertEquals(122,bets122(2).userId)
-		assertEquals(1,bets122(2).betSize,0)
-		assertEquals(4,bets122(2).betPrice,0)
+		assertEquals(3,bets122(2).betSize,0)
+		assertEquals(5,bets122(2).betPrice,0)
 		assertEquals(LAY,bets122(2).betType)
 		assertEquals(M,bets122(2).betStatus)
 		assertEquals(1,bets122(2).marketId)
@@ -459,9 +459,11 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets122(3).betSize,0)
 		assertEquals(4,bets122(3).betPrice,0)
 		assertEquals(LAY,bets122(3).betType)
-		assertEquals(U,bets122(3).betStatus)
+		assertEquals(M,bets122(3).betStatus)
 		assertEquals(1,bets122(3).marketId)
 		assertEquals(11,bets122(3).runnerId)
+
+		
 
 		/**Check bets for user 123.*/
 		val bets123 = market.getBets(123)
@@ -531,17 +533,17 @@ class MarketPlaceBetTest {
 
 		assertEquals(103,bets123(0).betId)
 		assertEquals(123,bets123(0).userId)
-		assertEquals(3,bets123(0).betSize,0)
-		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(1,bets123(0).betSize,0)
+		assertEquals(3,bets123(0).betPrice,0)
 		assertEquals(BACK,bets123(0).betType)
-		assertEquals(M,bets123(0).betStatus)
+		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-
+		
 		assertEquals(103,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
-		assertEquals(2,bets123(1).betSize,0)
-		assertEquals(4,bets123(1).betPrice,0)
+		assertEquals(3,bets123(1).betSize,0)
+		assertEquals(5,bets123(1).betPrice,0)
 		assertEquals(BACK,bets123(1).betType)
 		assertEquals(M,bets123(1).betStatus)
 		assertEquals(1,bets123(1).marketId)
@@ -549,12 +551,14 @@ class MarketPlaceBetTest {
 
 		assertEquals(103,bets123(2).betId)
 		assertEquals(123,bets123(2).userId)
-		assertEquals(1,bets123(2).betSize,0)
-		assertEquals(3,bets123(2).betPrice,0)
+		assertEquals(2,bets123(2).betSize,0)
+		assertEquals(4,bets123(2).betPrice,0)
 		assertEquals(BACK,bets123(2).betType)
-		assertEquals(U,bets123(2).betStatus)
+		assertEquals(M,bets123(2).betStatus)
 		assertEquals(1,bets123(2).marketId)
 		assertEquals(11,bets123(2).runnerId)
+
+	
 	}
 
 	@Test def testMatchBackBetFullyMatchedWithBiggerLayBet {
@@ -569,19 +573,19 @@ class MarketPlaceBetTest {
 
 		assertEquals(100,bets122(0).betId)
 		assertEquals(122,bets122(0).userId)
-		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(4,bets122(0).betSize,0)
 		assertEquals(5,bets122(0).betPrice,0)
 		assertEquals(LAY,bets122(0).betType)
-		assertEquals(M,bets122(0).betStatus)
+		assertEquals(U,bets122(0).betStatus)
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
-
+		
 		assertEquals(100,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
-		assertEquals(4,bets122(1).betSize,0)
+		assertEquals(2,bets122(1).betSize,0)
 		assertEquals(5,bets122(1).betPrice,0)
 		assertEquals(LAY,bets122(1).betType)
-		assertEquals(U,bets122(1).betStatus)
+		assertEquals(M,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
 
@@ -625,21 +629,22 @@ class MarketPlaceBetTest {
 
 		assertEquals(101,bets123(0).betId)
 		assertEquals(123,bets123(0).userId)
-		assertEquals(2,bets123(0).betSize,0)
-		assertEquals(8,bets123(0).betPrice,0)
+		assertEquals(4,bets123(0).betSize,0)
+		assertEquals(11,bets123(0).betPrice,0)
 		assertEquals(LAY,bets123(0).betType)
-		assertEquals(M,bets123(0).betStatus)
+		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-
+		
 		assertEquals(101,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
-		assertEquals(4,bets123(1).betSize,0)
-		assertEquals(11,bets123(1).betPrice,0)
+		assertEquals(2,bets123(1).betSize,0)
+		assertEquals(8,bets123(1).betPrice,0)
 		assertEquals(LAY,bets123(1).betType)
-		assertEquals(U,bets123(1).betStatus)
+		assertEquals(M,bets123(1).betStatus)
 		assertEquals(1,bets123(1).marketId)
 		assertEquals(11,bets123(1).runnerId)
+
 	}
 
 	@Test def testMatchLayBetPartiallyMatchedWithTwoBackBets {
@@ -663,19 +668,19 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
 
-		assertEquals(102,bets122(1).betId)
+		assertEquals(101,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
-		assertEquals(3,bets122(1).betSize,0)
-		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(1,bets122(1).betSize,0)
+		assertEquals(6,bets122(1).betPrice,0)
 		assertEquals(BACK,bets122(1).betType)
-		assertEquals(M,bets122(1).betStatus)
+		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-
-		assertEquals(101,bets122(2).betId)
+		
+		assertEquals(102,bets122(2).betId)
 		assertEquals(122,bets122(2).userId)
-		assertEquals(1,bets122(2).betSize,0)
-		assertEquals(6,bets122(2).betPrice,0)
+		assertEquals(3,bets122(2).betSize,0)
+		assertEquals(5,bets122(2).betPrice,0)
 		assertEquals(BACK,bets122(2).betType)
 		assertEquals(M,bets122(2).betStatus)
 		assertEquals(1,bets122(2).marketId)
@@ -686,7 +691,7 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets122(3).betSize,0)
 		assertEquals(6,bets122(3).betPrice,0)
 		assertEquals(BACK,bets122(3).betType)
-		assertEquals(U,bets122(3).betStatus)
+		assertEquals(M,bets122(3).betStatus)
 		assertEquals(1,bets122(3).marketId)
 		assertEquals(11,bets122(3).runnerId)
 
@@ -758,17 +763,17 @@ class MarketPlaceBetTest {
 
 		assertEquals(103,bets123(0).betId)
 		assertEquals(123,bets123(0).userId)
-		assertEquals(3,bets123(0).betSize,0)
-		assertEquals(5,bets123(0).betPrice,0)
+		assertEquals(1,bets123(0).betSize,0)
+		assertEquals(7,bets123(0).betPrice,0)
 		assertEquals(LAY,bets123(0).betType)
-		assertEquals(M,bets123(0).betStatus)
+		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-
+		
 		assertEquals(103,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
-		assertEquals(2,bets123(1).betSize,0)
-		assertEquals(6,bets123(1).betPrice,0)
+		assertEquals(3,bets123(1).betSize,0)
+		assertEquals(5,bets123(1).betPrice,0)
 		assertEquals(LAY,bets123(1).betType)
 		assertEquals(M,bets123(1).betStatus)
 		assertEquals(1,bets123(1).marketId)
@@ -776,12 +781,13 @@ class MarketPlaceBetTest {
 
 		assertEquals(103,bets123(2).betId)
 		assertEquals(123,bets123(2).userId)
-		assertEquals(1,bets123(2).betSize,0)
-		assertEquals(7,bets123(2).betPrice,0)
+		assertEquals(2,bets123(2).betSize,0)
+		assertEquals(6,bets123(2).betPrice,0)
 		assertEquals(LAY,bets123(2).betType)
-		assertEquals(U,bets123(2).betStatus)
+		assertEquals(M,bets123(2).betStatus)
 		assertEquals(1,bets123(2).marketId)
 		assertEquals(11,bets123(2).runnerId)
+
 	}
 
 	@Test def testMatchLayBetFullyMatchedWithBiggerBackBet {
@@ -796,22 +802,22 @@ class MarketPlaceBetTest {
 
 		assertEquals(100,bets122(0).betId)
 		assertEquals(122,bets122(0).userId)
-		assertEquals(2,bets122(0).betSize,0)
+		assertEquals(4,bets122(0).betSize,0)
 		assertEquals(8,bets122(0).betPrice,0)
 		assertEquals(BACK,bets122(0).betType)
-		assertEquals(M,bets122(0).betStatus)
+		assertEquals(U,bets122(0).betStatus)
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
 
 		assertEquals(100,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
-		assertEquals(4,bets122(1).betSize,0)
+		assertEquals(2,bets122(1).betSize,0)
 		assertEquals(8,bets122(1).betPrice,0)
 		assertEquals(BACK,bets122(1).betType)
-		assertEquals(U,bets122(1).betStatus)
+		assertEquals(M,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-
+		
 		/**Check bets for user 123.*/
 		val bets123 = market.getBets(123)
 		assertEquals(1, bets123.size)

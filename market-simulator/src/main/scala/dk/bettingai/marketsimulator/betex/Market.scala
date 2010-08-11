@@ -30,6 +30,7 @@ object Market {
 class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val runners:List[IMarket.IRunner]) extends IMarket{
 
 	private val bets = ListBuffer[IBet]()
+	private val matchedBets = ListBuffer[IBet]()
 private val betsIds = scala.collection.mutable.Set[Long]()
 
 	require(numOfWinners>0,"numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
@@ -52,10 +53,9 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 
 		val betsToBeMatched =  
 			betType match {
-			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice).toList
-			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice).toList
+			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
+			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
 		}
-			
 		matchBet(betSize,0)
 
 		/**Match bet recursively until fully matched or nothing is to match with.*/
@@ -75,8 +75,8 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 
 				/**Do the bets matching.*/
 				val matchingResult = newBet.matchBet(betToBeMatched)
-				/**Add all matched portions of bets to the main bets list.*/
-				matchingResult.filter(b => b.betStatus ==M || b.betId!=betId).foreach(b => bets += b)
+				matchingResult.filter(b => b.betStatus ==U && b.betId!=betId).foreach(b => bets += b)
+				matchingResult.filter(b => b.betStatus ==M).foreach(b => matchedBets += b)
 
 				/**Find unmatched portion for a bet being placed.*/
 				val unmatchedPortion = matchingResult.find(b => b.betId==betId && b.betStatus==U)
@@ -167,7 +167,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-			val betsByPrice = bets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
+			val betsByPrice = matchedBets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
 			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
@@ -177,7 +177,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	 *
 	 *@param userId
 	 */
-	def getBets(userId:Int):List[IBet] = bets.filter(b => b.userId == userId).toList
+	def getBets(userId:Int):List[IBet] = bets.filter(b => b.userId == userId).toList ::: matchedBets.filter(b => b.userId == userId).toList
 
 	override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId,marketName,eventName,numOfWinners,marketTime,runners)
 }
