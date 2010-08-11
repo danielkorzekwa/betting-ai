@@ -53,8 +53,8 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 
 		val betsToBeMatched =  
 			betType match {
-			case LAY => bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
-			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betStatus == U && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
+			case LAY => bets.filter(b => b.runnerId==runnerId && b.betType ==BACK && b.betPrice<= betPrice).sortWith((a,b) => a.betPrice<b.betPrice)
+			case BACK => 	bets.filter(b => b.runnerId==runnerId && b.betType ==LAY && b.betPrice>= betPrice).sortWith((a,b) => a.betPrice>b.betPrice)
 		}
 		matchBet(betSize,0)
 
@@ -95,7 +95,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	 * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
 	 */
 	def cancelBet(betId:Long):Double = {
-			val betToBeCancelled = bets.find(b => b.betId==betId && b.betStatus==U).get
+			val betToBeCancelled = bets.find(b => b.betId==betId).get
 			bets -=  betToBeCancelled
 			betToBeCancelled.betSize
 	}
@@ -111,7 +111,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	 * @return Amount cancelled. Zero is returned if nothing is available to cancel.
 	 */
 	def cancelBets(userId:Long,betsSize:Double,betPrice:Double,betType:BetTypeEnum,runnerId:Long):Double = {
-			val betsToBeCancelled = bets.filter(b => b.userId==userId && b.betPrice==betPrice && b.betType==betType && b.betStatus==U && b.runnerId==runnerId).reverseIterator
+			val betsToBeCancelled = bets.filter(b => b.userId==userId && b.betPrice==betPrice && b.betType==betType && b.runnerId==runnerId).reverseIterator
 
 			def cancelRecursively(amountToCancel:Double,amountCancelled:Double):Double = {
 				val betToCancel = betsToBeCancelled.next
@@ -141,7 +141,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	def getRunnerPrices(runnerId:Long):List[IMarket.IRunnerPrice] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-			val betsByPriceMap = bets.toList.filter(b => b.betStatus==U && b.runnerId==runnerId).groupBy(b => b.betPrice) 
+			val betsByPriceMap = bets.toList.filter(b => b.runnerId==runnerId).groupBy(b => b.betPrice) 
 
 			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).foldLeft(0d)(_ + _.betSize)
 			betsByPriceMap.map( entry => new RunnerPrice(entry._1,totalStake(entry._2,LAY),totalStake(entry._2,BACK))).toList.sortWith(_.price<_.price)
@@ -155,8 +155,8 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	def getBestPrices(runnerId: Long):Tuple2[Double,Double] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-			val layBets = bets.toList.filter(b => b.betStatus==U && b.betType==LAY && b.runnerId==runnerId)
-			val backBets = bets.toList.filter(b => b.betStatus==U && b.betType==BACK && b.runnerId==runnerId)
+			val layBets = bets.toList.filter(b => b.betType==LAY && b.runnerId==runnerId)
+			val backBets = bets.toList.filter(b => b.betType==BACK && b.runnerId==runnerId)
 			val bestPriceToBack = if(layBets.isEmpty) Double.NaN else layBets.reduceLeft((a,b) => if(a.betPrice>b.betPrice) a else b).betPrice
 			val bestPriceToLay = if(backBets.isEmpty) Double.NaN else backBets.reduceLeft((a,b) => if(a.betPrice<b.betPrice) a else b).betPrice
 
@@ -167,7 +167,7 @@ private val betsIds = scala.collection.mutable.Set[Long]()
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-			val betsByPrice = matchedBets.toList.filter(b => b.betStatus==M && b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
+			val betsByPrice = matchedBets.toList.filter(b => b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
 			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
