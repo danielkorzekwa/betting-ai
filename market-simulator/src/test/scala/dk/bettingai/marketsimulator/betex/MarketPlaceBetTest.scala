@@ -26,7 +26,7 @@ class MarketPlaceBetTest {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		market.placeBet(100,123,2,1.01,BACK,13)
 	}
-	
+
 	@Test(expected=classOf[IllegalArgumentException])
 	def testPlaceBetDuplicateBetId {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
@@ -79,20 +79,20 @@ class MarketPlaceBetTest {
 		val bets = market.getBets(121)
 		assertEquals(2, bets.size)
 
-		assertEquals(101,bets(0).betId)
+			assertEquals(103,bets(0).betId)
 		assertEquals(121,bets(0).userId)
-		assertEquals(3,bets(0).betSize,0)
-		assertEquals(2.2,bets(0).betPrice,0)
-		assertEquals(LAY,bets(0).betType)
+		assertEquals(8,bets(0).betSize,0)
+		assertEquals(2.4,bets(0).betPrice,0)
+		assertEquals(BACK,bets(0).betType)
 		assertEquals(U,bets(0).betStatus)
 		assertEquals(1,bets(0).marketId)
 		assertEquals(11,bets(0).runnerId)
-
-		assertEquals(103,bets(1).betId)
-		assertEquals(121,bets(0).userId)
-		assertEquals(8,bets(1).betSize,0)
-		assertEquals(2.4,bets(1).betPrice,0)
-		assertEquals(BACK,bets(1).betType)
+		
+		assertEquals(101,bets(1).betId)
+		assertEquals(121,bets(1).userId)
+		assertEquals(3,bets(1).betSize,0)
+		assertEquals(2.2,bets(1).betPrice,0)
+		assertEquals(LAY,bets(1).betType)
 		assertEquals(U,bets(1).betStatus)
 		assertEquals(1,bets(1).marketId)
 		assertEquals(11,bets(1).runnerId)
@@ -100,68 +100,71 @@ class MarketPlaceBetTest {
 		val bets122 = market.getBets(122)
 		assertEquals(3, bets122.size)
 
-		assertEquals(100,bets122(0).betId)
+		assertEquals(104,bets122(0).betId)
 		assertEquals(122,bets122(0).userId)
-		assertEquals(13,bets122(0).betSize,0)
-		assertEquals(2.1,bets122(0).betPrice,0)
-		assertEquals(LAY,bets122(0).betType)
+		assertEquals(25,bets122(0).betSize,0)
+		assertEquals(2.5,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
 		assertEquals(U,bets122(0).betStatus)
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
-
-		assertEquals(102,bets122(1).betId)
+		
+		assertEquals(100,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
-		assertEquals(5,bets122(1).betSize,0)
-		assertEquals(2.2,bets122(1).betPrice,0)
+		assertEquals(13,bets122(1).betSize,0)
+		assertEquals(2.1,bets122(1).betPrice,0)
 		assertEquals(LAY,bets122(1).betType)
 		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
 
-		assertEquals(104,bets122(2).betId)
+		assertEquals(102,bets122(2).betId)
 		assertEquals(122,bets122(2).userId)
-		assertEquals(25,bets122(2).betSize,0)
-		assertEquals(2.5,bets122(2).betPrice,0)
-		assertEquals(BACK,bets122(2).betType)
+		assertEquals(5,bets122(2).betSize,0)
+		assertEquals(2.2,bets122(2).betPrice,0)
+		assertEquals(LAY,bets122(2).betType)
 		assertEquals(U,bets122(2).betStatus)
 		assertEquals(1,bets122(2).marketId)
 		assertEquals(11,bets122(2).runnerId)
+
 	}
-	
-		@Test def testPlaceLayThenPlaceBackOnDifferentRunner {
+
+	@Test def testPlaceLayThenPlaceBackOnDifferentRunner {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
 		market.placeBet(100,122,2,5,LAY,11)
 		market.placeBet(101,122,2,4,BACK,12)
-		
+
 		val bets122 = market.getBets(122)
 		assertEquals(2, bets122.size)
 
-		assertEquals(100,bets122(0).betId)
+		assertEquals(101,bets122(0).betId)
 		assertEquals(122,bets122(0).userId)
 		assertEquals(2,bets122(0).betSize,0)
-		assertEquals(5,bets122(0).betPrice,0)
-		assertEquals(LAY,bets122(0).betType)
+		assertEquals(4,bets122(0).betPrice,0)
+		assertEquals(BACK,bets122(0).betType)
 		assertEquals(U,bets122(0).betStatus)
 		assertEquals(1,bets122(0).marketId)
-		assertEquals(11,bets122(0).runnerId)
-
-		assertEquals(101,bets122(1).betId)
+		assertEquals(12,bets122(0).runnerId)
+		
+		assertEquals(100,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
 		assertEquals(2,bets122(1).betSize,0)
-		assertEquals(4,bets122(1).betPrice,0)
-		assertEquals(BACK,bets122(1).betType)
+		assertEquals(5,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
 		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
-		assertEquals(12,bets122(1).runnerId)
-		}
+		assertEquals(11,bets122(1).runnerId)
+
 		
-			@Test def testPlaceBackThenPlaceLayOnDifferentRunner {
+	}
+
+	@Test def testPlaceBackThenPlaceLayOnDifferentRunner {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
 		market.placeBet(100,122,2,5,BACK,11)
 		market.placeBet(101,122,2,6,LAY,12)
-		
+
 		val bets122 = market.getBets(122)
 		assertEquals(2, bets122.size)
 
@@ -182,8 +185,8 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(12,bets122(1).runnerId)
-		}
-		
+	}
+
 	@Test def testMatchLayBetWithBackBet {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
@@ -405,7 +408,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-		
+
 		assertEquals(101,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
 		assertEquals(2,bets123(1).betSize,0)
@@ -444,7 +447,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-		
+
 		assertEquals(102,bets122(2).betId)
 		assertEquals(122,bets122(2).userId)
 		assertEquals(3,bets122(2).betSize,0)
@@ -463,7 +466,7 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets122(3).marketId)
 		assertEquals(11,bets122(3).runnerId)
 
-		
+
 
 		/**Check bets for user 123.*/
 		val bets123 = market.getBets(123)
@@ -539,7 +542,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-		
+
 		assertEquals(103,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
 		assertEquals(3,bets123(1).betSize,0)
@@ -558,7 +561,7 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets123(2).marketId)
 		assertEquals(11,bets123(2).runnerId)
 
-	
+
 	}
 
 	@Test def testMatchBackBetFullyMatchedWithBiggerLayBet {
@@ -579,7 +582,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets122(0).betStatus)
 		assertEquals(1,bets122(0).marketId)
 		assertEquals(11,bets122(0).runnerId)
-		
+
 		assertEquals(100,bets122(1).betId)
 		assertEquals(122,bets122(1).userId)
 		assertEquals(2,bets122(1).betSize,0)
@@ -635,7 +638,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-		
+
 		assertEquals(101,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
 		assertEquals(2,bets123(1).betSize,0)
@@ -676,7 +679,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-		
+
 		assertEquals(102,bets122(2).betId)
 		assertEquals(122,bets122(2).userId)
 		assertEquals(3,bets122(2).betSize,0)
@@ -769,7 +772,7 @@ class MarketPlaceBetTest {
 		assertEquals(U,bets123(0).betStatus)
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
-		
+
 		assertEquals(103,bets123(1).betId)
 		assertEquals(123,bets123(1).userId)
 		assertEquals(3,bets123(1).betSize,0)
@@ -817,7 +820,7 @@ class MarketPlaceBetTest {
 		assertEquals(M,bets122(1).betStatus)
 		assertEquals(1,bets122(1).marketId)
 		assertEquals(11,bets122(1).runnerId)
-		
+
 		/**Check bets for user 123.*/
 		val bets123 = market.getBets(123)
 		assertEquals(1, bets123.size)
@@ -832,7 +835,71 @@ class MarketPlaceBetTest {
 		assertEquals(11,bets123(0).runnerId)
 
 	}
-	
+
+	/**Test for match ordering, many bets on the same price.*/
+	@Test def testMatchBackBetsWithLayBetTwoLayBetsOnTheSamePrice {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		market.placeBet(101,122,2,1.9,LAY,11)
+		market.placeBet(102,122,5,1.9,LAY,11)
+		market.placeBet(103,123,1,1.9,BACK,11)
+		market.placeBet(104,123,1,1.9,BACK,11)
+
+		/**Check bets for user 122.*/
+		val bets122 = market.getBets(122)
+		assertEquals(3, bets122.size)
+
+		assertEquals(102,bets122(0).betId)
+		assertEquals(122,bets122(0).userId)
+		assertEquals(5,bets122(0).betSize,0)
+		assertEquals(1.9,bets122(0).betPrice,0)
+		assertEquals(LAY,bets122(0).betType)
+		assertEquals(U,bets122(0).betStatus)
+		assertEquals(1,bets122(0).marketId)
+		assertEquals(11,bets122(0).runnerId)
+
+		assertEquals(101,bets122(1).betId)
+		assertEquals(122,bets122(1).userId)
+		assertEquals(1,bets122(1).betSize,0)
+		assertEquals(1.9,bets122(1).betPrice,0)
+		assertEquals(LAY,bets122(1).betType)
+		assertEquals(M,bets122(1).betStatus)
+		assertEquals(1,bets122(1).marketId)
+		assertEquals(11,bets122(1).runnerId)
+
+		assertEquals(101,bets122(2).betId)
+		assertEquals(122,bets122(2).userId)
+		assertEquals(1,bets122(2).betSize,0)
+		assertEquals(1.9,bets122(2).betPrice,0)
+		assertEquals(LAY,bets122(2).betType)
+		assertEquals(M,bets122(2).betStatus)
+		assertEquals(1,bets122(2).marketId)
+		assertEquals(11,bets122(2).runnerId)
+
+		/**Check bets for user 123.*/
+		val bets123 = market.getBets(123)
+		assertEquals(2, bets123.size)
+
+		assertEquals(103,bets123(0).betId)
+		assertEquals(123,bets123(0).userId)
+		assertEquals(1,bets123(0).betSize,0)
+		assertEquals(1.9,bets123(0).betPrice,0)
+		assertEquals(BACK,bets123(0).betType)
+		assertEquals(M,bets123(0).betStatus)
+		assertEquals(1,bets123(0).marketId)
+		assertEquals(11,bets123(0).runnerId)
+		
+		assertEquals(104,bets123(1).betId)
+		assertEquals(123,bets123(1).userId)
+		assertEquals(1,bets123(1).betSize,0)
+		assertEquals(1.9,bets123(1).betPrice,0)
+		assertEquals(BACK,bets123(1).betType)
+		assertEquals(M,bets123(1).betStatus)
+		assertEquals(1,bets123(1).marketId)
+		assertEquals(11,bets123(1).runnerId)
+
+	}
+
 	/**Test scenarios for rounding issues.*/
 	@Test def testMatchRoundingLayBetWithBackBet {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
@@ -844,7 +911,7 @@ class MarketPlaceBetTest {
 		val bets122 = market.getBets(122)
 		assertEquals(1, bets122.size)
 
-	
+
 		assertEquals(100,bets122(0).betId)
 		assertEquals(122,bets122(0).userId)
 		assertEquals(2.26,bets122(0).betSize,0)
@@ -867,5 +934,5 @@ class MarketPlaceBetTest {
 		assertEquals(1,bets123(0).marketId)
 		assertEquals(11,bets123(0).runnerId)
 	}
-	
+
 }
