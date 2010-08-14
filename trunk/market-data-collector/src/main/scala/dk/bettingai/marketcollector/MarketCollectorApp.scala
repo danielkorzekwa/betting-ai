@@ -39,7 +39,12 @@ object MarketCollectorApp {
 		val collectionInterval = inputData("collectionInterval").toLong		
 		while(true) {
 			log.info("EventCollectorTask is running.")
+			try {
 				eventCollectorTask.execute()
+			}
+			catch {
+			case e:BetFairException => log.error("EventCollector error.",e)
+			}
 			Thread.sleep(collectionInterval*1000)
 		}
 
