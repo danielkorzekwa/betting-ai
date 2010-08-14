@@ -49,9 +49,18 @@ class MarketTest {
 		market.cancelBet(100)
 	}
 
-	@Test def testCancelUnsettledBet {
+	@Test def testCancelUnsettledBackBet {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
 		market.placeBet(100,123,2,3,BACK,11)
+
+		assertEquals(1,market.getBets(123).size)
+		assertEquals(2,market.cancelBet(100),0)
+		assertEquals(0,market.getBets(123).size)
+	}
+	
+	@Test def testCancelUnsettledLayBet {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))	
+		market.placeBet(100,123,2,3,LAY,11)
 
 		assertEquals(1,market.getBets(123).size)
 		assertEquals(2,market.cancelBet(100),0)
