@@ -249,10 +249,11 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			val runnerLayBetsMap = getRunnerBets(runnerId,layBets)
 			val runnerBackBetsMap = getRunnerBets(runnerId,backBets)
 
-			val runnerLayBets = runnerLayBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
-			val runnerBackBets = runnerBackBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
-			val bestPriceToBack = if(runnerLayBets.isEmpty) Double.NaN else runnerLayBets.reduceLeft((a,b) => if(a.betPrice>b.betPrice) a else b).betPrice
-			val bestPriceToLay = if(runnerBackBets.isEmpty) Double.NaN else runnerBackBets.reduceLeft((a,b) => if(a.betPrice<b.betPrice) a else b).betPrice
+			val pricesToBack = runnerLayBetsMap.filter(entry => !entry._2.isEmpty).keys
+			val pricesToLay = runnerBackBetsMap.filter(entry => !entry._2.isEmpty).keys
+			
+			val bestPriceToBack = if(!pricesToBack.isEmpty) pricesToBack.max else Double.NaN
+			val bestPriceToLay = if(!pricesToLay.isEmpty) pricesToLay.min else Double.NaN
 
 			new Tuple2(bestPriceToBack,bestPriceToLay)
 	}
