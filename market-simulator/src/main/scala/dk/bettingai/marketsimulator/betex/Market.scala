@@ -33,13 +33,15 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	/**key - runnerId, value - runnerLayBetsPerPrice*/
 	private val layBets = scala.collection.mutable.Map[Long,scala.collection.mutable.Map[Double,ListBuffer[IBet]]]()
 
-	private val bets = ListBuffer[IBet]()
 	private val matchedBets = ListBuffer[IBet]()
 	private val betsIds = scala.collection.mutable.Set[Long]()
 
 	require(numOfWinners>0,"numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
 	require(runners.size>1,"Number of market runners should be bigger than 1, numOfRunners=" + runners.size)
 
+	private def getRunnerBets(runnerId:Long,bets: scala.collection.mutable.Map[Long,scala.collection.mutable.Map[Double,ListBuffer[IBet]]]):scala.collection.mutable.Map[Double,ListBuffer[IBet]] = {
+		bets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
+	}
 
 	/** Places a bet on a betting exchange market.
 	 * 
@@ -56,17 +58,17 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		require(!betsIds.contains(betId),"Bet for betId=%s already exists".format(betId))
 
 		val pricesToBeMatched = betType match {
-		case LAY => backBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]()).keys.filter(p => p <= betPrice).toList.sortWith((a,b) => a<b).iterator
-		case BACK => layBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]()).keys.filter(p => p >= betPrice).toList.sortWith((a,b) => a>b).iterator
+		case LAY => getRunnerBets(runnerId,backBets).keys.filter(p => p <= betPrice).toList.sortWith((a,b) => a<b).iterator
+		case BACK => getRunnerBets(runnerId,layBets).keys.filter(p => p >= betPrice).toList.sortWith((a,b) => a>b).iterator
 		}
 		val betsToBeMatched:scala.collection.mutable.Map[Double,ListBuffer[IBet]] = betType match {
-		case LAY => backBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
-		case BACK => layBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
+		case LAY => getRunnerBets(runnerId,backBets)
+		case BACK => getRunnerBets(runnerId,layBets)
 		}
 
 		val betsToBeAdded:scala.collection.mutable.Map[Double,ListBuffer[IBet]] = betType match {
-		case LAY => layBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
-		case BACK => backBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
+		case LAY => getRunnerBets(runnerId,layBets)
+		case BACK => getRunnerBets(runnerId,backBets)
 		}
 
 		betsIds += betId
@@ -244,8 +246,8 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	def getBestPrices(runnerId: Long):Tuple2[Double,Double] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-			val runnerLayBetsMap = layBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
-			val runnerBackBetsMap = backBets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
+			val runnerLayBetsMap = getRunnerBets(runnerId,layBets)
+			val runnerBackBetsMap = getRunnerBets(runnerId,backBets)
 
 			val runnerLayBets = runnerLayBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
 			val runnerBackBets = runnerBackBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
