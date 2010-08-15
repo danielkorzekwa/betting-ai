@@ -14,7 +14,7 @@ class SimulatorAppPerformanceTest {
 		println(new String(consoleStream.toByteArray))
 	}
 
-	@Test @Ignore def testRealMarketDataAndSimpleTrader() {
+	@Test def testRealMarketDataAndSimpleTrader() {
 		val consoleStream = new ByteArrayOutputStream()
 		SimulatorApp.main(Array("marketData=src/test/resources/marketDataPerfTest.csv","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
 		println(new String(consoleStream.toByteArray))

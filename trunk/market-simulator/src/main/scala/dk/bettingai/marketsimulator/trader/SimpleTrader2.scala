@@ -20,16 +20,14 @@ class SimpleTrader2 extends ITrader{
 
 		for(runner <- ctx.runners) {
 			
-			if(i>1000) {
+			
 				val bestPrices = ctx.getBestPrices(runner.runnerId)
 
 			if(bestPrices._1<50 && !bestPrices._1.isNaN && !bestPrices._2.isNaN) {
-				ctx.placeBet(4,1/((1/bestPrices._2)-0.01),BACK,runner.runnerId)
-				ctx.placeBet(4,1/((1/bestPrices._1)+0.01),LAY,runner.runnerId)
+				ctx.placeBet(2,1/((1/bestPrices._2)-0.01),BACK,runner.runnerId)
+			//	ctx.placeBet(2,1/((1/bestPrices._1)+0.01),LAY,runner.runnerId)
 			}
-				i = 0
-			}
-			i=i+1
+				
 		}	
 
 	}

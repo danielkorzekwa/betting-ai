@@ -68,23 +68,34 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val marketEventsNumber = marketData.reset.getLines().size
 			val iterator = marketData.reset.getLines();
 
-			def process(marketEventIndex:Int,progress:Int):Unit = {
+			def process(marketEventIndex:Int,progress:Int,eventTimestamp:Long):Unit = {
 					val marketEvent = iterator.next
 					val newProgress=(marketEventIndex*100)/marketEventsNumber
 					if(newProgress>progress) p(newProgress)
-					marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
+					val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
 
 					/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-					for(market <- betex.getMarkets) {
-						val traderContext = new TraderContext(nextBetId(),traderUserId,market)
-						trader.execute(traderContext)
+					if(processedEventTimestamp>eventTimestamp) {
+						for(market <- betex.getMarkets) {
+							val traderContext = new TraderContext(nextBetId(),traderUserId,market)
+							trader.execute(traderContext)
+						}
 					}
-
 					/**Recursive  call.*/
-					if(iterator.hasNext) process(marketEventIndex+1,newProgress)
+					if(!iterator.hasNext) {
+						/**Process remaining events*/
+						if(processedEventTimestamp<=eventTimestamp) {
+							for(market <- betex.getMarkets) {
+								val traderContext = new TraderContext(nextBetId(),traderUserId,market)
+								trader.execute(traderContext)
+							}
+						}
+					}
+					else process(marketEventIndex+1,newProgress,processedEventTimestamp)
 			}
 
-			if(iterator.hasNext) process(1,0)	
+			if(iterator.hasNext) process(1,0,0)	
+
 			val riskReport = 	betex.getMarkets.map(calculateRiskReport(traderUserId,_))
 			riskReport
 	}
