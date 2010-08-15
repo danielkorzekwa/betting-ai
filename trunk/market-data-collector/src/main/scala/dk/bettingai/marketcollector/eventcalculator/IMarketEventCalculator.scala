@@ -11,18 +11,24 @@ trait IMarketEventCalculator {
   
 	/**Transforms delta between two states of market runner into the stream of events.
 	 * 	
+	 * @param timestamp for all generated events
+	 * @param marketId
+	 * @param runnerId
+	 * @param marketRunner current state of market runner
+	 * @param prevMarketRunner previous state of market runner
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String]
+	def produce(timestamp:Long,marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String]
 	
 	/**Calculates market events for the delta between the previous and the current state of the market runner.
 	 * 
+	 * @param timestamp for all generated events
 	 * @param marketId The market id that the bet placement events are calculated for. 
 	 * @param runnerId The market runner id that the bet placement events are calculated for. 
 	 * @param marketRunnerDelta Delta between the new and the previous state of the market runner (both runner prices and traded volume combined to runner prices).
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
-	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String]
+	def calculateMarketEvents(timestamp:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String]
 
 	/**Combines delta for runner prices with delta for traded volume and represents it as runner prices.
 	 * 
@@ -56,6 +62,10 @@ trait IMarketEventCalculator {
 	 * State A is represented by runner prices in state A and traded volume delta between states B and A. 
 	 * The state B is represented the list of market events that reflect traded volume delta between states B and A
 	 *  and by runner prices in state B.
+	 *  
+	 *  @param timestamp for all generated events
+	 *  @param marketId
+	 *  @param runnerId
 	 * */
-	def calculateMarketEventsForTradedVolume(marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]]
+	def calculateMarketEventsForTradedVolume(timestamp:Long,marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]]
 }

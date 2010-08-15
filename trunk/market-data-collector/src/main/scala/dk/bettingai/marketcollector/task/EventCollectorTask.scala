@@ -64,7 +64,7 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 						val file = new File(marketDataDir + "/" + marketId)
 						val fw = new FileWriter(file, false)
 						val marketDetails = marketService.getMarketDetails(marketId)
-						val createMarketEvent = buildCreateMarketEvent(marketDetails)
+						val createMarketEvent = buildCreateMarketEvent(now.getMillis,marketDetails)
 						IOUtils.writeLines(createMarketEvent::Nil,null,fw)
 						fw
 				}
@@ -77,8 +77,8 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 				/**Collect data for not inplay markets only.*/
 				if(marketRunners.inPlayDelay==0) {
 					/**Generate market events and add them to the file.*/
-					val events = eventProducer.produce(marketId,marketRunners.runnerPrices)
-					val eventsCheck = eventProducer.produce(marketId,marketRunners.runnerPrices)
+					val events = eventProducer.produce(now.getMillis,marketId,marketRunners.runnerPrices)
+					val eventsCheck = eventProducer.produce(now.getMillis,marketId,marketRunners.runnerPrices)
 					if(!eventsCheck.isEmpty) throw new IllegalStateException("Events size should be 0 here.")
 					IOUtils.writeLines(events,null,printWriter)
 					printWriter.flush()
@@ -104,11 +104,11 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 		log.error("Events = " + e.events)
 	}
 
-	private def buildCreateMarketEvent(marketDetails:MarketDetails):String = {
+	private def buildCreateMarketEvent(timestamp:Long,marketDetails:MarketDetails):String = {
 			import marketDetails._
 			val runners = marketDetails.runners.map(r => """{"runnerId":%s,"runnerName":"%s"}""".format(r.runnerId,r.runnerName)).mkString("[",",","]")
-			val createMarketEvent = """{"eventType":"CREATE_MARKET","marketId":%s,"marketName":"%s","eventName":"%s","numOfWinners":%s,"marketTime":"%s","runners": %s}""".
-			format(marketId,marketName,menuPath.replaceAll("\\\\", "/"),numOfWinners,df.format(marketTime),runners)
+			val createMarketEvent = """{"time":%s,"eventType":"CREATE_MARKET","marketId":%s,"marketName":"%s","eventName":"%s","numOfWinners":%s,"marketTime":"%s","runners": %s}""".
+			format(timestamp,marketId,marketName,menuPath.replaceAll("\\\\", "/"),numOfWinners,df.format(marketTime),runners)
 			createMarketEvent
 	}
 }
