@@ -181,25 +181,27 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 */
 	def cancelBets(userId:Long,betsSize:Double,betPrice:Double,betType:BetTypeEnum,runnerId:Long):Double = {
 
-		val bets = betType match {
+			val bets = betType match {
 			case BACK => backBets
 			case LAY => layBets
-		}
-		
+			}
+
 			val runnerBets = bets.getOrElseUpdate(runnerId,scala.collection.mutable.Map[Double,ListBuffer[IBet]]())
 			val priceBets = runnerBets.getOrElseUpdate(betPrice,new ListBuffer[IBet]())
-				
-		val betsToBeCancelled = priceBets.filter(b => b.userId==userId).reverseIterator
+
+			val betsToBeCancelled = priceBets.filter(b => b.userId==userId).reverseIterator
 
 			def cancelRecursively(amountToCancel:Double,amountCancelled:Double):Double = {
 				val betToCancel = betsToBeCancelled.next
-				val betCanceledAmount = if(amountToCancel>=betToCancel.betSize) 
-					cancelBet(betToCancel.betId)
-					else {
-						val updatedBet = Bet(betToCancel.betId,betToCancel.userId,betToCancel.betSize - amountToCancel,betToCancel.betPrice,betToCancel.betType,betToCancel.marketId,betToCancel.runnerId)
-						priceBets.update(priceBets.indexOf(betToCancel,0),updatedBet)
-						amountToCancel
-					}
+				val betCanceledAmount = if(amountToCancel>=betToCancel.betSize) {
+					priceBets -= betToCancel
+					betToCancel.betSize
+				}
+				else {
+					val updatedBet = Bet(betToCancel.betId,betToCancel.userId,betToCancel.betSize - amountToCancel,betToCancel.betPrice,betToCancel.betType,betToCancel.marketId,betToCancel.runnerId)
+					priceBets.update(priceBets.indexOf(betToCancel,0),updatedBet)
+					amountToCancel
+				}
 				val newAmountToCancel = amountToCancel-betCanceledAmount
 				val newAmountCancelled = amountCancelled+betCanceledAmount
 				if(betsToBeCancelled.hasNext && newAmountToCancel>0) cancelRecursively(newAmountToCancel,newAmountCancelled)
@@ -219,7 +221,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	def getRunnerPrices(runnerId:Long):List[IMarket.IRunnerPrice] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-				val allBackBets = for{
+			val allBackBets = for{
 				runnerBackBetsMap <- backBets.values
 				val runnerBets = runnerBackBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
 			} yield runnerBets
@@ -229,9 +231,9 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 				val runnerBets = runnerLayBetsMap.values.foldLeft(List[IBet]())((a,b) => a.toList ::: b.toList).filter(b => b.runnerId == runnerId)
 			} yield runnerBets
 
-				val allBackBetsList = allBackBets.foldLeft(List[IBet]())((a,b) => a ::: b)
+			val allBackBetsList = allBackBets.foldLeft(List[IBet]())((a,b) => a ::: b)
 			val allLayBetsList = allLayBets.foldLeft(List[IBet]())((a,b) => a ::: b)
-			
+
 			val betsByPriceMap = (allBackBetsList.toList ::: allLayBetsList.toList).toList.groupBy(b => b.betPrice) 
 
 			def totalStake(bets: List[IBet],betType:BetTypeEnum) = bets.filter(b => b.betType==betType).foldLeft(0d)(_ + _.betSize)
@@ -251,7 +253,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 
 			val pricesToBack = runnerLayBetsMap.filter(entry => !entry._2.isEmpty).keys
 			val pricesToLay = runnerBackBetsMap.filter(entry => !entry._2.isEmpty).keys
-			
+
 			val bestPriceToBack = if(!pricesToBack.isEmpty) pricesToBack.max else Double.NaN
 			val bestPriceToLay = if(!pricesToLay.isEmpty) pricesToLay.min else Double.NaN
 
