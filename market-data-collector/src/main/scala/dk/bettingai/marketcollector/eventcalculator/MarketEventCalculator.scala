@@ -12,9 +12,14 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 	/**Transforms delta between two states of market runner into the stream of events.
 	 * 	
+	 * @param timestamp for all generated events
+	 * @param marketId
+	 * @param runnerId
+	 * @param marketRunner current state of market runner
+	 * @param prevMarketRunner previous state of market runner
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String] = {
+	def produce(timestamp:Long,marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String] = {
 
 			/**Round down all volumes using Math.floor*/
 			val validatedMarketPrices = marketRunner._1.map(r => new RunnerPrice(r.price,r.totalToBack.floor,r.totalToLay.floor))
@@ -24,10 +29,10 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 			val validatedMarketRunner = (validatedMarketPrices,validatedTradedVolumeDelta)
 			val validatedPrevMarketRunner = (validatedPrevMarketPrices,validatedPrevTradedVolumeDelta)
 
-			val tradedVolumeDelta = MarketEventCalculator.calculateTradedVolumeDelta(validatedMarketRunner._2.toList,validatedPrevMarketRunner._2)
-			val intermediatePrices = MarketEventCalculator.calculateMarketEventsForTradedVolume(marketId, runnerId)(validatedPrevMarketRunner._1, tradedVolumeDelta)
-			val runnerPricesDelta = MarketEventCalculator.calculateRunnerPricesDelta(validatedMarketRunner._1.toList,intermediatePrices._1)
-			val marketEvents = MarketEventCalculator.calculateMarketEvents(marketId,runnerId)(runnerPricesDelta)
+			val tradedVolumeDelta = calculateTradedVolumeDelta(validatedMarketRunner._2.toList,validatedPrevMarketRunner._2)
+			val intermediatePrices = calculateMarketEventsForTradedVolume(timestamp,marketId, runnerId)(validatedPrevMarketRunner._1, tradedVolumeDelta)
+			val runnerPricesDelta = calculateRunnerPricesDelta(validatedMarketRunner._1.toList,intermediatePrices._1)
+			val marketEvents = calculateMarketEvents(timestamp,marketId,runnerId)(runnerPricesDelta)
 
 			intermediatePrices._2 ::: marketEvents 
 	}
@@ -35,12 +40,13 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 
 	/**Calculates market events for the delta between the previous and the current state of the market runner.
 	 * 
+	 * @param timestamp for all generated events
 	 * @param marketId The market id that the bet placement events are calculated for. 
 	 * @param runnerId The market runner id that the bet placement events are calculated for. 
 	 * @param marketRunnerDelta Delta between the new and the previous state of the market runner (both runner prices and traded volume combined to runner prices).
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for the market runner
 	 */
-	def calculateMarketEvents(marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
+	def calculateMarketEvents(timestamp:Long,marketId:Long,runnerId:Long)(marketRunnerDelta:List[IRunnerPrice]): List[String] = {
 		require(marketRunnerDelta.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + marketRunnerDelta);
 require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"Price with both totalToBack and totalToLay less than 0 is not allowed. RunnerPrices=" + marketRunnerDelta);
 
@@ -49,9 +55,9 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack < 0 || deltaRunnerPrice.totalToLay<0) 
 				val cancelBetEvent = if(deltaRunnerPrice.totalToBack<0)
-					cancelBetsEvent(-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
+					cancelBetsEvent(timestamp,-deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)				
 					else	
-						cancelBetsEvent(-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
+						cancelBetsEvent(timestamp,-deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)				
 		} yield cancelBetEvent
 
 		/**Create bet events.*/
@@ -59,9 +65,9 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 			deltaRunnerPrice <- marketRunnerDelta 
 			if(deltaRunnerPrice.totalToBack > 0 || deltaRunnerPrice.totalToLay>0) 
 				val betEvent = if(deltaRunnerPrice.totalToBack>0)
-					placeBetEvent(deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
+					placeBetEvent(timestamp,deltaRunnerPrice.totalToBack,deltaRunnerPrice.price,"LAY",marketId,runnerId)
 					else	
-						placeBetEvent(deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
+						placeBetEvent(timestamp,deltaRunnerPrice.totalToLay,deltaRunnerPrice.price,"BACK",marketId,runnerId)	
 		} yield betEvent
 
 		/**Return events, cancelBet events must be returned first.*/
@@ -139,8 +145,12 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 	 * State A is represented by runner prices in state A and traded volume delta between states B and A. 
 	 * The state B is represented the list of market events that reflect traded volume delta between states B and A
 	 *  and by runner prices in state B.
+	 *  
+	 *  @param timestamp for all generated events
+	 *  @param marketId
+	 *  @param runnerId
 	 * */
-	def calculateMarketEventsForTradedVolume(marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]] = {
+	def calculateMarketEventsForTradedVolume(timestamp:Long,marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]] = {
 
 		require(previousRunnerPrices.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
 		require(previousRunnerPrices.find(p => p.totalToBack==0 && p.totalToLay==0).isEmpty,"Price with both totalToBack and totalToLay to be 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
@@ -159,8 +169,8 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 			val newTotalToBack = (runnerPrice.totalToBack - toLayDelta).max(0)
 			val newTotalToLay=(runnerPrice.totalToLay - toBackDelta).max(0)
 
-			val placeBackBetEvents:List[String] = if(toLayDelta>0) placeBetEvent(toLayDelta,runnerTradedVolume.price,"BACK",marketId,runnerId) :: Nil else Nil
-			val placeLayBetEvents = if(toBackDelta>0) placeBetEvent(toBackDelta,runnerTradedVolume.price,"LAY",marketId,runnerId)  :: Nil else Nil
+			val placeBackBetEvents:List[String] = if(toLayDelta>0) placeBetEvent(timestamp,toLayDelta,runnerTradedVolume.price,"BACK",marketId,runnerId) :: Nil else Nil
+			val placeLayBetEvents = if(toBackDelta>0) placeBetEvent(timestamp,toBackDelta,runnerTradedVolume.price,"LAY",marketId,runnerId)  :: Nil else Nil
 
 			val newUpdateRunnerPrices = if(newTotalToBack>0 || newTotalToLay>0) new RunnerPrice(runnerTradedVolume.price,newTotalToBack,newTotalToLay) :: updatedRunnerPrices.filterNot(p => p.price==runnerTradedVolume.price)
 			else updatedRunnerPrices.filterNot(p => p.price==runnerTradedVolume.price)
@@ -172,8 +182,8 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 			}
 
 			val cancelBetsEvents = betType match {
-			case BACK => partition._2.map(p =>cancelBetsEvent(p.totalToBack,p.price,"LAY",marketId,runnerId))
-			case LAY => partition._2.map(p =>cancelBetsEvent(p.totalToLay,p.price,"BACK",marketId,runnerId))
+			case BACK => partition._2.map(p =>cancelBetsEvent(timestamp,p.totalToBack,p.price,"LAY",marketId,runnerId))
+			case LAY => partition._2.map(p =>cancelBetsEvent(timestamp,p.totalToLay,p.price,"BACK",marketId,runnerId))
 			}
 
 			val newEvents = cancelBetsEvents ::: placeLayBetEvents ::: placeBackBetEvents
@@ -198,12 +208,12 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 				(resultForPricesToBack._1 ::: resultForPricesToLay._1, resultForPricesToBack._2 ::: resultForPricesToLay._2)
 	}
 
-	private def placeBetEvent(betSize:Double,betPrice:Double,betType:String,marketId:Long,runnerId:Long):String = {
-		"""{"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(betSize,betPrice,betType,marketId,runnerId)
+	private def placeBetEvent(timestamp:Long,betSize:Double,betPrice:Double,betType:String,marketId:Long,runnerId:Long):String = {
+		"""{"time":%s,"eventType":"PLACE_BET","betSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(timestamp,betSize,betPrice,betType,marketId,runnerId)
 	}
 
-	private def cancelBetsEvent(betsSize:Double,betPrice:Double,betType:String,marketId:Long,runnerId:Long):String = {
-		"""{"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(betsSize,betPrice,betType,marketId,runnerId)
+	private def cancelBetsEvent(timestamp:Long,betsSize:Double,betPrice:Double,betType:String,marketId:Long,runnerId:Long):String = {
+		"""{"time":%s,"eventType":"CANCEL_BETS","betsSize":%s,"betPrice":%s,"betType":"%s","marketId":%s,"runnerId":%s}""".format(timestamp,betsSize,betPrice,betType,marketId,runnerId)
 	}
 
 }

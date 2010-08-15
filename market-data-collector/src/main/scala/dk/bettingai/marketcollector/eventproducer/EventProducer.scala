@@ -35,12 +35,13 @@ class EventProducer extends IEventProducer{
 	 * First call of this method for a given market returns list of events that represents delta between empty state of a market(no prices and traded volume) and market state passed to this method.
 	 * Next call of this method for the same market returns list of events that represents delta between previous and new state of a market.
 	 * 
+	 * @param timestamp for all generated events
 	 * @param marketId Market id.
 	 * @param marketRunners Market state represented by runner prices and price traded volume.
 	 * 
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):List[String] = {
+	def produce(timestamp:Long,marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):List[String] ={
 
 			/**Round down all unmatched and matched volume.*/
 			def floorMarketRunner(marketRunner: Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]] = {
@@ -63,19 +64,20 @@ class EventProducer extends IEventProducer{
 			}
 			}
 
-			val marketEvents = generateMarketEvents(marketId,validatedMarketRunners)
+			val marketEvents = generateMarketEvents(timestamp,marketId,validatedMarketRunners)
 			processEvents(marketId, validatedMarketRunners, marketEvents)
 			marketEvents.foldLeft(List[String]())((a,b) => a ::: b._2)
 	}
 
 	/**Generate events for all market runners.
 	 * 
+	 * @param timestamp for all generated events
 	 * @param marketId
 	 * @param validatedMarketRunners
 	 * 
 	 * @return List of Tuple2[runnerId, runnerEvents]
 	 * */
-	private def generateMarketEvents(marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):Iterable[Tuple2[Long,List[String]]] = {
+	private def generateMarketEvents(timestamp:Long, marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):Iterable[Tuple2[Long,List[String]]] = {
 			val betexMarket = betex.findMarket(marketId)	
 			val marketEvents = for{(runnerId,runnerData) <- validatedMarketRunners
 
@@ -83,7 +85,7 @@ class EventProducer extends IEventProducer{
 				val previousTradedVolume = betexMarket.getRunnerTradedVolume(runnerId)
 				val prevRunnerData = (previousRunnerPrices,previousTradedVolume)
 
-				val runnerEvents = MarketEventCalculator.produce(marketId,runnerId,runnerData,prevRunnerData)		
+				val runnerEvents = MarketEventCalculator.produce(timestamp,marketId,runnerId,runnerData,prevRunnerData)		
 			} yield (runnerId, runnerEvents)
 			marketEvents
 	}
