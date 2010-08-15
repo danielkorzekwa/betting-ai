@@ -21,16 +21,23 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 	val f = new JsonFactory();
 
 	val objectMapper = new ObjectMapper()
-	/**Processes market event in a json format and calls appropriate method on a betting exchange.
+		/**Processes market event in a json format and calls appropriate method on a betting exchange.
 	 * 
 	 * @param marketEvent
 	 * @param nextBetId Returns betId for PLACE_BET event
 	 * @param userId It is used for bet placement events
+	 * 
+	 * @return event timestamp
 	 */
-	def process(marketEvent:String, nextBetId: => Long,userId:Int) {	
+	def process(marketEvent:String, nextBetId: => Long,userId:Int):Long = {	
 
-		val jp = f.createJsonParser(marketEvent);
-		jp.nextToken
+		val jp = f.createJsonParser(marketEvent)
+		jp.nextToken //start of json object
+
+		jp.nextToken 
+		jp.nextToken //timestamp
+		val timestamp = jp.getText().toLong
+		
 		jp.nextToken 
 		jp.nextToken //eventType
 		require(jp.getCurrentName()=="eventType","No 'eventType' attribute for event: " + marketEvent)
@@ -69,6 +76,7 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 			 
 		}
 
+		timestamp
 	}
 
 }

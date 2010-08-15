@@ -13,7 +13,9 @@ trait MarketEventProcessor {
 	 * @param marketEvent
 	 * @param nextBetId Returns betId for PLACE_BET event
 	 * @param userId It is used for bet placement events
+	 * 
+	 * @return event timestamp
 	 */
-	def process(marketEvent:String, nextBetId: => Long,userId:Int)
+	def process(marketEvent:String, nextBetId: => Long,userId:Int):Long
 	
 }

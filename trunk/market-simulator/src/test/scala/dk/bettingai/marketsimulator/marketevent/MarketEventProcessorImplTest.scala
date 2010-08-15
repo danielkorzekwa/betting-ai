@@ -35,8 +35,8 @@ class MarketEventProcessorImplTest {
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"CREATE_MARKET",
+		val time = new MarketEventProcessorImpl(betex).process(new String("""
+				{"time":1234567,"eventType":"CREATE_MARKET",
 				"marketId":10, 
 				"marketName":"Match Odds",
 				"eventName":"Man Utd vs Arsenal", 
@@ -49,12 +49,14 @@ class MarketEventProcessorImplTest {
 				"runnerName":"Arsenal"}]
 				}
 		"""),0,123)
+
+		assertEquals(1234567,time)
 	}
 
 	@Test(expected=classOf[ClassCastException])
 	def testProcessCreateMarketEventMarketIdNotANumber() {
 		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"CREATE_MARKET",
+				{"time":1234567,"eventType":"CREATE_MARKET",
 				"marketId":"not_a_number", 
 				"marketName":"Match Odds",
 				"eventName":"Man Utd vs Arsenal", 
@@ -72,7 +74,7 @@ class MarketEventProcessorImplTest {
 	@Test(expected=classOf[NoSuchElementException])
 	def testProcessCreateMarketEventNoMarketName() {
 		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"CREATE_MARKET",
+				{"time":1234567,"eventType":"CREATE_MARKET",
 				"marketId":1, 
 				"eventName":"Man Utd vs Arsenal", 
 				"numOfWinners":1, 
@@ -99,8 +101,8 @@ class MarketEventProcessorImplTest {
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"PLACE_BET",	
+		val time = new MarketEventProcessorImpl(betex).process(new String("""
+				{"time":1234568,"eventType":"PLACE_BET",	
 				"betSize":10,
 				"betPrice":3,
 				"betType":"LAY",
@@ -108,6 +110,8 @@ class MarketEventProcessorImplTest {
 				"runnerId":11
 				}
 		"""),100,123)
+
+		assertEquals(1234568,time)
 	}
 
 	@Test def testProcessPlaceBetEventBack() {
@@ -119,8 +123,8 @@ class MarketEventProcessorImplTest {
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"PLACE_BET",
+		val time = new MarketEventProcessorImpl(betex).process(new String("""
+				{"time":1234569,"eventType":"PLACE_BET",
 				"betSize":10,
 				"betPrice":3,
 				"betType":"BACK",
@@ -128,6 +132,8 @@ class MarketEventProcessorImplTest {
 				"runnerId":11
 				}
 		"""),101,345)
+
+		assertEquals(1234569,time)
 	}
 
 	@Test(expected=classOf[NoSuchElementException]) 
@@ -138,8 +144,8 @@ class MarketEventProcessorImplTest {
 				one(betex).findMarket(1);will(returnValue(market))
 			}
 		})
-		new MarketEventProcessorImpl(betex).process(new String("""
-				{"eventType":"PLACE_BET",
+		val time = new MarketEventProcessorImpl(betex).process(new String("""
+				{"time":12345610,"eventType":"PLACE_BET", 
 				"betSize":10,
 				"betPrice":3,
 				"betType":"NOT_SUPPORTED",
@@ -147,6 +153,8 @@ class MarketEventProcessorImplTest {
 				"runnerId":11
 				}
 		"""),0,123)
+
+		assertEquals(12345610,time)
 	}
 
 	/**
@@ -161,7 +169,9 @@ class MarketEventProcessorImplTest {
 			}
 		})
 
-		new MarketEventProcessorImpl(betex).process("""{"eventType":"CANCEL_BETS","betsSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""",0,124)
+		val time = new MarketEventProcessorImpl(betex).process("""{"time":12345611,"eventType":"CANCEL_BETS","betsSize":3.0,"betPrice":1.85,"betType":"LAY","marketId":10,"runnerId":1000}""",0,124)
+
+		assertEquals(12345611,time)
 	}
 
 	/**
