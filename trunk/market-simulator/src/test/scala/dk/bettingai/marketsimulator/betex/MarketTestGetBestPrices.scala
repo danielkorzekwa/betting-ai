@@ -10,7 +10,7 @@ import IBet.BetStatusEnum._
 class MarketTestGetBestPrices {
 	
 	/** 
-	 *  Tests for getBestPrices.
+	 *  Tests for getBestPrices for runner.
 	 * 
 	 * */
 	@Test(expected=classOf[IllegalArgumentException]) def testGetBestPricesForNotExistingRunner  {
@@ -98,5 +98,29 @@ class MarketTestGetBestPrices {
 		assertEquals(Double.NaN,bestPrices._1,0)
 		assertEquals(Double.NaN,bestPrices._2,0)
 	}
+	
+	/** 
+	 *  Tests for getBestPrices for market.
+	 * 
+	 * */
+@Test def testGetBestPricesBothToBackAndToLayAreAvailableOnTwoRunners {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
+		market.placeBet(100,122,13,2.1,LAY,11)
+		market.placeBet(101,121,3,2.2,LAY,11)
+		market.placeBet(102,122,5,2.2,LAY,11)
+		market.placeBet(103,121,8,2.4,BACK,11)
+		market.placeBet(104,122,25,2.5,BACK,11)
+
+		market.placeBet(105,122,13,2.6,LAY,12)
+		market.placeBet(106,122,25,2.8,BACK,12)
+
+		val bestPrices = market.getBestPrices()
+		assertEquals(2,bestPrices.size)
+		assertEquals(2.2,bestPrices(11)._1,0)
+		assertEquals(2.4,bestPrices(11)._2,0)
+		
+		assertEquals(2.6,bestPrices(12)._1,0)
+		assertEquals(2.8,bestPrices(12)._2,0)
+	}
 }

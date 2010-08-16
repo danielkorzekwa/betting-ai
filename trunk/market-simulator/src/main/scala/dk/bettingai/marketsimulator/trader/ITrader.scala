@@ -30,6 +30,12 @@ object ITrader {
 	* */
 	def getBestPrices(runnerId: Long): Tuple2[Double,Double]
 	
+	/**Returns best toBack/toLay prices for market.
+	 * 
+	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
+	 */
+	def getBestPrices():Map[Long,Tuple2[Double,Double]]
+	
 	/** Places a bet on a betting exchange market.
 	* 
 	* @param betSize

@@ -259,6 +259,14 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 
 			new Tuple2(bestPriceToBack,bestPriceToLay)
 	}
+	
+	/**Returns best toBack/toLay prices for market.
+	 * 
+	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
+	 */
+	def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
+		Map(runners.map(r => r.runnerId -> getBestPrices(r.runnerId)) : _*)
+	}
 
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
