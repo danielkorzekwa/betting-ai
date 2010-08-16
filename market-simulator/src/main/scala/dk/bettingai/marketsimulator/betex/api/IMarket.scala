@@ -82,6 +82,12 @@ trait IMarket {
 	 * */
 	def getBestPrices(runnerId: Long): Tuple2[Double,Double]
 	
+	/**Returns best toBack/toLay prices for market.
+	 * 
+	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
+	 */
+	def getBestPrices():Map[Long,Tuple2[Double,Double]]
+	
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume]
 	

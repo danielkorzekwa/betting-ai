@@ -46,6 +46,14 @@ object Simulator {
 		 * @return 
 		 * */
 		def getBestPrices(runnerId: Long): Tuple2[Double,Double] = market.getBestPrices(runnerId)
+		
+		/**Returns best toBack/toLay prices for market.
+		 * 
+		 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
+		 */
+		def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
+			market.getBestPrices()
+		}
 	}
 
 }
@@ -106,7 +114,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 	 */
 	private def calculateRiskReport(traderUserId:Int,market:IMarket):IMarketRiskReport = {
 
-			val marketPrices = Map(market.runners.map(r => r.runnerId -> market.getBestPrices(r.runnerId)) : _*)
+			val marketPrices = market.getBestPrices()
 			val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
 			val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
