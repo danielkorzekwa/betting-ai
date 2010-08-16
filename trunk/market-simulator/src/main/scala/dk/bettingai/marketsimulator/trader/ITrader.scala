@@ -45,6 +45,11 @@ object ITrader {
 	*/
 	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long)
 	
+	/**Returns all bets placed by trader on the market.
+	 *
+	 *@param userId
+	 */
+	def getBets():List[IBet]
 	}
 }
 trait ITrader {
