@@ -21,7 +21,7 @@ object Simulator {
 		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, expectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,expectedProfit,matchedBetsNumber,unmatchedBetsNumber)
 	}
 
-	class TraderContext(nextBetId: => Long,userId:Long, market:IMarket) extends ITraderContext {
+	class TraderContext(nextBetId: => Long,userId:Int, market:IMarket) extends ITraderContext {
 		val marketId = market.marketId
 		val marketName = market.marketName
 		val eventName = market.eventName
@@ -54,6 +54,12 @@ object Simulator {
 		def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
 			market.getBestPrices()
 		}
+		
+		/**Returns all bets placed by trader on the market.
+	 *
+	 *@param userId
+	 */
+	def getBets():List[IBet] = market.getBets(userId)
 	}
 
 }
