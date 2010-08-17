@@ -126,6 +126,6 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
 			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
 
-			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
+			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit.marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
 	}
 }
