@@ -10,6 +10,7 @@ import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.risk._
 import scala.io._
+import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -17,8 +18,8 @@ import scala.io._
  *
  */
 object Simulator {
-	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val expectedProfit:Double,val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
-		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, expectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,expectedProfit,matchedBetsNumber,unmatchedBetsNumber)
+	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val marketExpectedProfit:MarketExpectedProfit,val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
+		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,marketExpectedProfit,matchedBetsNumber,unmatchedBetsNumber)
 	}
 
 	class TraderContext(nextBetId: => Long,userId:Int, market:IMarket) extends ITraderContext {
@@ -46,20 +47,20 @@ object Simulator {
 		 * @return 
 		 * */
 		def getBestPrices(runnerId: Long): Tuple2[Double,Double] = market.getBestPrices(runnerId)
-		
+
 		/**Returns best toBack/toLay prices for market.
 		 * 
 		 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
 		 */
 		def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
-			market.getBestPrices()
+				market.getBestPrices()
 		}
-		
+
 		/**Returns all bets placed by trader on the market.
-	 *
-	 *@param userId
-	 */
-	def getBets():List[IBet] = market.getBets(userId)
+		 *
+		 *@param userId
+		 */
+		def getBets():List[IBet] = market.getBets(userId)
 	}
 
 }
@@ -126,6 +127,6 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
 			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
 
-			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit.marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
+			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
 	}
 }

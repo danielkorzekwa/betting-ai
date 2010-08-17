@@ -49,23 +49,23 @@ object SimulatorApp  {
 		printMarketReportSummary(marketRiskReports, console)
 		console.println("")
 	}
-	
+
 	private def printMarketReport(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
 		printMarketRiskReport(0,0)
-			def printMarketRiskReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
+		def printMarketRiskReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
 			if(marketReportIndex < marketRiskReports.size) {
 				val marketRiskReport = marketRiskReports(marketReportIndex)
-				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.expectedProfit
-				console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.expectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
-				
+				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.marketExpectedProfit.marketExpectedProfit
+				console.print("\n%s: %s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
+
 				/**Recursive call.*/
 				printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
 			}
 		}
 	}
-	
+
 	private def printMarketReportSummary(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
-			val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.expectedProfit)
+		val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.marketExpectedProfit.marketExpectedProfit)
 		val aggrMatchedBets = marketRiskReports.foldLeft(0l)(_ + _.matchedBetsNumber)
 		val aggrUnmatchedBets = marketRiskReports.foldLeft(0l)(_ + _.unmatchedBetsNumber)
 		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit,2),aggrMatchedBets,aggrUnmatchedBets))
