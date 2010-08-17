@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator.risk
 
 import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
+import IExpectedProfitCalculator._
 
 /**This object represents a function that calculates market expected profit from bets and probabilities.
  * 
@@ -10,12 +11,12 @@ import IBet.BetTypeEnum._
  */
 object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 
-	/** Calculates market expected profit from bets and probabilities. Probabilities must be normalised.
-	 * @param bets Bets on the same market
+	/** Calculates market expected profit from bets and probabilities
+	 * @param bets
 	 * @param probabilities Key - runnerId, value - runner probability.
-	 * @return
+	 * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
 	 */
-	def calculate(bets:List[IBet],probabilities:Map[Long,Double]): Double = {
+	def calculate(bets:List[IBet],probabilities:Map[Long,Double]): MarketExpectedProfit = {
 		if(bets.isEmpty) 0
 		
 		/**Check input parameters.*/
@@ -27,13 +28,16 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 		/**Lay bet is a back bet with a negative stake.*/
 		def betSize(bet:IBet):Double = if(bet.betType==BACK) bet.betSize else -bet.betSize
 		
-		/**Sum of expected payouts for all bets. Expected payout for a bet = betSize*betPrice*runnerProbability*/
-		val totalExpectedPayout = bets.foldLeft(0d)((sum:Double,bet:IBet) => sum + betSize(bet)*bet.betPrice*probabilities(bet.runnerId))
+		/**Key - runnerId, value - sum of bet payouts for all runner bets. Bet payout = betsize*betprice*/
+		val runnerPayoutMap = bets.groupBy(_.runnerId).map(entry => entry._1 -> entry._2.foldLeft(0d)((a,b)=> a + betSize(b)*b.betPrice))
 		
+		/**Sum of expected payouts for all bets. Expected payout for a bet = betSize*betPrice*runnerProbability*/
+		val totalExpectedPayout = runnerPayoutMap.map(entry => entry._2*probabilities(entry._1)).foldLeft(0d)(_ + _)
 		/**Sum of all stakes for all bets.*/
 		val totalStake = bets.foldLeft(0d)(_ + betSize(_))
 		
+		val runnersIfwin = runnerPayoutMap.map(entry => entry._1 -> (entry._2-totalStake))
 		/**Calculate market expected profit.*/
-		totalExpectedPayout - totalStake
+		new MarketExpectedProfit(totalExpectedPayout - totalStake,runnersIfwin)
 	}
 }
