@@ -7,9 +7,11 @@ import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
 class ExpectedProfitCalculatorTest {
 
 	@Test def testCalculateNoBets {
-		val expectedProfit = ExpectedProfitCalculator.calculate(List(), Map())
+		val expectedProfit = ExpectedProfitCalculator.calculate(List(), Map(11l->1.5,12l->3))
 		assertEquals(0,expectedProfit.marketExpectedProfit,0)
-		assertEquals(0,expectedProfit.runnersIfWin.size)
+		assertEquals(2,expectedProfit.runnersIfWin.size)
+		assertEquals(0,expectedProfit.runnersIfWin(11),0)
+		assertEquals(0,expectedProfit.runnersIfWin(12),0)
 	}
 
 	@Test(expected=classOf[IllegalArgumentException]) 
@@ -36,12 +38,13 @@ class ExpectedProfitCalculatorTest {
 
 	@Test def testCalculateOneBackBetProbabilityNotChanged {
 		val bets = List(Bet(100,123,10,3,BACK,1,11))
-		val probabilities:Map[Long,Double] = Map(11l -> 1d/3d)
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/3d,12l->1.5d)
 		val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities)
 		assertEquals(0,expectedProfit.marketExpectedProfit,0)
 
-		assertEquals(1,expectedProfit.runnersIfWin.size)
+		assertEquals(2,expectedProfit.runnersIfWin.size)
 		assertEquals(20,expectedProfit.runnersIfWin(11),0)
+		assertEquals(-10,expectedProfit.runnersIfWin(12),0)
 	}
 
 	@Test def testCalculateOneBackBetProbabilityChanged1 {
@@ -86,24 +89,26 @@ class ExpectedProfitCalculatorTest {
 	}
 
 	@Test def testCalculateOneLayBetProbabilityChanged2 {
-		val bets = List(Bet(100,123,10,2,LAY,1,11))
-		val probabilities:Map[Long,Double] = Map(11l -> 1d/1.5)
+		val bets = List(Bet(100,123,10,2.5,LAY,1,11))
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/1.5,12l ->3)
 		val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities)
-		assertEquals(-3.333,expectedProfit.marketExpectedProfit,0.001)
+		assertEquals(-6.666,expectedProfit.marketExpectedProfit,0.001)
 
-		assertEquals(1,expectedProfit.runnersIfWin.size)
-		assertEquals(-10,expectedProfit.runnersIfWin(11),0)
+		assertEquals(2,expectedProfit.runnersIfWin.size)
+		assertEquals(-15,expectedProfit.runnersIfWin(11),0)
+		assertEquals(10,expectedProfit.runnersIfWin(12),0)
 	}
 
 	@Test def testCalculateTwoBackBetsOnTwoRunnersBetProbabilityNotChanged {
 		val bets = List(Bet(100,123,10,1.5,BACK,1,11),Bet(101,123,10,3,BACK,1,12))
-		val probabilities:Map[Long,Double] = Map(11l -> 1/1.5,12l -> 1d/3d)
+		val probabilities:Map[Long,Double] = Map(11l -> 1/1.5,12l -> 1d/3d,13l->0d)
 		val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities)
 		assertEquals(0,expectedProfit.marketExpectedProfit,0)
 
-		assertEquals(2,expectedProfit.runnersIfWin.size)
+		assertEquals(3,expectedProfit.runnersIfWin.size)
 		assertEquals(-5,expectedProfit.runnersIfWin(11),0)
 		assertEquals(10,expectedProfit.runnersIfWin(12),0)
+		assertEquals(-20,expectedProfit.runnersIfWin(13),0)
 	}
 
 	@Test def testCalculateTwoBackBetsOnTwoRunnersBetProbabilityChanged {

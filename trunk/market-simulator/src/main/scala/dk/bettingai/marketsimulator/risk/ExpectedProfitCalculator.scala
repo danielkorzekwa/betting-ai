@@ -37,7 +37,9 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 		val totalStake = bets.foldLeft(0d)(_ + betSize(_))
 		
 		val runnersIfwin = runnerPayoutMap.map(entry => entry._1 -> (entry._2-totalStake))
+		
+		val missingIfWins = (probabilities.keys.toList -- runnersIfwin.keys.toList).map(_ -> -totalStake)
 		/**Calculate market expected profit.*/
-		new MarketExpectedProfit(totalExpectedPayout - totalStake,runnersIfwin)
+		new MarketExpectedProfit(totalExpectedPayout - totalStake,runnersIfwin ++ missingIfWins)
 	}
 }
