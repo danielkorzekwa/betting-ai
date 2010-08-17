@@ -9,7 +9,7 @@ import IExpectedProfitCalculator._
  *
  */
 object IExpectedProfitCalculator {
-	
+
 	/**
 	 * @param marketExpcetedProfit Market expected profit from bets and probabilities 
 	 * @param runnersIfWin If wins values for all market runners. IfWin = What was the market profit if the runner would win.
@@ -19,7 +19,7 @@ object IExpectedProfitCalculator {
 	}
 }
 trait IExpectedProfitCalculator {
-	
+
 	/** Calculates market expected profit from bets and probabilities
 	 * @param bets
 	 * @param probabilities Key - runnerId, value - runner probability.
