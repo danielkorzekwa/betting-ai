@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator
 import ISimulator._
 import scala.io._
 import dk.bettingai.marketsimulator.trader._
+import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -15,7 +16,7 @@ object ISimulator {
 		val marketName:String
 		val eventName:String
 		/**Market expected profit based on bets and market probabilities.*/
-		val expectedProfit:Double
+		val marketExpectedProfit:MarketExpectedProfit
 		val matchedBetsNumber:Long
 		val unmatchedBetsNumber:Long
 	}

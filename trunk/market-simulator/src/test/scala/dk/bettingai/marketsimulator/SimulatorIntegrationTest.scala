@@ -34,7 +34,12 @@ class SimulatorIntegrationTest {
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-		assertEquals(0,marketRiskReport(0).expectedProfit,0)
+
+		assertEquals(0,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
+		assertEquals(0,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0)
+		assertEquals(0,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0)
+
 		assertEquals(0,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(0,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -49,7 +54,12 @@ class SimulatorIntegrationTest {
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-		assertEquals(-0.625,marketRiskReport(0).expectedProfit,0.001)
+
+		assertEquals(-0.625,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
+		assertEquals(2.4,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0.001)
+		assertEquals(-2,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0)
+
 		assertEquals(1,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -64,7 +74,12 @@ class SimulatorIntegrationTest {
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-		assertEquals(0.199,marketRiskReport(0).expectedProfit,0.001)
+
+		assertEquals(0.199,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0.001)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
+		assertEquals(-1.6,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0.001)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0)
+
 		assertEquals(1,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -79,7 +94,12 @@ class SimulatorIntegrationTest {
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-		assertEquals(-0.607,marketRiskReport(0).expectedProfit,0.001)
+
+		assertEquals(-0.607,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0.001)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
+		assertEquals(2.4,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0.001)
+		assertEquals(-2,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0)
+
 		assertEquals(3,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -94,7 +114,12 @@ class SimulatorIntegrationTest {
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
-		assertEquals(-1.066,marketRiskReport(0).expectedProfit,0.001)
+
+		assertEquals(-1.066,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0.001)
+		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
+		assertEquals(15.6,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0.001)
+		assertEquals(-14.6,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0.001)
+
 		assertEquals(7,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(7,marketRiskReport(0).unmatchedBetsNumber,0)
 	}
@@ -109,14 +134,14 @@ class SimulatorIntegrationTest {
 		assertEquals(20,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Fulham vs Wigan",marketRiskReport(0).eventName)
-		assertEquals(0.6,marketRiskReport(0).expectedProfit,0.001)
+		assertEquals(0.6,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0.001)
 		assertEquals(1,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
 
 		assertEquals(10,marketRiskReport(1).marketId)
 		assertEquals("Match Odds",marketRiskReport(1).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(1).eventName)
-		assertEquals(1.058,marketRiskReport(1).expectedProfit,0.001)
+		assertEquals(1.058,marketRiskReport(1).marketExpectedProfit.marketExpectedProfit,0.001)
 		assertEquals(2,marketRiskReport(1).matchedBetsNumber,0)
 		assertEquals(2,marketRiskReport(1).unmatchedBetsNumber,0)
 	}
