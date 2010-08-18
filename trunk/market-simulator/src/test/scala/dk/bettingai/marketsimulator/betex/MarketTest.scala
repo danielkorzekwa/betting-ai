@@ -104,6 +104,20 @@ class MarketTest {
 
 		assertEquals(0, market.getBets(123).size)
 	}
+	
+	@Test def getBetsMatchedOnly {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		market.placeBet(100,123,2,1.5,BACK,11)
+		market.placeBet(101,123,3,1.4,BACK,11)
+		market.placeBet(102,123,2,1.6,LAY,11)
+		
+		val matchedBets = market.getBets(123,true)
+		assertEquals(2, matchedBets.size)
+		
+		val allBets = market.getBets(123,false)
+		assertEquals(4, allBets.size)
+	}
 
 	/** 
 	 *  Tests for getRunnerPrices.
