@@ -45,11 +45,13 @@ object ITrader {
 	*/
 	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long)
 	
-	/**Returns all bets placed by trader on the market.
+	/**Returns all bets placed by user on that market.
 	 *
-	 *@param userId
+	 *@param matchedBetsOnly If true then matched bets are returned only, 
+	 * otherwise all unmatched and matched bets for user are returned.
 	 */
-	def getBets():List[IBet]
+	def getBets(matchedBetsOnly:Boolean):List[IBet]
+	
 	}
 }
 trait ITrader {
