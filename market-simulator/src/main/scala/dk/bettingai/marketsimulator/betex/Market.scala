@@ -302,5 +302,18 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 
 	}
 
+	/**Returns all bets placed by user on that market.
+	 *
+	 *@param userId
+	 *@param matchedBetsOnly If true then matched bets are are returned only, 
+	 * otherwise all unmatched and matched bets for user are returned 
+	 */
+	def getBets(userId:Int,matchedBetsOnly:Boolean):List[IBet] = {
+		val bets = matchedBetsOnly match {
+			case true => matchedBets.filter(b => b.userId == userId).toList
+			case false => getBets(userId)
+		}
+		bets
+	}
 	override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId,marketName,eventName,numOfWinners,marketTime,runners)
 }
