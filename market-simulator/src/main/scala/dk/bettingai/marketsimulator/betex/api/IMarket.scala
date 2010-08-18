@@ -100,8 +100,8 @@ trait IMarket {
 	/**Returns all bets placed by user on that market.
 	 *
 	 *@param userId
-	 *@param matchedBetsOnly If true then matched bets are are returned only, 
-	 * otherwise all unmatched and matched bets for user are returned 
+	 *@param matchedBetsOnly If true then matched bets are returned only, 
+	 * otherwise all unmatched and matched bets for user are returned.
 	 */
 	def getBets(userId:Int,matchedBetsOnly:Boolean):List[IBet]
 }

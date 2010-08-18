@@ -56,11 +56,12 @@ object Simulator {
 				market.getBestPrices()
 		}
 
-		/**Returns all bets placed by trader on the market.
-		 *
-		 *@param userId
-		 */
-		def getBets():List[IBet] = market.getBets(userId)
+		/**Returns all bets placed by user on that market.
+	 *
+	 *@param matchedBetsOnly If true then matched bets are returned only, 
+	 * otherwise all unmatched and matched bets for user are returned.
+	 */
+	def getBets(matchedBetsOnly:Boolean):List[IBet] = market.getBets(userId,matchedBetsOnly)
 	}
 
 }
