@@ -1,0 +1,6 @@
+{"time":12345,"eventType":"CREATE_MARKET","marketId":10,"marketName":"Match Odds","eventName":"Man Utd vs Arsenal","numOfWinners":1,"marketTime":"2010-04-15 14:00:00","runners": [{"runnerId":11,"runnerName":"Man Utd"},{"runnerId":12,"runnerName":"Arsenal"}]}
+{"time":12345,"eventType":"PLACE_BET","userId":123,"betId":100,"betSize":10,"betPrice":1.8,"betType":"BACK","marketId":10,"runnerId":11}
+{"time":12345,"eventType":"CREATE_MARKET","marketId":20,"marketName":"Match Odds","eventName":"Fulham vs Wigan","numOfWinners":1,"marketTime":"2010-04-15 14:00:00","runners": [{"runnerId":21,"runnerName":"Fulham"},{"runnerId":22,"runnerName":"Wigan"}]}
+{"time":12345,"eventType":"PLACE_BET","userId":123,"betId":101,"betSize":20,"betPrice":1.4,"betType":"BACK","marketId":20,"runnerId":22}
+{"time":12345,"eventType":"PLACE_BET","userId":123,"betId":102,"betSize":20,"betPrice":1.4,"betType":"BACK","marketId":20,"runnerId":22}
+{"time":12345,"eventType":"PLACE_BET","userId":123,"betId":103,"betSize":10,"betPrice":1.3,"betType":"BACK","marketId":10,"runnerId":12}
