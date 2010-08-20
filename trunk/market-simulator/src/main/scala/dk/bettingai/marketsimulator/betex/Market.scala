@@ -22,7 +22,6 @@ object Market {
 	}
 
 	class PriceTradedVolume(val price:Double, val totalMatchedAmount:Double) extends IMarket.IPriceTradedVolume {
-
 		override def toString = "PriceTradedVolume [price=%s, totalMatchedAmount=%s]".format(price,totalMatchedAmount)
 	}
 }
