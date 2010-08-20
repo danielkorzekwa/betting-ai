@@ -8,7 +8,7 @@ class PriceUtilTest {
 
 	@Test def testValidate {
 
-		val validate = PriceUtil.validate(PriceUtil.getPricRanges) _
+		val validate = PriceUtil.validate(PriceUtil.getPriceRanges) _
 
 		assertEquals(1.64,validate(1.6317991631799162, ROUND_UP), 0);
 		assertEquals(1.63, validate(1.6317991631799162, ROUND_DOWN), 0);
@@ -16,6 +16,7 @@ class PriceUtilTest {
 		assertEquals(1.88, validate(1.88, ROUND_UP), 0);
 		assertEquals(1.88, validate(1.88, ROUND_DOWN), 0);
 
+		assertEquals(4.9,validate(4.8 + 0.01,ROUND_UP),0)
 		assertEquals(1.01, validate(0.5, ROUND_UP), 0);
 		assertEquals(1.01, validate(0.5, ROUND_DOWN), 0);
 
