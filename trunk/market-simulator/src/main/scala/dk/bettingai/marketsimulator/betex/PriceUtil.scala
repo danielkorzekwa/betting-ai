@@ -1,7 +1,6 @@
 package dk.bettingai.marketsimulator.betex
 
 import PriceUtil._
-
 /**Exchange price utils.
  * 
  */
@@ -22,7 +21,7 @@ case class PriceRange(val start:Double, val stop:Double,val step:Double)
  * @param round Which side (up or down) rounding should be done.
  * 
  * */
-def validate(priceRanges: List[PriceRange])(price:Double,round:PriceRoundEnum.PriceRoundEnum): Double = {
+def validate(priceRanges: List[PriceRange])(price:Double,rounding:PriceRoundEnum.PriceRoundEnum): Double = {
 	require(!priceRanges.isEmpty,"Price range list is empty.")
 
 	val minPrice = priceRanges.head.start
@@ -36,7 +35,7 @@ def validate(priceRanges: List[PriceRange])(price:Double,round:PriceRoundEnum.Pr
 		val reminded = ((price*100) % (priceRange.get.step*100))/100
 		if(reminded==0) 
 			price
-			else round match {
+			else rounding match {
 			case PriceRoundEnum.ROUND_UP => price - (price % priceRange.get.step) + priceRange.get.step
 			case PriceRoundEnum.ROUND_DOWN =>price - (price % priceRange.get.step)
 			}
@@ -46,7 +45,8 @@ def validate(priceRanges: List[PriceRange])(price:Double,round:PriceRoundEnum.Pr
 }
 
 /**Returns list of betfair price ranges.*/
-def getPricRanges:List[PriceRange] = {
+def getPriceRanges:List[PriceRange] = {
+	
 			val priceRanges = PriceRange(1.01, 2.0, 0.01) ::
 				PriceRange(2.0, 3.0, 0.02) ::
 					PriceRange(3.0, 4.0, 0.05) ::
