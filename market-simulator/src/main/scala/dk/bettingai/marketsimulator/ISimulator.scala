@@ -17,6 +17,8 @@ object ISimulator {
 		val eventName:String
 		/**Market expected profit based on bets and market probabilities.*/
 		val marketExpectedProfit:MarketExpectedProfit
+		/**Key runnerId, Value - runner probability.*/
+		val marketProbs:Map[Long,Double]
 		val matchedBetsNumber:Long
 		val unmatchedBetsNumber:Long
 	}

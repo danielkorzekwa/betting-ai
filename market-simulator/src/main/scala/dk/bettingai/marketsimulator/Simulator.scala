@@ -18,8 +18,9 @@ import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
  *
  */
 object Simulator {
-	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val marketExpectedProfit:MarketExpectedProfit,val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
-		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,marketExpectedProfit,matchedBetsNumber,unmatchedBetsNumber)
+	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val marketExpectedProfit:MarketExpectedProfit,
+			val marketProbs:Map[Long,Double],val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
+		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, marketProbs=%s,matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,marketExpectedProfit,marketProbs,matchedBetsNumber,unmatchedBetsNumber)
 	}
 
 	class TraderContext(nextBetId: => Long,userId:Int, market:IMarket) extends ITraderContext {
@@ -128,6 +129,6 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
 			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
 
-			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,matchedBets.size,unmatchedBets.size)	
+			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,marketProbs,matchedBets.size,unmatchedBets.size)	
 	}
 }
