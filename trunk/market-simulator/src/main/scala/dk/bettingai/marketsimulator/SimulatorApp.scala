@@ -56,8 +56,13 @@ object SimulatorApp  {
 			if(marketReportIndex < marketRiskReports.size) {
 				val marketRiskReport = marketRiskReports(marketReportIndex)
 				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.marketExpectedProfit.marketExpectedProfit
-				val highestIfWin = marketRiskReport.marketExpectedProfit.runnersIfWin.values.min
-				console.print("\n%s: %s highestIfWin=%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s".format(marketRiskReport.marketName,marketRiskReport.eventName,round(highestIfWin,2),round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
+				val maxRisk = marketRiskReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 < b._2) a else b)
+				val minRisk = marketRiskReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 > b._2) a else b)
+				console.print("\n%s: %s minProfit/prob=%s/%s maxProfit/prob=%s/%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s"
+						.format(marketRiskReport.marketName,marketRiskReport.eventName,round(maxRisk._2 ,2),
+								round(marketRiskReport.marketProbs(maxRisk._1),2),round(minRisk._2 ,2),round(marketRiskReport.marketProbs(minRisk._1),2),
+								round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),
+								marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
 
 				/**Recursive call.*/
 				printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
