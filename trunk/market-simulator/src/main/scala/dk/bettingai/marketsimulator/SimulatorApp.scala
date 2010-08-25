@@ -22,7 +22,7 @@ object SimulatorApp  {
 		printHeader(console)
 
 		/**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass*/
-		val inputData:Tuple2[Source,ITrader] = try {
+		val inputData:Tuple2[Map[Long,Source],ITrader] = try {
 			UserInputParser.parse(args)
 		}
 		catch {
@@ -90,7 +90,7 @@ object SimulatorApp  {
 	private def printHelpMessage(console:PrintStream) {
 		console.println("Usage:")
 		console.println("market_simulator marketData=[market_data_file] traderImpl=[trader_impl_class]\n")
-		console.println("marketData - Text file with market data that will be used for the simulation.")
+		console.println("marketDataDir - Text file with market data that will be used for the simulation.")
 		console.println("traderImpl - Fully classified name of the trader implementation class that the simulation will be executed for.")
 	}
 	def main(args:Array[String]) {

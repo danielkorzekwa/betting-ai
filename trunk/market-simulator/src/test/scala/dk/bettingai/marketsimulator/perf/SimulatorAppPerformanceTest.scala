@@ -10,13 +10,13 @@ class SimulatorAppPerformanceTest {
 
 	@Test def testRealMarketDataAndNopTrader() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("marketData=src/test/resources/marketDataPerfTest.csv","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("marketDataDir=src/test/resources/marketDataPerfTest","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader"),new PrintStream(consoleStream))
 		println(new String(consoleStream.toByteArray))
 	}
 
 	@Test def testRealMarketDataAndSimpleTrader() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("marketData=src/test/resources/marketDataPerfTest.csv","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("marketDataDir=src/test/resources/marketDataPerfTest","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
 		println(new String(consoleStream.toByteArray))
 	}
 }

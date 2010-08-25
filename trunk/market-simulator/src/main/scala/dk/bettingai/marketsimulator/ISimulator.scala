@@ -27,11 +27,11 @@ trait ISimulator {
 
 	/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
 	 * 
-	 * @param Contains market events that the market simulation is executed for.
+	 * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
 	 * @param trader
 	 * @param traderUserId
 	 * @param historicalDataUserId
 	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
 	 */
-	def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]
+	def runSimulation(marketData:Map[Long,Source], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]
 }

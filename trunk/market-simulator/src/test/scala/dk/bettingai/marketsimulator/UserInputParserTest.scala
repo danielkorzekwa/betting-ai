@@ -39,7 +39,7 @@ class UserInputParserTest {
 		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
 		assertEquals(2,inputData._1.size)
 		assertEquals(3,inputData._1(10).getLines.size)
-		assertEquals(2,inputData._1(11).getLines.size)
+		assertEquals(3,inputData._1(20).getLines.size)
 		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
 	}
 }
