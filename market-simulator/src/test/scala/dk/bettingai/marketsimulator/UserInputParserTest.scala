@@ -27,9 +27,19 @@ class UserInputParserTest {
 	def testTraderImplNoEmptyConstructor { UserInputParser.parse(Array("marketData=src/test/resources/marketDataEmpty.csv","traderImpl=dk.bettingai.marketsimulator.mock.TraderWithoutEmptyConstructor")) }
 	
 	@Test
-	def testTraderImplCorrectData { 
-		val inputData = UserInputParser.parse(Array("marketData=src/test/resources/marketDataPlaceAndCancelLayBet.csv","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
-		assertEquals(3,inputData._1.getLines().size)
+	def testTraderImplCorrectDataOneMarketFile { 
+		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		assertEquals(1,inputData._1.size)
+		assertEquals(3,inputData._1(10).getLines.size)
+		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
+	}
+	
+	@Test
+	def testTraderImplCorrectDataTwoMarketFiles { 
+		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		assertEquals(2,inputData._1.size)
+		assertEquals(3,inputData._1(10).getLines.size)
+		assertEquals(2,inputData._1(11).getLines.size)
 		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
 	}
 }
