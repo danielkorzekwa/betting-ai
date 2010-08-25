@@ -58,61 +58,71 @@ object Simulator {
 		}
 
 		/**Returns all bets placed by user on that market.
-	 *
-	 *@param matchedBetsOnly If true then matched bets are returned only, 
-	 * otherwise all unmatched and matched bets for user are returned.
-	 */
-	def getBets(matchedBetsOnly:Boolean):List[IBet] = market.getBets(userId,matchedBetsOnly)
+		 *
+		 *@param matchedBetsOnly If true then matched bets are returned only, 
+		 * otherwise all unmatched and matched bets for user are returned.
+		 */
+		def getBets(matchedBetsOnly:Boolean):List[IBet] = market.getBets(userId,matchedBetsOnly)
 	}
 
 }
 
 class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends ISimulator{
 
-	/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
-	 * 
-	 * @param Contains market events that the market simulation is executed for.
-	 * @param trader
-	 * @param traderUserId
-	 * @param historicalDataUserId
-	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
-	 */
-	def runSimulation(marketData:Source, trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]= {
+/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
+ * 
+ * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
+ * @param trader
+ * @param traderUserId
+ * @param historicalDataUserId
+ * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
+ */
+	def runSimulation(marketData:Map[Long,Source], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport] = {
 
 			var nextBetIdValue=1
 			val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
 
-			val marketEventsNumber = marketData.reset.getLines().size
-			val iterator = marketData.reset.getLines();
+			val numOfMarkets = marketData.size
+			val marketDataIterator = marketData.iterator
+			
+			/**Process all markets data.*/
+			def processMarketData(marketIndex:Int,progress:Int):Unit = {
+				val (marketId,marketEvents) = marketDataIterator.next
 
-			def process(marketEventIndex:Int,progress:Int,eventTimestamp:Long):Unit = {
-					val marketEvent = iterator.next
-					val newProgress=(marketEventIndex*100)/marketEventsNumber
-					if(newProgress>progress) p(newProgress)
-					val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
-
-					/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-					if(processedEventTimestamp>eventTimestamp) {
-						for(market <- betex.getMarkets) {
-							val traderContext = new TraderContext(nextBetId(),traderUserId,market)
-							trader.execute(traderContext)
-						}
-					}
-					/**Recursive  call.*/
-					if(!iterator.hasNext) {
-						/**Process remaining events*/
-						if(processedEventTimestamp<=eventTimestamp) {
-							for(market <- betex.getMarkets) {
+				val newProgress=(marketIndex*100)/numOfMarkets
+				if(newProgress>progress) p(newProgress)
+				
+				val marketEvensIterator = marketEvents.reset.getLines();
+				
+				/**Process all market events.*/
+				def processMarketEvents(eventTimestamp:Long):Unit = {
+						val marketEvent = marketEvensIterator.next
+					
+						val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
+						
+						/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
+						def triggerTrader() {
+							val market = betex.findMarket(marketId)
 								val traderContext = new TraderContext(nextBetId(),traderUserId,market)
 								trader.execute(traderContext)
-							}
 						}
-					}
-					else process(marketEventIndex+1,newProgress,processedEventTimestamp)
+						if(processedEventTimestamp>eventTimestamp) triggerTrader()
+						
+						/**Recursive  call.*/
+						if(!marketEvensIterator.hasNext) {
+							/**Process remaining events*/
+							if(processedEventTimestamp<=eventTimestamp) triggerTrader()
+						}
+						else processMarketEvents(processedEventTimestamp)
+				}
+
+				if(marketEvensIterator.hasNext) processMarketEvents(0)
+				if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress)
 			}
 
-			if(iterator.hasNext) process(1,0,0)	
-
+			p(0)
+			if(!marketDataIterator.isEmpty)	processMarketData(0,0)	
+			p(100)
 			val riskReport = 	betex.getMarkets.map(calculateRiskReport(traderUserId,_))
 			riskReport
 	}
