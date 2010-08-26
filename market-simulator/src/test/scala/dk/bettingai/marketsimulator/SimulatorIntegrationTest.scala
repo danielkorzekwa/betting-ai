@@ -17,7 +17,7 @@ class SimulatorIntegrationTest {
 	private val simulator = new Simulator(marketEventProcessor,betex)
 
 	@Test def testNoMarketEvents {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataEmpty/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataEmpty/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(11l->marketEventsFile),trader,100,1000,p => {})
@@ -25,7 +25,7 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testCreateMarketEventOnly {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataCreateMarketOnly/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataCreateMarketOnly/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
@@ -45,7 +45,7 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testOneMatchedBackBetNegativeExpectedProfit {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceLayBet/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
@@ -65,7 +65,7 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testOneMatchedLayBetPositiveExpectedProfit {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceBackBet/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataPlaceBackBet/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
@@ -85,7 +85,7 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testThreeMatchedBackBetsNegativeExpectedProfit {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceAndCancelLayBet/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataPlaceAndCancelLayBet/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
@@ -105,7 +105,7 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testOneMatchedBetAFewMatchedBets {
-		val marketEventsFile = Source.fromFile(new File("src/test/resources/marketDataPlaceAFewBets/10.csv"))
+		val marketEventsFile = new File("src/test/resources/marketDataPlaceAFewBets/10.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
@@ -125,8 +125,8 @@ class SimulatorIntegrationTest {
 	}
 
 	@Test def testOneMatchedBetsOnTwoMarkets {
-		val marketEventsFile10 = Source.fromFile(new File("src/test/resources/twoMarketFiles/10.csv"))
-val marketEventsFile20 = Source.fromFile(new File("src/test/resources/twoMarketFiles/20.csv"))
+		val marketEventsFile10 = new File("src/test/resources/twoMarketFiles/10.csv")
+		val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
 		/**Run market simulation.*/
 		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile10,20l->marketEventsFile20),trader,100,1000,p => {})

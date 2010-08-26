@@ -11,6 +11,9 @@ import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.risk._
 import scala.io._
 import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
+import java.io.File
+import java.io.BufferedReader
+import java.io.FileReader
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -77,47 +80,48 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
  * @param historicalDataUserId
  * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
  */
-	def runSimulation(marketData:Map[Long,Source], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport] = {
+	def runSimulation(marketData:Map[Long,File], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport] = {
 
 			var nextBetIdValue=1
 			val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
 
 			val numOfMarkets = marketData.size
 			val marketDataIterator = marketData.iterator
-			
+
 			/**Process all markets data.*/
 			def processMarketData(marketIndex:Int,progress:Int):Unit = {
-				val (marketId,marketEvents) = marketDataIterator.next
+					val (marketId,marketEvents) = marketDataIterator.next
 
-				val newProgress=(marketIndex*100)/numOfMarkets
-				if(newProgress>progress) p(newProgress)
-				
-				val marketEvensIterator = marketEvents.reset.getLines();
-				
-				/**Process all market events.*/
-				def processMarketEvents(eventTimestamp:Long):Unit = {
-						val marketEvent = marketEvensIterator.next
-					
-						val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
-						
-						/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-						def triggerTrader() {
-							val market = betex.findMarket(marketId)
+					val newProgress=(marketIndex*100)/numOfMarkets
+					if(newProgress>progress) p(newProgress)
+
+					val in = new BufferedReader(new FileReader(marketEvents));
+
+					/**Process all market events.*/
+					def processMarketEvents(marketEvent:String,eventTimestamp:Long):Unit = {
+
+							val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
+
+							/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
+							def triggerTrader() {
+								val market = betex.findMarket(marketId)
 								val traderContext = new TraderContext(nextBetId(),traderUserId,market)
 								trader.execute(traderContext)
-						}
-						if(processedEventTimestamp>eventTimestamp) triggerTrader()
-						
-						/**Recursive  call.*/
-						if(!marketEvensIterator.hasNext) {
-							/**Process remaining events*/
-							if(processedEventTimestamp<=eventTimestamp) triggerTrader()
-						}
-						else processMarketEvents(processedEventTimestamp)
-				}
+							}
+							if(processedEventTimestamp>eventTimestamp) triggerTrader()
 
-				if(marketEvensIterator.hasNext) processMarketEvents(0)
-				if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress)
+							/**Recursive  call.*/
+							val nextMarketEvent = in.readLine
+							if(nextMarketEvent==null) {
+								/**Process remaining events*/
+								if(processedEventTimestamp<=eventTimestamp) triggerTrader()
+							}
+							else processMarketEvents(nextMarketEvent,processedEventTimestamp)
+					}
+					
+					val marketEvent = in.readLine
+					if(marketEvent!=null) processMarketEvents(marketEvent,0)
+					if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress)
 			}
 
 			p(0)

@@ -17,7 +17,7 @@ object UserInputParser {
 	 * @return Element 1 - marketDataFiles, key - marketId, value - marketDataSource, element 2 - traderImplClass
 	 * @throws Illegal argument exception is thrown if any of input argument doesn't exist or is incorrect.
 	 */
-  def parse(args:Array[String]):Tuple2[Map[Long,Source],ITrader] = {
+  def parse(args:Array[String]):Tuple2[Map[Long,File],ITrader] = {
   	/**Parse input parameters.*/
 		val argsMap:Map[String,String] = argsToMap(args)
 
@@ -28,7 +28,7 @@ object UserInputParser {
 		val marketDataDir = new File(argsMap("marketDataDir"))
 		require(marketDataDir.isDirectory,"The marketDataDir is not a directory:" + argsMap("marketDataDir"))
 
-		val marketDataSources = marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> Source.fromFile(f))
+		val marketDataSources = marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f)
 			
 		/**Load trader implementation class.*/
 		val traderImpl = 

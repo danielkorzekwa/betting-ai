@@ -30,7 +30,7 @@ class UserInputParserTest {
 	def testTraderImplCorrectDataOneMarketFile { 
 		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
 		assertEquals(1,inputData._1.size)
-		assertEquals(3,inputData._1(10).getLines.size)
+		assertEquals("10.csv",inputData._1(10).getName)
 		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
 	}
 	
@@ -38,8 +38,8 @@ class UserInputParserTest {
 	def testTraderImplCorrectDataTwoMarketFiles { 
 		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
 		assertEquals(2,inputData._1.size)
-		assertEquals(3,inputData._1(10).getLines.size)
-		assertEquals(3,inputData._1(20).getLines.size)
+		assertEquals("10.csv",inputData._1(10).getName)
+		assertEquals("20.csv",inputData._1(20).getName)
 		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
 	}
 }
