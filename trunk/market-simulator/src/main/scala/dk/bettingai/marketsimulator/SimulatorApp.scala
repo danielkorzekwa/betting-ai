@@ -22,7 +22,7 @@ object SimulatorApp  {
 		printHeader(console)
 
 		/**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass*/
-		val inputData:Tuple2[Map[Long,Source],ITrader] = try {
+		val inputData:Tuple2[Map[Long,File],ITrader] = try {
 			UserInputParser.parse(args)
 		}
 		catch {

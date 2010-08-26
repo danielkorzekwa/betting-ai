@@ -4,7 +4,7 @@ import ISimulator._
 import scala.io._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
-
+import java.io.File
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
  * @author korzekwad
@@ -33,5 +33,5 @@ trait ISimulator {
 	 * @param historicalDataUserId
 	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
 	 */
-	def runSimulation(marketData:Map[Long,Source], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]
+	def runSimulation(marketData:Map[Long,File], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport]
 }
