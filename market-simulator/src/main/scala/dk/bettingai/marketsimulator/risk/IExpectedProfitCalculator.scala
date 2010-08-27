@@ -26,11 +26,5 @@ trait IExpectedProfitCalculator {
 	 * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
 	 */
 	def calculate(bets:List[IBet],probabilities:Map[Long,Double]): MarketExpectedProfit
-	
-	/**Calculate avg weighted price.
-	 * 
-	 * @param bets
-	 * @return
-	 */
-	def avgPrice(bets:List[IBet]):Double
+
 }
