@@ -42,4 +42,11 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 		/**Calculate market expected profit.*/
 		new MarketExpectedProfit(totalExpectedPayout - totalStake,runnersIfwin ++ missingIfWins)
 	}
+	
+		/**Calculate avg weighted price.
+	 * 
+	 * @param bets
+	 * @return
+	 */
+	def avgPrice(bets:List[IBet]):Double = bets.foldLeft(0d)((sum,bet)=> sum + bet.betPrice*bet.betSize) /bets.foldLeft(0d)(_ + _.betSize)
 }
