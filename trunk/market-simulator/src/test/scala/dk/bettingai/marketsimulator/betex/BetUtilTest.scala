@@ -46,7 +46,6 @@ class BetUtilTest {
 			val runnerPrices = BetUtil.mapToPrices(bets)
 			assertEquals(4,runnerPrices.size)
 
-			
 			assertEquals(13, runnerPrices(2.1)._1,0)
 			assertEquals(0, runnerPrices(2.1)._2,0)
 
@@ -66,10 +65,7 @@ class BetUtilTest {
 		val runnerPrices = BetUtil.mapToPrices(bets)
 
 		assertEquals(1,runnerPrices.size)
-
 		assertEquals(8, runnerPrices(2.4)._1,0)
 		assertEquals(5, runnerPrices(2.4)._2,0)
 	}
-
-
 }
