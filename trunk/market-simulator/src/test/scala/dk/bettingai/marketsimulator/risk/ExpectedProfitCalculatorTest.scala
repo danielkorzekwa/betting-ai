@@ -193,4 +193,15 @@ class ExpectedProfitCalculatorTest {
 		assertEquals(0,expectedProfit.runnersIfWin(13),0)
 	}
 
+	/**Tests for avgPrice */
+	@Test def testAvgPriceNoBets {
+		val bets = Nil
+		assertTrue(ExpectedProfitCalculator.avgPrice(bets).isNaN)
+	}
+
+	@Test def testAvgPrice {
+		val bets = Bet(100,123,2,2,BACK,1,11) ::Bet(101,123,3,3,BACK,1,12) :: Nil
+		assertEquals(2.6,ExpectedProfitCalculator.avgPrice(bets),0)
+	}
+
 }
