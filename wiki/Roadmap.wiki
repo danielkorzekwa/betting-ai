@@ -19,7 +19,7 @@ Betting AI version 1.3 (release planned on 30 October 2010)
     * Generate html reports for market simulation with some useful graphs.
 
 Betting AI version 1.4 (release planned on 30 December 2010)
-    * Provide web interface to market simulation and deploy it to Google App Engine.
+    * Provide web interface to market simulator and deploy it to Google App Engine.
 
 Betting AI version 1.5 (release planned on 30 February 2011)
     * Goal - Create and deploy web application to Google App Engine that allows to user placing bets on a historical market and testing trading strategies. Such application could be also used to play with betting exchange before risking money on Betfair.
