@@ -43,21 +43,41 @@ object SimulatorApp  {
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
+
 		console.print("\nSaving simulation html report...")
-		
-		val report = new StringBuilder()
-		for(riskReport <- marketRiskReports) {
-			report.append("\n" + riskReport)
-		}
-		val reportFile = new File(inputData._3 + "/market_sim_report.html")
-		FileUtils.writeStringToFile(reportFile,report.toString)
-		
+		generateHtmlReport(marketRiskReports, inputData._3)
 		console.print("DONE")
+
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
 		printMarketReport(marketRiskReports,console)
 		console.print("\n------------------------------------------------------------------------------------")
+
 		printMarketReportSummary(marketRiskReports, console)
 		console.println("")
+	}
+
+	private def generateHtmlReport(marketRiskReports:List[IMarketRiskReport], htmlReportDir:String) {
+		val in = this.getClass.getResourceAsStream("/sim_report_template.html")
+		val simReportTemplate = Source.fromInputStream(in).mkString
+
+		val reportHead = new StringBuilder()
+		val reportBody = new StringBuilder()
+
+		for(riskReport <- marketRiskReports) {
+			reportHead.append("\n var rawdata%s = {version:'0.6',status:'ok',sig:'963427694',table:{cols:[{id:'date',label:'Date',type:'datetime',pattern:''},{id:'BetFair',label:'BetFair',type:'number',pattern:''},{id:'BetDaq',label:'BetDaq',type:'number',pattern:''}],rows:[{c:[{v:new Date(2010,7,28,0,1,0)},{v:0.0},{v:-100.0}]},{c:[{v:new Date(2010,7,28,0,2,0)},{v:1.0},{v:-99.0}]},{c:[{v:new Date(2010,7,28,0,3,0)},{v:2.0},{v:-98.0}]},{c:[{v:new Date(2010,7,28,0,4,0)},{v:3.0},{v:-97.0}]}]}}"format(riskReport.marketId))
+			reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(riskReport.marketId,riskReport.marketId))
+			reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(riskReport.marketId,riskReport.marketId))
+			reportHead.append("\n chart%s.draw(data%s, {displayAnnotations: true});".format(riskReport.marketId,riskReport.marketId))
+
+			reportBody.append("<br/>%s/%s<br/>".format(riskReport.marketName,riskReport.eventName))
+			reportBody.append("<br/><div id='chart_div%s' style='width: 640px; height: 480px;'></div>".format(riskReport.marketId))
+
+		}
+		val formmatedReport = simReportTemplate.format(reportHead,reportBody)
+
+		val reportFile = new File(htmlReportDir + "/market_sim_report.html")
+		FileUtils.writeStringToFile(reportFile,formmatedReport.toString)
+
 	}
 
 	private def printMarketReport(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
@@ -74,8 +94,8 @@ object SimulatorApp  {
 								round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),
 								marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
 
-				/**Recursive call.*/
-				printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
+								/**Recursive call.*/
+								printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
 			}
 		}
 	}
@@ -103,7 +123,7 @@ object SimulatorApp  {
 		console.println("marketDataDir - Text file with market data that will be used for the simulation.")
 		console.println("traderImpl - Fully classified name of the trader implementation class that the simulation will be executed for.")
 		console.println("htmlReportDir - Directory the html report is written to. (default = ./)")
-	
+
 	}
 	def main(args:Array[String]) {
 		main(args,System.out)
