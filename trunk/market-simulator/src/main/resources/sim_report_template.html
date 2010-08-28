@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <script type='text/javascript' src='http://www.google.com/jsapi'></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {'packages':['annotatedtimeline']});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+      %s
+      }
+    </script>
+  </head>
+
+  <body>
+    <b>Market simulation report</b><br/>
+    %s
+  </body>
+</html>
