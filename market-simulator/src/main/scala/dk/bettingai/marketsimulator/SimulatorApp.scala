@@ -9,7 +9,7 @@ import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import org.apache.commons.math.util.MathUtils._
 import ISimulator._
-
+import org.apache.commons.io.FileUtils
 /** Main class for the market simulator.
  * 
  * @author korzekwad
@@ -21,8 +21,8 @@ object SimulatorApp  {
 
 		printHeader(console)
 
-		/**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass*/
-		val inputData:Tuple2[Map[Long,File],ITrader] = try {
+		/**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass, 3 - htmlReportDir*/
+		val inputData:Tuple3[Map[Long,File],ITrader,String] = try {
 			UserInputParser.parse(args)
 		}
 		catch {
@@ -43,6 +43,16 @@ object SimulatorApp  {
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
+		console.print("\nSaving simulation html report...")
+		
+		val report = new StringBuilder()
+		for(riskReport <- marketRiskReports) {
+			report.append("\n" + riskReport)
+		}
+		val reportFile = new File(inputData._3 + "/market_sim_report.html")
+		FileUtils.writeStringToFile(reportFile,report.toString)
+		
+		console.print("DONE")
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
 		printMarketReport(marketRiskReports,console)
 		console.print("\n------------------------------------------------------------------------------------")
@@ -92,6 +102,8 @@ object SimulatorApp  {
 		console.println("market_simulator marketData=[market_data_file] traderImpl=[trader_impl_class]\n")
 		console.println("marketDataDir - Text file with market data that will be used for the simulation.")
 		console.println("traderImpl - Fully classified name of the trader implementation class that the simulation will be executed for.")
+		console.println("htmlReportDir - Directory the html report is written to. (default = ./)")
+	
 	}
 	def main(args:Array[String]) {
 		main(args,System.out)
