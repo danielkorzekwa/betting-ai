@@ -14,10 +14,10 @@ object UserInputParser {
 	/**Parses input arguments to the SimlationApp.
 	 * 
 	 * @param args Array with input arguments.
-	 * @return Element 1 - marketDataFiles, key - marketId, value - marketDataSource, element 2 - traderImplClass
+	 * @return Element 1 - marketDataFiles, key - marketId, value - marketDataSource, element 2 - traderImplClass, 3 - htmlReportDir
 	 * @throws Illegal argument exception is thrown if any of input argument doesn't exist or is incorrect.
 	 */
-  def parse(args:Array[String]):Tuple2[Map[Long,File],ITrader] = {
+  def parse(args:Array[String]):Tuple3[Map[Long,File],ITrader,String] = {
   	/**Parse input parameters.*/
 		val argsMap:Map[String,String] = argsToMap(args)
 
@@ -39,7 +39,8 @@ object UserInputParser {
 		case e:Exception => throw new IllegalArgumentException("Can't load trader implementation class: " + argsMap("traderImpl") + ". Details: " + e)
 		}
 		
-		Map(marketDataSources: _*)->traderImpl.asInstanceOf[ITrader]
+	 val htmlReportDir = argsMap.getOrElse("htmlReportDir","./")
+		(Map(marketDataSources: _*),traderImpl.asInstanceOf[ITrader],htmlReportDir)
   }
   
   /**Map list of arguments to map, 
@@ -49,7 +50,7 @@ object UserInputParser {
 	 */
 	private def argsToMap(args:Array[String]):Map[String,String] = {
 			try {
-				if(args.length==2) {
+				if(args.length>=2) {
 					Map(args.map(arg => (arg.split("=")(0),arg.split("=")(1))): _*)
 				}
 				else {
