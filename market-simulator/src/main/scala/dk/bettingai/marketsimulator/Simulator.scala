@@ -5,6 +5,7 @@ import dk.bettingai.marketsimulator.betex.api._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import ITrader._
+import IMarket._
 import Simulator._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
@@ -66,6 +67,18 @@ object Simulator {
 		 * otherwise all unmatched and matched bets for user are returned.
 		 */
 		def getBets(matchedBetsOnly:Boolean):List[IBet] = market.getBets(userId,matchedBetsOnly)
+		
+		/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
+	 *  Prices with zero volume are not returned by this method.
+   * 
+   * @param runnerId Unique runner id that runner prices are returned for.
+   * @return
+   */
+	def getRunnerPrices(runnerId:Long):List[IRunnerPrice] = market.getRunnerPrices(runnerId)
+	
+	/**Returns total traded volume for all prices on all runners in a market.*/
+	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = market.getRunnerTradedVolume(runnerId)
+	
 	}
 
 }

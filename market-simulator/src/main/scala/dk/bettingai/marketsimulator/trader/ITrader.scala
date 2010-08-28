@@ -52,6 +52,16 @@ object ITrader {
 	 */
 	def getBets(matchedBetsOnly:Boolean):List[IBet]
 	
+	/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
+	 *  Prices with zero volume are not returned by this method.
+   * 
+   * @param runnerId Unique runner id that runner prices are returned for.
+   * @return
+   */
+	def getRunnerPrices(runnerId:Long):List[IRunnerPrice]
+	
+	/**Returns total traded volume for all prices on all runners in a market.*/
+	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume]
 	}
 }
 trait ITrader {
