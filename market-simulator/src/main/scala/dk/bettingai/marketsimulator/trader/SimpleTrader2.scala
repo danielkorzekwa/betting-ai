@@ -12,11 +12,20 @@ import ITrader._
  */
 class SimpleTrader2 extends ITrader{
 	var i=0
-	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
+	
+	/**It is called once on trader initialisation.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
+	 * */
+	def init(ctx: ITraderContext) {
+		//do nothing
+	}
+	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
+	 * 
+	 * @param eventTimestamp Time stamp of market event
+	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 */
-	def execute(ctx: ITraderContext) = {
+	def execute(eventTimestamp:Long,ctx: ITraderContext) = {
 
 		for(runner <- ctx.runners) {
 			
@@ -25,7 +34,6 @@ class SimpleTrader2 extends ITrader{
 
 			if(bestPrices._1<50 && !bestPrices._1.isNaN && !bestPrices._2.isNaN) {
 				ctx.placeBet(2,1/((1/bestPrices._2)-0.01),BACK,runner.runnerId)
-			//	ctx.placeBet(2,1/((1/bestPrices._1)+0.01),LAY,runner.runnerId)
 			}
 				
 		}	
