@@ -50,6 +50,16 @@ class SimulatorAppTest {
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Man Utd vs Arsenal minProfit/prob=0.4/0.34 maxProfit/prob=1.4/0.66 expProfit=1.06 expAggrProfit=1.66 mBets=2 uBets=2"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("TotalExpectedProfit=1.66 TotalMatchedBets=3 TotalUnmachedBets=3"))
 	}
+	
+	@Test def testSimpleTraderAndRealData() {
+		val consoleStream = new ByteArrayOutputStream()
+		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataPerfTest","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
+		println(new String(consoleStream.toByteArray))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("5f Mdn Stks: /GB/Ponte 15th Aug minProfit/prob=-2022.44/0.14 maxProfit/prob=21419.56/0.01 expProfit=-317.03 expAggrProfit=-317.03 mBets=12879 uBets=1096"))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("TotalExpectedProfit=-317.03 TotalMatchedBets=12879 TotalUnmachedBets=1096"))
+	}
 }
 
 

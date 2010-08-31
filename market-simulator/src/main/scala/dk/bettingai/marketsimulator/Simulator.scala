@@ -22,9 +22,15 @@ import java.io.FileReader
  *
  */
 object Simulator {
+	
 	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val marketExpectedProfit:MarketExpectedProfit,
-			val marketProbs:Map[Long,Double],val matchedBetsNumber:Long,val unmatchedBetsNumber:Long) extends IMarketRiskReport {
-		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, marketProbs=%s,matchedBetsNumber=%s, unmatchedBetsNumber=%s]".format(marketId,marketName,eventName,marketExpectedProfit,marketProbs,matchedBetsNumber,unmatchedBetsNumber)
+
+			/**
+			 * @param chartLabels Labels for all chart series.
+			 * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels.
+			 */
+			val marketProbs:Map[Long,Double],val matchedBetsNumber:Long,val unmatchedBetsNumber:Long,	val chartLabels:List[String],val chartValues:List[Tuple2[Long,List[Double]]]) extends IMarketRiskReport {
+		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, marketProbs=%s,matchedBetsNumber=%s, unmatchedBetsNumber=%s, chartLabels=%s, chartValues=%s]".format(marketId,marketName,eventName,marketExpectedProfit,marketProbs,matchedBetsNumber,unmatchedBetsNumber,chartLabels,chartValues)
 	}
 
 	class TraderContext(nextBetId: => Long,userId:Int, market:IMarket) extends ITraderContext {
@@ -35,6 +41,24 @@ object Simulator {
 		val marketTime = market.marketTime
 		val runners = market.runners
 
+		var chartLabels = List[String]()
+		/**Key - time stamp, value - list of values for all series in the same order as labels.*/
+		val chartData = new scala.collection.mutable.ListBuffer[Tuple2[Long,List[Double]]]()
+		
+		/**Returns labels for all chart series.*/
+		def getChartLabels:List[String] = chartLabels
+
+		/**Set labels for all chart series.*/
+		def setChartLabels(chartLabels:List[String]) {this.chartLabels = chartLabels}
+		
+		/**Returns chart values for all time series in the same order as chart labels. 
+		 * Key - time stamp, value - list of values for all series in the same order as labels.*/
+		def getChartValues:List[Tuple2[Long,List[Double]]] = chartData.toList
+
+			/**Add chart values to time line chart. Key - time stamp, value - list of values for all series in the same order as labels.*/
+		def addChartValues(chartValues:Tuple2[Long,List[Double]]) {chartData += chartValues}
+	
+		
 		/** Places a bet on a betting exchange market.
 		 * 
 		 * @param betSize
@@ -67,18 +91,18 @@ object Simulator {
 		 * otherwise all unmatched and matched bets for user are returned.
 		 */
 		def getBets(matchedBetsOnly:Boolean):List[IBet] = market.getBets(userId,matchedBetsOnly)
-		
+
 		/** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
-	 *  Prices with zero volume are not returned by this method.
-   * 
-   * @param runnerId Unique runner id that runner prices are returned for.
-   * @return
-   */
-	def getRunnerPrices(runnerId:Long):List[IRunnerPrice] = market.getRunnerPrices(runnerId)
-	
-	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = market.getRunnerTradedVolume(runnerId)
-	
+		 *  Prices with zero volume are not returned by this method.
+		 * 
+		 * @param runnerId Unique runner id that runner prices are returned for.
+		 * @return
+		 */
+		def getRunnerPrices(runnerId:Long):List[IRunnerPrice] = market.getRunnerPrices(runnerId)
+
+		/**Returns total traded volume for all prices on all runners in a market.*/
+		def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = market.getRunnerTradedVolume(runnerId)
+
 	}
 
 }
@@ -102,7 +126,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val marketDataIterator = marketData.iterator
 
 			/**Process all markets data.*/
-			def processMarketData(marketIndex:Int,progress:Int):Unit = {
+			def processMarketData(marketIndex:Int,progress:Int):List[TraderContext] = {
 					val (marketId,marketEvents) = marketDataIterator.next
 
 					val newProgress=(marketIndex*100)/numOfMarkets
@@ -111,36 +135,41 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 					val in = new BufferedReader(new FileReader(marketEvents));
 
 					/**Process all market events.*/
-					def processMarketEvents(marketEvent:String,eventTimestamp:Long):Unit = {
+					def processMarketEvents(marketEvent:String,traderContext:ITraderContext,eventTimestamp:Long):Unit = {
 
 							val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
 
 							/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-							def triggerTrader() {
-								val market = betex.findMarket(marketId)
-								val traderContext = new TraderContext(nextBetId(),traderUserId,market)
-								trader.execute(traderContext)
-							}
-							if(processedEventTimestamp>eventTimestamp) triggerTrader()
+							if(processedEventTimestamp>eventTimestamp) trader.execute(processedEventTimestamp,traderContext)
 
 							/**Recursive  call.*/
 							val nextMarketEvent = in.readLine
 							if(nextMarketEvent==null) {
 								/**Process remaining events*/
-								if(processedEventTimestamp<=eventTimestamp) triggerTrader()
+								if(processedEventTimestamp<=eventTimestamp) trader.execute(processedEventTimestamp,traderContext)
 							}
-							else processMarketEvents(nextMarketEvent,processedEventTimestamp)
+							else processMarketEvents(nextMarketEvent,traderContext,processedEventTimestamp)
 					}
-					
+
+					/**Process CREATE_MARKET EVENT*/
+					val createMarketEvent = in.readLine	
+					if(createMarketEvent!=null) {
+					val processedEventTimestamp = marketEventProcessor.process(createMarketEvent,nextBetId(),historicalDataUserId)
+					val market = betex.findMarket(marketId)
+					val traderContext = new TraderContext(nextBetId(),traderUserId,market)
+					trader.init(traderContext)
 					val marketEvent = in.readLine
-					if(marketEvent!=null) processMarketEvents(marketEvent,0)
-					if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress)
+					if(marketEvent!=null) processMarketEvents(marketEvent,traderContext,processedEventTimestamp)
+					val traderContexts = if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress) else Nil
+					traderContext :: traderContexts
+					}
+					else Nil
 			}
 
 			p(0)
-			if(!marketDataIterator.isEmpty)	processMarketData(0,0)	
+			val traderContexts = if(!marketDataIterator.isEmpty)	processMarketData(0,0) else Nil
 			p(100)
-			val riskReport = 	betex.getMarkets.map(calculateRiskReport(traderUserId,_))
+			val riskReport = 	betex.getMarkets.map(market => calculateRiskReport(traderUserId,market,traderContexts.find(_.marketId==market.marketId).get))
 			riskReport
 	}
 
@@ -148,7 +177,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 	 * 
 	 * @return
 	 */
-	private def calculateRiskReport(traderUserId:Int,market:IMarket):IMarketRiskReport = {
+	private def calculateRiskReport(traderUserId:Int,market:IMarket,traderContext:TraderContext):IMarketRiskReport = {
 
 			val marketPrices = market.getBestPrices()
 			val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
@@ -156,6 +185,6 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
 			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
 
-			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,marketProbs,matchedBets.size,unmatchedBets.size)	
+			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,marketProbs,matchedBets.size,unmatchedBets.size,traderContext.getChartLabels,traderContext.getChartValues)	
 	}
 }
