@@ -10,6 +10,28 @@ import dk.bettingai.marketsimulator.trader._
 import org.apache.commons.math.util.MathUtils._
 import ISimulator._
 import org.apache.commons.io.FileUtils
+import scala.collection.JavaConversions._
+
+/**Google visualization imports*/
+import com.google.visualization.datasource._
+import DataSourceHelper._
+import com.google.visualization.datasource.DataSourceRequest
+import com.google.visualization.datasource.base.DataSourceException
+import com.google.visualization.datasource.base.DataSourceParameters
+import com.google.visualization.datasource.base.TypeMismatchException
+import com.google.visualization.datasource.datatable.ColumnDescription
+import com.google.visualization.datasource.datatable.DataTable
+import com.google.visualization.datasource.datatable.TableCell
+import com.google.visualization.datasource.datatable.TableRow
+import com.google.visualization.datasource.datatable.value.DateTimeValue
+import com.google.visualization.datasource.datatable.value.Value
+import com.google.visualization.datasource.datatable.value.ValueType
+import com.google.visualization.datasource.query.Query
+import com.ibm.icu.text.SimpleDateFormat
+import com.ibm.icu.util.GregorianCalendar
+import com.ibm.icu.util.TimeZone
+import com.ibm.icu.util.ULocale
+
 /** Main class for the market simulator.
  * 
  * @author korzekwad
@@ -64,7 +86,8 @@ object SimulatorApp  {
 		val reportBody = new StringBuilder()
 
 		for(riskReport <- marketRiskReports) {
-			reportHead.append("\n var rawdata%s = {version:'0.6',status:'ok',sig:'963427694',table:{cols:[{id:'date',label:'Date',type:'datetime',pattern:''},{id:'BetFair',label:'BetFair',type:'number',pattern:''},{id:'BetDaq',label:'BetDaq',type:'number',pattern:''}],rows:[{c:[{v:new Date(2010,7,28,0,1,0)},{v:0.0},{v:-100.0}]},{c:[{v:new Date(2010,7,28,0,2,0)},{v:1.0},{v:-99.0}]},{c:[{v:new Date(2010,7,28,0,3,0)},{v:2.0},{v:-98.0}]},{c:[{v:new Date(2010,7,28,0,4,0)},{v:3.0},{v:-97.0}]}]}}"format(riskReport.marketId))
+			val rawData = generateDataTableJson(riskReport.chartLabels,riskReport.chartValues)
+			reportHead.append("\n var rawdata%s =%s".format(riskReport.marketId,rawData))
 			reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(riskReport.marketId,riskReport.marketId))
 			reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(riskReport.marketId,riskReport.marketId))
 			reportHead.append("\n chart%s.draw(data%s, {displayAnnotations: true});".format(riskReport.marketId,riskReport.marketId))
@@ -78,6 +101,43 @@ object SimulatorApp  {
 		val reportFile = new File(htmlReportDir + "/market_sim_report.html")
 		FileUtils.writeStringToFile(reportFile,formmatedReport.toString)
 
+	}
+
+	/**Generate json data string for time series chart.
+	 * 
+	 * @param chartLabels Labels for all chart series.
+	 * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels
+	 *  
+	 */
+	private def generateDataTableJson(chartLabels:List[String], chartValues:List[Tuple2[Long,List[Double]]]):String = {
+			val data = new DataTable()
+			val timeSeriesColumns = chartLabels.map(label => new ColumnDescription(label, ValueType.NUMBER, label)).toList
+			val cd = new ColumnDescription("date", ValueType.DATETIME, "Date") :: timeSeriesColumns
+			data.addColumns(cd)
+
+			/**Add rows for all series.*/
+			for((timestamp,values) <-chartValues) {
+					val row = new TableRow();
+				val calendar = com.ibm.icu.util.Calendar.getInstance().asInstanceOf[GregorianCalendar]
+				calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+				calendar.setTimeInMillis(TimeZone.getDefault().getOffset(timestamp) + timestamp);
+				row.addCell(new TableCell(new DateTimeValue(calendar)));
+				for (value <- values) {
+					if(!value.isNaN) {
+					row.addCell(value);
+					}
+					else {
+						row.addCell(Value.getNullValueFromValueType(ValueType.NUMBER));
+					}
+				}
+				data.addRow(row);
+			}
+			
+			val query = new Query()
+			val parameters = new DataSourceParameters("")
+			val request = new DataSourceRequest(query, parameters, ULocale.UK)
+			val response = DataSourceHelper.generateResponse(data, request)
+			response
 	}
 
 	private def printMarketReport(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {

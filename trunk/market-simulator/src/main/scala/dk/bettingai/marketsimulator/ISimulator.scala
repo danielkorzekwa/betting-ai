@@ -21,6 +21,12 @@ object ISimulator {
 		val marketProbs:Map[Long,Double]
 		val matchedBetsNumber:Long
 		val unmatchedBetsNumber:Long
+		
+		/**Labels for all chart series.*/
+		val chartLabels:List[String]
+		
+		/**Key - time stamp, value - list of values for all series in the same order as labels.*/
+		val chartValues:List[Tuple2[Long,List[Double]]]
 	}
 }
 trait ISimulator {
