@@ -61,7 +61,9 @@ object SimulatorApp  {
 		/**Run market simulator.*/
 		console.print(" Simulation progress:")
 		val time = System.currentTimeMillis
-		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],100,1000,p => console.print(" " + p + "%"))
+		/**Commission on winnings that is used when generating expected profit report.*/
+		val commission = 0.05;
+		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],100,1000,p => console.print(" " + p + "%"),commission)
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
@@ -71,6 +73,7 @@ object SimulatorApp  {
 		console.print("DONE")
 
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
+		console.print("\nCommission on winnings=" + round(commission*100,2) + "%")
 		printMarketReport(marketRiskReports,console)
 		console.print("\n------------------------------------------------------------------------------------")
 
