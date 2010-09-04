@@ -23,8 +23,9 @@ trait IExpectedProfitCalculator {
 	/** Calculates market expected profit from bets and probabilities
 	 * @param bets
 	 * @param probabilities Key - runnerId, value - runner probability.
+	 * @param commision Commission on winnings in percentage.
 	 * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
 	 */
-	def calculate(bets:List[IBet],probabilities:Map[Long,Double]): MarketExpectedProfit
+	def calculate(bets:List[IBet],probabilities:Map[Long,Double],commission:Double): MarketExpectedProfit
 
 }

@@ -20,7 +20,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataEmpty/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(11l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(11l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(0,marketRiskReport.size)
 	}
 
@@ -28,7 +28,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataCreateMarketOnly/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -48,14 +48,14 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
 		assertEquals("Match Odds",marketRiskReport(0).marketName)
 		assertEquals("Man Utd vs Arsenal",marketRiskReport(0).eventName)
 
-		assertEquals(-0.625,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0)
+		assertEquals(-0.625,marketRiskReport(0).marketExpectedProfit.marketExpectedProfit,0.001)
 		assertEquals(2,marketRiskReport(0).marketExpectedProfit.runnersIfWin.size,0)
 		assertEquals(2.4,marketRiskReport(0).marketExpectedProfit.runnersIfWin(11),0.001)
 		assertEquals(-2,marketRiskReport(0).marketExpectedProfit.runnersIfWin(12),0)
@@ -68,7 +68,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataPlaceBackBet/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -88,7 +88,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataPlaceAndCancelLayBet/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -108,7 +108,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile = new File("src/test/resources/marketDataPlaceAFewBets/10.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile),trader,100,1000,p => {},0)
 		assertEquals(1,marketRiskReport.size)
 
 		assertEquals(10,marketRiskReport(0).marketId)
@@ -129,7 +129,7 @@ class SimulatorIntegrationTest {
 		val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
 		/**Run market simulation.*/
-		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile10,20l->marketEventsFile20),trader,100,1000,p => {})
+		val marketRiskReport = simulator.runSimulation(Map(10l->marketEventsFile10,20l->marketEventsFile20),trader,100,1000,p => {},0)
 		assertEquals(2,marketRiskReport.size)
 
 		assertEquals(20,marketRiskReport(0).marketId)

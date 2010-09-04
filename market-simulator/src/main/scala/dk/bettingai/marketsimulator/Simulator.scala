@@ -116,8 +116,9 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
  * @param traderUserId
  * @param historicalDataUserId
  * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
+ * @param commision Commission on winnings in percentage.
  */
-	def runSimulation(marketData:Map[Long,File], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit):List[IMarketRiskReport] = {
+	def runSimulation(marketData:Map[Long,File], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit,commission:Double):List[IMarketRiskReport] = {
 
 			var nextBetIdValue=1
 			val nextBetId = () => {nextBetIdValue = nextBetIdValue +1;nextBetIdValue}
@@ -169,21 +170,25 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 			p(0)
 			val traderContexts = if(!marketDataIterator.isEmpty)	processMarketData(0,0) else Nil
 			p(100)
-			val riskReport = 	betex.getMarkets.map(market => calculateRiskReport(traderUserId,market,traderContexts.find(_.marketId==market.marketId).get))
+			val riskReport = 	betex.getMarkets.map(market => calculateRiskReport(traderUserId,market,traderContexts.find(_.marketId==market.marketId).get,commission))
 			riskReport
 	}
 
 	/**Calculates market expected profit based on all bets that are placed by the trader implementation on all betting exchange markets.
 	 * 
+	 * @param traderUserId
+	 * @param market
+	 * @param traderContext
+	 * @param commision Commission on winnings in percentage.
 	 * @return
 	 */
-	private def calculateRiskReport(traderUserId:Int,market:IMarket,traderContext:TraderContext):IMarketRiskReport = {
+	private def calculateRiskReport(traderUserId:Int,market:IMarket,traderContext:TraderContext,commission:Double):IMarketRiskReport = {
 
 			val marketPrices = market.getBestPrices()
 			val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
 			val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)
-			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs)
+			val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets,marketProbs,commission)
 
 			new MarketRiskReport(market.marketId,market.marketName,market.eventName, marketExpectedProfit,marketProbs,matchedBets.size,unmatchedBets.size,traderContext.getChartLabels,traderContext.getChartValues)	
 	}
