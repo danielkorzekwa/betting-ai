@@ -44,5 +44,9 @@ class PriceUtilTest {
 		assertEquals(1000, validate(999.99, ROUND_UP), 0);
 		assertEquals(990, validate(999.99, ROUND_DOWN), 0);
 	}
+	
+	@Test def testAvgPrice {
+		assertEquals(-1, PriceUtil.avgPrice(1.5->3.0),0)
+	}
 
 }
