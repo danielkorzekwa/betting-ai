@@ -26,7 +26,7 @@ def validate(priceRanges: List[PriceRange])(price:Double,rounding:PriceRoundEnum
 
 	val minPrice = priceRanges.head.start
 	val maxPrice = priceRanges.last.stop
-	
+
 	val validatedPrice = if(price<minPrice) minPrice
 	else if(price > maxPrice) maxPrice
 	else {
@@ -40,13 +40,19 @@ def validate(priceRanges: List[PriceRange])(price:Double,rounding:PriceRoundEnum
 			case PriceRoundEnum.ROUND_DOWN =>price - (price % priceRange.get.step)
 			}
 	}
-	
+
 	(validatedPrice*100)/100
 }
 
+/**Increment price.*/
+def priceUp(priceRanges: List[PriceRange],price:Double):Double = validate(priceRanges)(price + 0.01, PriceRoundEnum.ROUND_UP)
+
+/**Decrement price.*/
+def priceDown(priceRanges: List[PriceRange],price:Double):Double = validate(priceRanges)(price - 0.01, PriceRoundEnum.ROUND_DOWN)
+
 /**Returns list of betfair price ranges.*/
 def getPriceRanges:List[PriceRange] = {
-	
+
 			val priceRanges = PriceRange(1.01, 2.0, 0.01) ::
 				PriceRange(2.0, 3.0, 0.02) ::
 					PriceRange(3.0, 4.0, 0.05) ::
@@ -59,4 +65,7 @@ def getPriceRanges:List[PriceRange] = {
 												PriceRange(100.0, 1000.0, 10.0) :: Nil
 												priceRanges
 	}
+
+	/**Returns average price between two prices.*/
+	def avgPrice(prices:Tuple2[Double,Double]):Double = 1/((1/prices._1 + 1/prices._2)/2)
 }

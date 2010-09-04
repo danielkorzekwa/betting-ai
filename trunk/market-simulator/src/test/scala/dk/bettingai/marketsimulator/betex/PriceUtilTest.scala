@@ -44,9 +44,21 @@ class PriceUtilTest {
 		assertEquals(1000, validate(999.99, ROUND_UP), 0);
 		assertEquals(990, validate(999.99, ROUND_DOWN), 0);
 	}
-	
+
+	@Test def testPriceUp {
+		assertEquals(1.91,PriceUtil.priceUp(PriceUtil.getPriceRanges,1.9),0)
+		assertEquals(5.1,PriceUtil.priceUp(PriceUtil.getPriceRanges,5.01),0)
+		assertEquals(130,PriceUtil.priceUp(PriceUtil.getPriceRanges,120),0)
+	}
+
+	@Test def testPriceDown {
+		assertEquals(1.89,PriceUtil.priceDown(PriceUtil.getPriceRanges,1.9),0)
+		assertEquals(5.0,PriceUtil.priceDown(PriceUtil.getPriceRanges,5.01),0)
+		assertEquals(110,PriceUtil.priceDown(PriceUtil.getPriceRanges,120),0)
+	}
+
 	@Test def testAvgPrice {
-		assertEquals(-1, PriceUtil.avgPrice(1.5->3.0),0)
+		assertEquals(2, PriceUtil.avgPrice(1.5->3.0),0)
 	}
 
 }
