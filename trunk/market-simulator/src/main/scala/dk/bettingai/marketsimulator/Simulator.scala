@@ -101,7 +101,7 @@ object Simulator {
 		def getRunnerPrices(runnerId:Long):List[IRunnerPrice] = market.getRunnerPrices(runnerId)
 
 		/**Returns total traded volume for all prices on all runners in a market.*/
-		def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = market.getRunnerTradedVolume(runnerId)
+		def getRunnerTradedVolume(runnerId:Long): List[IRunnerTradedVolume.IPriceTradedVolume] = market.getRunnerTradedVolume(runnerId)
 
 	}
 

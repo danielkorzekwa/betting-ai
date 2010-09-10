@@ -7,6 +7,8 @@ import scala.collection.mutable.ListBuffer
 import IBet.BetStatusEnum._
 import IBet.BetTypeEnum._
 import Market._
+import IMarket._
+import IRunnerTradedVolume._
 
 /**This class represents a market on a betting exchange.
  * @author korzekwad
@@ -21,9 +23,8 @@ object Market {
 		override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s]".format(price,totalToBack,totalToLay)
 	}
 
-	class PriceTradedVolume(val price:Double, val totalMatchedAmount:Double) extends IMarket.IPriceTradedVolume {
-		override def toString = "PriceTradedVolume [price=%s, totalMatchedAmount=%s]".format(price,totalMatchedAmount)
-	}
+	
+	
 }
 
 class Market(val marketId:Long, val marketName:String,val eventName:String,val numOfWinners:Int, val marketTime:Date,val runners:List[IMarket.IRunner]) extends IMarket{
@@ -268,14 +269,14 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	}
 
 	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(runnerId:Long): List[IMarket.IPriceTradedVolume] = {
+	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
 			/**Take only BACK bets to not double count traded volume (each matched back bet has corresponding matched lay bet.*/
 			val betsByPrice = matchedBets.toList.filter(b => b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
-			betsByPrice.map( entry => new PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
+			betsByPrice.map( entry => new RunnerTradedVolume.PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
 	}
 
 	/**Returns all bets placed by user on that market.
