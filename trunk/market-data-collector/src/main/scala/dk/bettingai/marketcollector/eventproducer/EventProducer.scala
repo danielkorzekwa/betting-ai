@@ -17,9 +17,9 @@ import EventProducer._
  */
 object EventProducer {
 
-	class EventProducerVerificationError(val message:String,val prevRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],
-			val newRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],
-			val toVerifyRunnerData:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],val events:List[String]) extends RuntimeException(message)
+	class EventProducerVerificationError(val message:String,val prevRunnerData:Tuple2[List[IRunnerPrice],IRunnerTradedVolume],
+			val newRunnerData:Tuple2[List[IRunnerPrice],IRunnerTradedVolume],
+			val toVerifyRunnerData:Tuple2[List[IRunnerPrice],IRunnerTradedVolume],val events:List[String]) extends RuntimeException(message)
 }
 
 class EventProducer extends IEventProducer{
@@ -41,12 +41,12 @@ class EventProducer extends IEventProducer{
 	 * 
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(timestamp:Long,marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):List[String] ={
+	def produce(timestamp:Long,marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],IRunnerTradedVolume]]):List[String] ={
 
 			/**Round down all unmatched and matched volume.*/
-			def floorMarketRunner(marketRunner: Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]] = {
+			def floorMarketRunner(marketRunner: Tuple2[List[IRunnerPrice],IRunnerTradedVolume]):Tuple2[List[IRunnerPrice],IRunnerTradedVolume] = {
 					val validatedMarketPrices = marketRunner._1.map(r => new RunnerPrice(r.price,r.totalToBack.floor,r.totalToLay.floor)).filterNot(p => p.totalToBack==0 && p.totalToLay==0)
-					val validatedTradedVolumeDelta = marketRunner._2.map(tv => new PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor)).filterNot(p => p.totalMatchedAmount==0)
+					val validatedTradedVolumeDelta = new RunnerTradedVolume(marketRunner._2.pricesTradedVolume.map(tv => new RunnerTradedVolume.PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor)).filterNot(p => p.totalMatchedAmount==0))
 					val validatedMarketRunner = (validatedMarketPrices,validatedTradedVolumeDelta)
 					validatedMarketRunner
 			}
@@ -77,7 +77,7 @@ class EventProducer extends IEventProducer{
 	 * 
 	 * @return List of Tuple2[runnerId, runnerEvents]
 	 * */
-	private def generateMarketEvents(timestamp:Long, marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):Iterable[Tuple2[Long,List[String]]] = {
+	private def generateMarketEvents(timestamp:Long, marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],IRunnerTradedVolume]]):Iterable[Tuple2[Long,List[String]]] = {
 			val betexMarket = betex.findMarket(marketId)	
 			val marketEvents = for{(runnerId,runnerData) <- validatedMarketRunners
 
@@ -98,7 +98,7 @@ class EventProducer extends IEventProducer{
 	 * @throw EventProducerVerificationError
 	 * */
 	private def processEvents(
-			marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]],
+			marketId:Long,validatedMarketRunners:Map[Long,Tuple2[List[IRunnerPrice],IRunnerTradedVolume]],
 			marketEvents: Iterable[Tuple2[Long,List[String]]]) {
 		
 		val betexMarket = betex.findMarket(marketId)		
@@ -127,8 +127,8 @@ class EventProducer extends IEventProducer{
 				if(newRunnerPrice.totalToBack!=toVerifyRunnerPrice.totalToBack) throwVerificationError("TotalToBack is not the same=" + (newRunnerPrice,toVerifyRunnerPrice))
 				if(newRunnerPrice.totalToLay!=toVerifyRunnerPrice.totalToLay) throwVerificationError("TotalToLay is not the same=" + (newRunnerPrice,toVerifyRunnerPrice))
 			}
-			if(validatedMarketRunners(runnerId)._2.size != toVerifyTradedVolume.size) throwVerificationError("Traded volume sizes are not the same: " + validatedMarketRunners(runnerId)._2.size + "!=" + toVerifyTradedVolume.size)
-			for((newTradedVolume,toVerifyTradedVolume) <-validatedMarketRunners(runnerId)._2.zip(toVerifyTradedVolume)) {
+			if(validatedMarketRunners(runnerId)._2.pricesTradedVolume.size != toVerifyTradedVolume.pricesTradedVolume.size) throwVerificationError("Traded volume sizes are not the same: " + validatedMarketRunners(runnerId)._2.pricesTradedVolume.size + "!=" + toVerifyTradedVolume.pricesTradedVolume.size)
+			for((newTradedVolume,toVerifyTradedVolume) <-validatedMarketRunners(runnerId)._2.pricesTradedVolume.zip(toVerifyTradedVolume.pricesTradedVolume)) {
 				if(newTradedVolume.price!=toVerifyTradedVolume.price) throwVerificationError("Price is not the same=" + (newTradedVolume,toVerifyTradedVolume))
 				if(newTradedVolume.totalMatchedAmount!=toVerifyTradedVolume.totalMatchedAmount) throwVerificationError("TotalAmountMatched is not the same=" + (newTradedVolume,toVerifyTradedVolume))
 			}
