@@ -4,6 +4,8 @@ import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.betex.Market._
 import dk.bettingai.marketsimulator.betex.api.IMarket._
+import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
@@ -11,7 +13,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testNegativeTradedVolumeData {
 		val previousRunnerPrices = Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,-3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,-3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1234,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -20,7 +22,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testPriceWithBothToBackAndToLayToBeZero {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1234,2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
@@ -28,7 +30,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testPriceWithBothToBackAndToLayAvailable {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,2) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1234,2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
@@ -36,7 +38,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	@Test(expected=classOf[IllegalArgumentException]) 
 	def testTotalToBackOnHigherPriceThanTotalToLay {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,0) :: new RunnerPrice(1.9,0,3) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1235,2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
@@ -44,14 +46,14 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	/**Price to back is 1000, toLay is not available - it's a valid data, not exception should be thrown.*/
 	@Test def testTotalToBackis1000ToLayNotAvailable {
 		val previousRunnerPrices = new RunnerPrice(1000.0,20,0) :: Nil
-		val tradedVolumeDelta = Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1234,2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
 	/**Price to back is not available, toLay is 1.01 - it's a valid data, not exception should be thrown.*/
 	@Test def testTotalToBackisNotAvailableToLayIs1_01 {
 		val previousRunnerPrices = new RunnerPrice(1.01,0,20) :: Nil
-		val tradedVolumeDelta = Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1236,2,22)(previousRunnerPrices,tradedVolumeDelta)
 	}
@@ -60,7 +62,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToBackNothingIsMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,0) :: Nil
-		val tradedVolumeDelta = Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1236,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -76,7 +78,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToBackFullyMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1236,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -90,7 +92,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToBackPartiallyMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,2) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume (new PriceTradedVolume(2.0,2) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1237,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -107,7 +109,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToBackMatchedMoreThanAvailable {
 		val previousRunnerPrices = new RunnerPrice(2.0,3,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,5) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,5) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1237,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -123,7 +125,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToBackPartiallyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,2) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,2) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1237,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -141,7 +143,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToBackPartiallyMatchedOnFirstPriceThenPartiallyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,2) :: new PriceTradedVolume(2.1,40) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,2) :: new PriceTradedVolume(2.1,40) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1238,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -160,7 +162,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToBackPartiallyMatchedOnFirstPriceThenFullyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,4) :: new PriceTradedVolume(2.1,40) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,4) :: new PriceTradedVolume(2.1,40) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1238,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -177,7 +179,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTradedVolumeZeroOnSecondToBackPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,0) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,0) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1238,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -199,7 +201,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToLayNothingIsMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,3) :: Nil
-		val tradedVolumeDelta = Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1238,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -215,7 +217,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToLayFullyMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,3) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1239,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -229,7 +231,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToLayPartiallyMatched {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,3) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,2) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,2) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(1239,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -246,7 +248,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testOnePriceToLayMatchedMoreThanAvailable {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,3) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,5) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,5) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -262,7 +264,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToLayPartiallyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,100) :: new RunnerPrice(2.1,0,4) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.1,2) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.1,2) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -280,7 +282,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToLayPartiallyMatchedOnFirstPriceThenPartiallyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,100) :: new RunnerPrice(2.1,0,4) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,40) :: new PriceTradedVolume(2.1,2) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,40) :: new PriceTradedVolume(2.1,2) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -299,7 +301,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTwoPricesToLayPartiallyMatchedOnFirstPriceThenFullyMatchedOnSecondPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,100) :: new RunnerPrice(2.1,0,4) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,40) :: new PriceTradedVolume(2.1,4) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,40) :: new PriceTradedVolume(2.1,4) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -316,7 +318,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testTradedVolumeZeroOnSecondToLayPrice {
 		val previousRunnerPrices = new RunnerPrice(2.0,0,100) :: new RunnerPrice(2.1,0,4) :: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.1,0) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.1,0) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -337,7 +339,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 	/**Test scenarios for traded volume on not available price.*/
 	@Test def testTradedVolumeOnNotAvailablePrices {
 		val previousRunnerPrices = Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,3) :: new PriceTradedVolume(2.1,6) :: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,3) :: new PriceTradedVolume(2.1,6) :: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(134,2,22)(previousRunnerPrices,tradedVolumeDelta)
 
@@ -355,7 +357,7 @@ class MarketEventCalculatorTradedVolumeMarketEventsTest {
 
 	@Test def testBothToBackAndToLayPricesAvailable {
 		val previousRunnerPrices = new RunnerPrice(2.0,4,0) :: new RunnerPrice(2.1,100,0) :: new RunnerPrice(2.2,0,50) :: new RunnerPrice(2.3,0,8):: Nil
-		val tradedVolumeDelta = new PriceTradedVolume(2.0,2) :: new PriceTradedVolume(2.1,40) :: new PriceTradedVolume(2.2,20) :: new PriceTradedVolume(2.3,5):: Nil
+		val tradedVolumeDelta = new RunnerTradedVolume(new PriceTradedVolume(2.0,2) :: new PriceTradedVolume(2.1,40) :: new PriceTradedVolume(2.2,20) :: new PriceTradedVolume(2.3,5):: Nil)
 
 		val result:Tuple2[List[IRunnerPrice],List[String]] = MarketEventCalculator.calculateMarketEventsForTradedVolume(135,2,22)(previousRunnerPrices,tradedVolumeDelta)
 

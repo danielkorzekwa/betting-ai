@@ -4,6 +4,7 @@ import java.util.Date
 import dk.bettingai.marketsimulator.betex._
 import Market._
 import IMarketService._
+import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 object IMarketService {
 	
@@ -11,7 +12,7 @@ object IMarketService {
 	 * @param inPlayDelay if bigger than 0 then market is in play.
 	 * @param runnerPrices Key - runnerId, Value - Tuple[runner prices, price traded volume]
 	 */
-	class MarketRunners(val inPlayDelay:Int, val runnerPrices:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]]) {
+	class MarketRunners(val inPlayDelay:Int, val runnerPrices:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]]) {
 		override def toString = "MarketRunners [inPlayDelay=%s, runnerPrices=%s]".format(inPlayDelay,runnerPrices)
 	}
 	

@@ -1,6 +1,7 @@
 package dk.bettingai.marketcollector.eventproducer
 
-import dk.bettingai.marketsimulator.betex.api.IMarket._
+import dk.bettingai.marketsimulator.betex.api._
+import IMarket._
 /**This trait represents a service that transforms state of a market on a betting exchange into the stream of events.
  * 
  * @author KorzekwaD
@@ -20,5 +21,5 @@ trait IEventProducer {
 	 * 
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(timestamp:Long,marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]]):List[String]
+	def produce(timestamp:Long,marketId:Long,marketRunners: Map[Long,Tuple2[List[IRunnerPrice],IRunnerTradedVolume]]):List[String]
 }

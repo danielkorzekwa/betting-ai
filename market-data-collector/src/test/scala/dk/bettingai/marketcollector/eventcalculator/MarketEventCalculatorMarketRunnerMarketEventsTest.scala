@@ -3,13 +3,15 @@ package dk.bettingai.marketcollector.eventcalculator
 import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.betex.Market._
+import dk.bettingai.marketsimulator.betex._
+import RunnerTradedVolume._
 
 class MarketEventCalculatorMarketRunnerMarketEventsTest {
 
 
 	@Test def testEmptyData {
-		val marketRunner = (List(),List())
-		val prevMarketRunner = (List(),List())
+		val marketRunner = (List(),new RunnerTradedVolume(List()))
+		val prevMarketRunner = (List(),new RunnerTradedVolume(List()))
 		val result = MarketEventCalculator.produce(1234,2,22,marketRunner,prevMarketRunner)
 
 		assertEquals(0,result.size)
@@ -21,8 +23,8 @@ class MarketEventCalculatorMarketRunnerMarketEventsTest {
 
 		val runnerPrices = new RunnerPrice(2.0,23.53,0) :: new RunnerPrice(2.1,23.42,0) :: new RunnerPrice(2.2,3.45,0) :: new RunnerPrice(2.25,0,78.72) :: new RunnerPrice(2.3,0,70.12):: Nil 
 		val tradedVolume = new PriceTradedVolume(1.9,3.4) :: new PriceTradedVolume(1.95,56.74) :: new PriceTradedVolume(2.0,5.1) :: new PriceTradedVolume(2.05,16.0003) :: new PriceTradedVolume(2.2,344.13) :: new PriceTradedVolume(2.3,8.23) :: new PriceTradedVolume(2.4,39.64) :: new PriceTradedVolume(2.35,45.64) :: Nil
-		val marketRunner = (runnerPrices,tradedVolume)
-		val prevMarketRunner = (prevRunnerPrices,prevTradedVolume)
+		val marketRunner = (runnerPrices,new RunnerTradedVolume(tradedVolume))
+		val prevMarketRunner = (prevRunnerPrices,new RunnerTradedVolume(prevTradedVolume))
 		val result = MarketEventCalculator.produce(1235,2,22,marketRunner,prevMarketRunner)
 
 		assertEquals(19,result.size)

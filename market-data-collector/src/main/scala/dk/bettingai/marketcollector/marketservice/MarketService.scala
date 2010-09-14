@@ -8,6 +8,7 @@ import Market._
 import dk.bot.betfairservice.model._
 import IMarketService._
 import MarketService._
+import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 /**Betfair service adapter.
  * 
@@ -66,10 +67,10 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 
 					val bfRunnerTradedVolume = bfTradedVolume.getRunnerTradedVolume.find(rtv => rtv.getSelectionId==runnerId).getOrElse(new BFRunnerTradedVolume(runnerId,List()))
 					val priceTradedVolume = bfRunnerTradedVolume.getPriceTradedVolume.map(tv => new PriceTradedVolume(tv.getPrice,tv.getTradedVolume))
-				} yield (runnerId.asInstanceOf[Long], (runnerPrices,priceTradedVolume.toList))
+				} yield (runnerId.asInstanceOf[Long], (runnerPrices,new RunnerTradedVolume(priceTradedVolume.toList)))
 
 				/**key - selectionId, value - runner prices + price traded volume*/
-				val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] = Map(marketRunnersList : _*)
+				val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]] = Map(marketRunnersList : _*)
 				val marketRunners = new MarketRunners(bfMarketRunners.getInPlayDelay,marketRunnersMap)
 				marketRunners
 			}

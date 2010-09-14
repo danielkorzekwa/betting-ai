@@ -1,5 +1,9 @@
 package dk.bettingai.marketcollector.eventcalculator
 
+import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.api._
+import IRunnerTradedVolume._
+import RunnerTradedVolume._
 import dk.bettingai.marketsimulator.betex.api.IMarket._
 import dk.bettingai.marketsimulator.betex.Market._
 import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
@@ -19,17 +23,17 @@ object MarketEventCalculator  extends IMarketEventCalculator{
 	 * @param prevMarketRunner previous state of market runner
 	 * @return List of market events in a json format (PLACE_BET, CANCEL_BET) for a market
 	 * */
-	def produce(timestamp:Long,marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]],prevMarketRunner:Tuple2[List[IRunnerPrice],List[IPriceTradedVolume]]):List[String] = {
+	def produce(timestamp:Long,marketId:Long,runnerId:Long,marketRunner:Tuple2[List[IRunnerPrice],IRunnerTradedVolume],prevMarketRunner:Tuple2[List[IRunnerPrice],IRunnerTradedVolume]):List[String] = {
 
 			/**Round down all volumes using Math.floor*/
 			val validatedMarketPrices = marketRunner._1.map(r => new RunnerPrice(r.price,r.totalToBack.floor,r.totalToLay.floor))
 			val validatedPrevMarketPrices = prevMarketRunner._1.map(r => new RunnerPrice(r.price,r.totalToBack.floor,r.totalToLay.floor))
-			val validatedTradedVolumeDelta = marketRunner._2.map(tv => new PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor))
-			val validatedPrevTradedVolumeDelta = prevMarketRunner._2.map(tv => new PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor))
+			val validatedTradedVolumeDelta = new RunnerTradedVolume(marketRunner._2.pricesTradedVolume.map(tv => new RunnerTradedVolume.PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor)))
+			val validatedPrevTradedVolumeDelta = new RunnerTradedVolume(prevMarketRunner._2.pricesTradedVolume.map(tv => new RunnerTradedVolume.PriceTradedVolume(tv.price,tv.totalMatchedAmount.floor)))
 			val validatedMarketRunner = (validatedMarketPrices,validatedTradedVolumeDelta)
 			val validatedPrevMarketRunner = (validatedPrevMarketPrices,validatedPrevTradedVolumeDelta)
 
-			val tradedVolumeDelta = calculateTradedVolumeDelta(validatedMarketRunner._2.toList,validatedPrevMarketRunner._2)
+			val tradedVolumeDelta = validatedMarketRunner._2 - validatedPrevMarketRunner._2
 			val intermediatePrices = calculateMarketEventsForTradedVolume(timestamp,marketId, runnerId)(validatedPrevMarketRunner._1, tradedVolumeDelta)
 			val runnerPricesDelta = calculateRunnerPricesDelta(validatedMarketRunner._1.toList,intermediatePrices._1)
 			val marketEvents = calculateMarketEvents(timestamp,marketId,runnerId)(runnerPricesDelta)
@@ -84,14 +88,14 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 	 * traded volume [price,volume] = 1.9,5
 	 * runner price + traded volume = [price,toBack+volume,toLay+volume] = 1.9,7,5
 	 * */
-	def combine(runnerPricesDelta:List[IRunnerPrice], runnerTradedVolumeDelta:List[IPriceTradedVolume]):List[IRunnerPrice] = {
+	def combine(runnerPricesDelta:List[IRunnerPrice], runnerTradedVolumeDelta:List[IRunnerTradedVolume.IPriceTradedVolume]):List[IRunnerPrice] = {
 		val allPrices = (runnerPricesDelta.map(_.price) :::runnerTradedVolumeDelta.map(_.price)).distinct
 
 		/**Total delta represents both runnerPricesDelta and tradedVolumeDelta in a form of runner prices.*/
 		val totalDelta = for {
 			price <- allPrices
 			val deltaRunnerPrice = runnerPricesDelta.find(_.price==price).getOrElse(new RunnerPrice(price,0,0))
-			val deltaTradedVolume = runnerTradedVolumeDelta.find(_.price==price).getOrElse(new PriceTradedVolume(price,0))
+			val deltaTradedVolume = runnerTradedVolumeDelta.find(_.price==price).getOrElse(new RunnerTradedVolume.PriceTradedVolume(price,0))
 			val totalRunnerPriceDelta = new RunnerPrice(deltaRunnerPrice.price,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToBack,deltaTradedVolume.totalMatchedAmount + deltaRunnerPrice.totalToLay)
 		} yield totalRunnerPriceDelta
 
@@ -118,29 +122,7 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 
 		deltaForRunnerPrices
 	}
-
-	/**Calculates delta between the new and the previous state of the runner traded volume.
-	 * 
-	 * @param newTradedVolumes
-	 * @param previousTradedVolumes
-	 * @return Delta between the new and the previous state of the runner traded volume.
-	 */
-	def calculateTradedVolumeDelta(newTradedVolumes:List[IPriceTradedVolume],previousTradedVolumes:List[IPriceTradedVolume]):List[IPriceTradedVolume] = {
-		val allPrices = (newTradedVolumes.map(_.price) :::previousTradedVolumes.map(_.price)).distinct
-
-		/**Get delta between new and previous prices traded volume.*/
-		val deltaForUpdatedAndNewTradedVolume = for {
-			price <- allPrices
-			val newTradedVolume = newTradedVolumes.find(_.price==price).getOrElse(new PriceTradedVolume(price,0))
-			val previousTradedVolume = previousTradedVolumes.find(_.price==price).getOrElse(new PriceTradedVolume(price,0))
-			val tradedVolumeDelta = new PriceTradedVolume(newTradedVolume.price,(newTradedVolume.totalMatchedAmount-previousTradedVolume.totalMatchedAmount))
-
-			if(tradedVolumeDelta.totalMatchedAmount != 0)
-		} yield tradedVolumeDelta
-
-		deltaForUpdatedAndNewTradedVolume
-	}
-
+	
 	/**This function transforms runner from state A to B. 
 	 * State A is represented by runner prices in state A and traded volume delta between states B and A. 
 	 * The state B is represented the list of market events that reflect traded volume delta between states B and A
@@ -150,11 +132,11 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 	 *  @param marketId
 	 *  @param runnerId
 	 * */
-	def calculateMarketEventsForTradedVolume(timestamp:Long,marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:List[IPriceTradedVolume]):Tuple2[List[IRunnerPrice],List[String]] = {
+	def calculateMarketEventsForTradedVolume(timestamp:Long,marketId:Long,runnerId:Long)(previousRunnerPrices:List[IRunnerPrice],runnerTradedVolumeDelta:IRunnerTradedVolume):Tuple2[List[IRunnerPrice],List[String]] = {
 
 		require(previousRunnerPrices.find(p => p.totalToBack>0 && p.totalToLay>0).isEmpty,"Price with both totalToBack and totalToLay bigger than 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
 		require(previousRunnerPrices.find(p => p.totalToBack==0 && p.totalToLay==0).isEmpty,"Price with both totalToBack and totalToLay to be 0 is not allowed. RunnerPrices=" + previousRunnerPrices);
-		require(runnerTradedVolumeDelta.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. MarketId=%s, RunnerId=%s, TradedVolumeDelta=%s".format(marketId,runnerId,runnerTradedVolumeDelta))
+		require(runnerTradedVolumeDelta.pricesTradedVolume.find(tv =>tv.totalMatchedAmount<0).isEmpty,"Price with negative traded volume is not allowed. MarketId=%s, RunnerId=%s, TradedVolumeDelta=%s".format(marketId,runnerId,runnerTradedVolumeDelta))
 
 		val bestPriceToBack =previousRunnerPrices.filter(p => p.totalToBack>0).foldLeft(1.0)((a,b) => if(b.price>a) b.price else a)
 		val bestPriceToLay = previousRunnerPrices.filter(p => p.totalToLay>0).foldLeft(1001d)((a,b) => if(b.price<a) b.price else a)
@@ -192,14 +174,14 @@ require(marketRunnerDelta.find(p => p.totalToBack<0 && p.totalToLay<0).isEmpty,"
 		}
 
 		/**Process traded volume on pricesToBack moving from the highest price to the lowest.*/
-		val tradedVolumeOnPricesToBack = runnerTradedVolumeDelta.filter(tv => tv.price<bestPriceToLay && tv.totalMatchedAmount>0).sortWith((a,b) => a.price>b.price).iterator
+		val tradedVolumeOnPricesToBack = runnerTradedVolumeDelta.pricesTradedVolume.filter(tv => tv.price<bestPriceToLay && tv.totalMatchedAmount>0).sortWith((a,b) => a.price>b.price).iterator
 		val pricesToBack = previousRunnerPrices.filter(p => p.price<bestPriceToLay)
 		val resultForPricesToBack = if(!tradedVolumeOnPricesToBack.isEmpty)
 			calculateRecursive(BACK,pricesToBack,tradedVolumeOnPricesToBack,List())
 			else Tuple2(pricesToBack,List())
 
 			/**Process traded volume on pricesToLay moving from the highest price to the lowest.*/
-			val tradedVolumeOnPricesToLay = runnerTradedVolumeDelta.filter(tv => tv.price >=bestPriceToLay && tv.totalMatchedAmount>0 ).sortWith((a,b) => a.price<b.price).iterator
+			val tradedVolumeOnPricesToLay = runnerTradedVolumeDelta.pricesTradedVolume.filter(tv => tv.price >=bestPriceToLay && tv.totalMatchedAmount>0 ).sortWith((a,b) => a.price<b.price).iterator
 			val pricesToLay = previousRunnerPrices.filter(p => p.price>=bestPriceToLay)
 			val resultForPricesToLay = if(!tradedVolumeOnPricesToLay.isEmpty)
 				calculateRecursive(LAY,pricesToLay,tradedVolumeOnPricesToLay,List())

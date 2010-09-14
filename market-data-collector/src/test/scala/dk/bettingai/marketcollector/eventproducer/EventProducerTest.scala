@@ -4,6 +4,7 @@ import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.betex._
 import Market._
+import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 class EventProducerTest {
 
@@ -14,10 +15,10 @@ def testProduce {
 
 	/**key - selectionId, value - runner prices + price traded volume*/
 	val runnerPrices = new RunnerPrice(2.0,23.53,0) :: new RunnerPrice(2.25,0,78.72) :: Nil 
-	val tradedVolume = new PriceTradedVolume(1.9,3.4) :: new PriceTradedVolume(2.3,8.23) :: Nil
+	val tradedVolume = new RunnerTradedVolume(new PriceTradedVolume(1.9,3.4) :: new PriceTradedVolume(2.3,8.23) :: Nil)
 	val runnerPrices2 = new RunnerPrice(2.0,4.3,0) :: new RunnerPrice(2.1,100.02,0):: Nil 
-	val tradedVolume2 = new PriceTradedVolume(1.9,2.1) :: new PriceTradedVolume(2.0,2.5) :: Nil
-	val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((22,(runnerPrices,tradedVolume)),(23,(runnerPrices2,tradedVolume2)))
+	val tradedVolume2 = new RunnerTradedVolume(new PriceTradedVolume(1.9,2.1) :: new PriceTradedVolume(2.0,2.5) :: Nil)
+	val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]] =  Map((22,(runnerPrices,tradedVolume)),(23,(runnerPrices2,tradedVolume2)))
 	
 	val events = eventProducer.produce(12345,2,marketRunnersMap)
 	assertEquals(12,events.size)
@@ -35,10 +36,10 @@ def testProduce {
 	assertEquals("""{"time":12345,"eventType":"PLACE_BET","betSize":100.0,"betPrice":2.1,"betType":"LAY","marketId":2,"runnerId":23}""",events(11))
 
 	val nextRunnerPrices = new RunnerPrice(2.0,23.53,0) :: new RunnerPrice(2.25,0,88.72) :: Nil 
-	val nextTradedVolume = new PriceTradedVolume(1.9,13.4) :: new PriceTradedVolume(2.3,8.23) :: Nil
+	val nextTradedVolume = new RunnerTradedVolume(new PriceTradedVolume(1.9,13.4) :: new PriceTradedVolume(2.3,8.23) :: Nil)
 	val nextRunnerPrices2 = new RunnerPrice(2.0,4.3,0) :: new RunnerPrice(2.1,100.02,0):: Nil 
-	val nextTradedVolume2 = new PriceTradedVolume(1.9,2.1) :: new PriceTradedVolume(2.0,2.5) :: Nil
-	val nextMarketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((22,(nextRunnerPrices,nextTradedVolume)),(23,(nextRunnerPrices2,nextTradedVolume2)))
+	val nextTradedVolume2 = new RunnerTradedVolume(new PriceTradedVolume(1.9,2.1) :: new PriceTradedVolume(2.0,2.5) :: Nil)
+	val nextMarketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]] =  Map((22,(nextRunnerPrices,nextTradedVolume)),(23,(nextRunnerPrices2,nextTradedVolume2)))
 	
 	val events2 = eventProducer.produce(12346,2,nextMarketRunnersMap)
 	assertEquals(5,events2.size)
@@ -59,16 +60,16 @@ def testProduce {
 def testProduce2 {
 		
 	val runnerPrices = new RunnerPrice(20.0,11.0,0) :: new RunnerPrice(21,19.00,0) :: Nil 
-	val tradedVolume = Nil
-	val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((21,(Nil,Nil)),(22,(runnerPrices,tradedVolume)))
+	val tradedVolume = new RunnerTradedVolume(Nil)
+	val marketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]] =  Map((21,(Nil,new RunnerTradedVolume(Nil))),(22,(runnerPrices,tradedVolume)))
 	val events = eventProducer.produce(12347,2,marketRunnersMap)
 	assertEquals(2,events.size)
 	assertEquals("""{"time":12347,"eventType":"PLACE_BET","betSize":11.0,"betPrice":20.0,"betType":"LAY","marketId":2,"runnerId":22}""",events(0))
 	assertEquals("""{"time":12347,"eventType":"PLACE_BET","betSize":19.0,"betPrice":21.0,"betType":"LAY","marketId":2,"runnerId":22}""",events(1))
 	
 	val nextRunnerPrices = new RunnerPrice(20.0,0,8) :: Nil 
-	val nextTradedVolume = Nil
-	val nextMarketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],List[PriceTradedVolume]]] =  Map((21,(Nil,Nil)),(22,(nextRunnerPrices,nextTradedVolume)))
+	val nextTradedVolume = new RunnerTradedVolume(Nil)
+	val nextMarketRunnersMap:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]] =  Map((21,(Nil,new RunnerTradedVolume(Nil))),(22,(nextRunnerPrices,nextTradedVolume)))
 	
 	val nextEvents = eventProducer.produce(12348,2,nextMarketRunnersMap)
 	assertEquals(3,nextEvents.size)
