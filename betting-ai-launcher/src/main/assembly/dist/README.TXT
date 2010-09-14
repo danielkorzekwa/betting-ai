@@ -5,11 +5,9 @@
 ***********************************************************************************
 
 Betting AI ver. 1.2
-- Market simulator for many markets.
+- Market simulation for many markets.
 
 Betting AI ver. 1.1
-
-What's new?
 - Market Data Collector.
 ------------------------------------------------------------------------------------
 FAQ
