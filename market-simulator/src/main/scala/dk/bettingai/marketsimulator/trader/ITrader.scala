@@ -67,7 +67,7 @@ object ITrader {
 	def getRunnerPrices(runnerId:Long):List[IRunnerPrice]
 	
 	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(runnerId:Long): List[IRunnerTradedVolume.IPriceTradedVolume]
+	def getRunnerTradedVolume(runnerId:Long): IRunnerTradedVolume
 	
 	}
 }

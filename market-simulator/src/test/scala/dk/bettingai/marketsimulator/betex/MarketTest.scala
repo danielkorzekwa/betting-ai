@@ -246,14 +246,14 @@ class MarketTest {
 	@Test def testRunnerTradedVolumeNoBets {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		assertEquals(0,market.getRunnerTradedVolume(11).size)
+		assertEquals(0,market.getRunnerTradedVolume(11).pricesTradedVolume.size)
 	}
 	@Test def testRunnerTradedVolumeNoMatchedBets {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		market.placeBet(100,122,5,2.4,BACK,11)
 		market.placeBet(101,122,8,2.3,LAY,11)
 
-		assertEquals(0,market.getRunnerTradedVolume(11).size)
+		assertEquals(0,market.getRunnerTradedVolume(11).pricesTradedVolume.size)
 	}
 
 	@Test(expected=classOf[IllegalArgumentException])
@@ -269,9 +269,9 @@ class MarketTest {
 		market.placeBet(101,122,8,2.6,LAY,11)
 
 		val tradedVolume = market.getRunnerTradedVolume(11)
-		assertEquals(1,tradedVolume.size)
-		assertEquals(2.4,tradedVolume(0).price,0)
-		assertEquals(5,tradedVolume(0).totalMatchedAmount,0)
+		assertEquals(1,tradedVolume.pricesTradedVolume.size)
+		assertEquals(2.4,tradedVolume.pricesTradedVolume(0).price,0)
+		assertEquals(5,tradedVolume.pricesTradedVolume(0).totalMatchedAmount,0)
 	}
 
 	@Test def testRunnerTradedVolumeThreeMatchedBet {
@@ -282,15 +282,15 @@ class MarketTest {
 		market.placeBet(103,122,2,2.8,LAY,11)
 
 		val tradedVolume = market.getRunnerTradedVolume(11)
-		assertEquals(3,tradedVolume.size)
-		assertEquals(2.4,tradedVolume(0).price,0)
-		assertEquals(5,tradedVolume(0).totalMatchedAmount,0)
+		assertEquals(3,tradedVolume.pricesTradedVolume.size)
+		assertEquals(2.4,tradedVolume.pricesTradedVolume(0).price,0)
+		assertEquals(5,tradedVolume.pricesTradedVolume(0).totalMatchedAmount,0)
 
-		assertEquals(2.5,tradedVolume(1).price,0)
-		assertEquals(1,tradedVolume(1).totalMatchedAmount,0)
+		assertEquals(2.5,tradedVolume.pricesTradedVolume(1).price,0)
+		assertEquals(1,tradedVolume.pricesTradedVolume(1).totalMatchedAmount,0)
 
-		assertEquals(2.6,market.getRunnerTradedVolume(11)(2).price,0)
-		assertEquals(3,tradedVolume(2).totalMatchedAmount,0)
+		assertEquals(2.6,market.getRunnerTradedVolume(11).pricesTradedVolume(2).price,0)
+		assertEquals(3,tradedVolume.pricesTradedVolume(2).totalMatchedAmount,0)
 	}
 
 
@@ -302,14 +302,14 @@ class MarketTest {
 		market.placeBet(103,122,2,2.8,LAY,12)
 
 		val tradedVolume11 = market.getRunnerTradedVolume(11)
-		assertEquals(1,tradedVolume11.size)
-		assertEquals(2.4,tradedVolume11(0).price,0)
-		assertEquals(5,tradedVolume11(0).totalMatchedAmount,0)
+		assertEquals(1,tradedVolume11.pricesTradedVolume.size)
+		assertEquals(2.4,tradedVolume11.pricesTradedVolume(0).price,0)
+		assertEquals(5,tradedVolume11.pricesTradedVolume(0).totalMatchedAmount,0)
 
 		val tradedVolume12 = market.getRunnerTradedVolume(12)
-		assertEquals(1,tradedVolume12.size)
-		assertEquals(2.5,tradedVolume12(0).price,0)
-		assertEquals(2,tradedVolume12(0).totalMatchedAmount,0)
+		assertEquals(1,tradedVolume12.pricesTradedVolume.size)
+		assertEquals(2.5,tradedVolume12.pricesTradedVolume(0).price,0)
+		assertEquals(2,tradedVolume12.pricesTradedVolume(0).totalMatchedAmount,0)
 
 	}
 
