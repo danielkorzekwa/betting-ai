@@ -269,14 +269,15 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	}
 
 	/**Returns total traded volume for all prices on all runners in a market.*/
-	def getRunnerTradedVolume(runnerId:Long): List[IPriceTradedVolume] = {
+	def getRunnerTradedVolume(runnerId:Long): IRunnerTradedVolume = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
 			/**Take only BACK bets to not double count traded volume (each matched back bet has corresponding matched lay bet.*/
 			val betsByPrice = matchedBets.toList.filter(b => b.betType==BACK && b.runnerId==runnerId).groupBy(b => b.betPrice)
 
 			/**Map betsByPrice to list of PriceTradedVolume.*/
-			betsByPrice.map( entry => new RunnerTradedVolume.PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
+			val pricesTradedVolume = betsByPrice.map( entry => new RunnerTradedVolume.PriceTradedVolume(entry._1,entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price<_.price)
+			new RunnerTradedVolume(pricesTradedVolume)
 	}
 
 	/**Returns all bets placed by user on that market.
