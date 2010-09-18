@@ -11,7 +11,6 @@ import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.risk._
 import scala.io._
-import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
 import java.io.File
 import java.io.BufferedReader
 import java.io.FileReader

@@ -5,7 +5,7 @@ import ITrader._
 import IBet.BetTypeEnum._
 import IMarket._
 import dk.bettingai.marketsimulator.risk._
-import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
+import dk.bettingai.marketsimulator.risk._
 
 /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
  * 
