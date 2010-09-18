@@ -37,7 +37,7 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator{
 
 			val expectedProfitValue = runnersIfwin.map(entry => entry._2* probabilities(entry._1)).sum
 			/**Calculate market expected profit.*/
-			new MarketExpectedProfit(expectedProfitValue,runnersIfwin)
+			new MarketExpectedProfit(expectedProfitValue,runnersIfwin,probabilities)
 	}
 
 /**Lay bet is a back bet with a negative stake.*/
