@@ -5,6 +5,7 @@ import IMarket._
 import IBet.BetTypeEnum._
 import java.util.Date
 import ITrader._
+import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
 
 /**This trait represents a trader that can place bets on a betting exchange.
  * 
@@ -69,6 +70,7 @@ object ITrader {
 	/**Returns total traded volume for all prices on all runners in a market.*/
 	def getRunnerTradedVolume(runnerId:Long): IRunnerTradedVolume
 	
+	def risk():MarketExpectedProfit
 	}
 }
 trait ITrader {

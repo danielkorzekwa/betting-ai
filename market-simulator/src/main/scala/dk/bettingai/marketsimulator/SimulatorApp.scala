@@ -153,7 +153,7 @@ object SimulatorApp  {
 				val minRisk = marketRiskReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 > b._2) a else b)
 				console.print("\n%s %s: %s minProfit/prob=%s/%s maxProfit/prob=%s/%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s"
 						.format(marketRiskReport.marketId,marketRiskReport.marketName,marketRiskReport.eventName,round(maxRisk._2 ,2),
-								round(marketRiskReport.marketProbs(maxRisk._1),2),round(minRisk._2 ,2),round(marketRiskReport.marketProbs(minRisk._1),2),
+								round(marketRiskReport.marketExpectedProfit.probabilities(maxRisk._1),2),round(minRisk._2 ,2),round(marketRiskReport.marketExpectedProfit.probabilities(minRisk._1),2),
 								round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),
 								marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
 
