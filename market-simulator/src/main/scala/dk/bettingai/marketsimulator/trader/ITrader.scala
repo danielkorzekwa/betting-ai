@@ -5,7 +5,7 @@ import IMarket._
 import IBet.BetTypeEnum._
 import java.util.Date
 import ITrader._
-import dk.bettingai.marketsimulator.risk.IExpectedProfitCalculator._
+import dk.bettingai.marketsimulator.risk._
 
 /**This trait represents a trader that can place bets on a betting exchange.
  * 
