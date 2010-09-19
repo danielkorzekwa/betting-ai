@@ -35,13 +35,13 @@ object ITrader {
 	* Double.NaN is returned if price is not available.
 	* @return 
 	* */
-	def getBestPrices(runnerId: Long): Tuple2[Double,Double]
+	def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice,IRunnerPrice]
 	
 	/**Returns best toBack/toLay prices for market.
 	 * 
 	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
 	 */
-	def getBestPrices():Map[Long,Tuple2[Double,Double]]
+	def getBestPrices():Map[Long,Tuple2[IRunnerPrice,IRunnerPrice]]
 	
 	/** Places a bet on a betting exchange market.
 	* 
@@ -49,8 +49,18 @@ object ITrader {
 	* @param betPrice
 	* @param betType
 	* @param runnerId
+	* 
+	* @return bet id
 	*/
-	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long)
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Long
+	
+	/** Cancels a bet on a betting exchange market.
+	 * 
+	 * @param betId Unique id of a bet to be cancelled.
+	 * 
+	 * @return amount cancelled
+	*/
+	def cancelBet(betId:Long):Double
 	
 	/**Returns all bets placed by user on that market.
 	 *

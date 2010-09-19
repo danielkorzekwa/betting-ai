@@ -110,7 +110,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 	 */
 	private def calculateRiskReport(traderUserId:Int,market:IMarket,traderContext:TraderContext,commission:Double):IMarketRiskReport = {
 
-			val marketPrices = market.getBestPrices()
+			val marketPrices = market.getBestPrices().mapValues(prices => prices._1.price -> prices._2.price)
 			val marketProbs = ProbabilityCalculator.calculate(marketPrices,market.numOfWinners)
 			val matchedBets = market.getBets(traderUserId).filter(_.betStatus==M)
 			val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus==U)

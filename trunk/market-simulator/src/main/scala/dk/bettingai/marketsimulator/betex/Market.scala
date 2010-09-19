@@ -245,7 +245,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * Double.NaN is returned if price is not available.
 	 * @return 
 	 * */
-	def getBestPrices(runnerId: Long):Tuple2[Double,Double] = {
+	def getBestPrices(runnerId: Long):Tuple2[IRunnerPrice,IRunnerPrice] = {
 			require(runners.exists(s => s.runnerId==runnerId),"Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
 			val runnerLayBetsMap = getRunnerBets(runnerId,layBets)
@@ -254,8 +254,20 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 			val pricesToBack = runnerLayBetsMap.filter(entry => !entry._2.isEmpty).keys
 			val pricesToLay = runnerBackBetsMap.filter(entry => !entry._2.isEmpty).keys
 
-			val bestPriceToBack = if(!pricesToBack.isEmpty) pricesToBack.max else Double.NaN
-			val bestPriceToLay = if(!pricesToLay.isEmpty) pricesToLay.min else Double.NaN
+			val bestPriceToBack = if(!pricesToBack.isEmpty) {
+				val price = pricesToBack.max 
+				val totalStake = BetUtil.totalStake(runnerLayBetsMap(price).toList)
+				new RunnerPrice(price,totalStake,0d)
+				
+			}
+			else new RunnerPrice(Double.NaN,0d,0d)
+			val bestPriceToLay = if(!pricesToLay.isEmpty) {
+				val price = pricesToLay.min 
+				val totalStake = BetUtil.totalStake(runnerBackBetsMap(price).toList)
+				new RunnerPrice(price,0d,totalStake)
+			}
+			else new RunnerPrice(Double.NaN,0d,0d)
+			
 
 			new Tuple2(bestPriceToBack,bestPriceToLay)
 	}
@@ -264,7 +276,7 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * 
 	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
 	 */
-	def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
+	def getBestPrices():Map[Long,Tuple2[IRunnerPrice,IRunnerPrice]] = {
 		Map(runners.map(r => r.runnerId -> getBestPrices(r.runnerId)) : _*)
 	}
 

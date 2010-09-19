@@ -46,8 +46,20 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	 * @param betType
 	 * @param runnerId
 	 */
-	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long) {
-		market.placeBet(nextBetId,userId,betSize,betPrice,betType,runnerId)
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Long = {
+		val betId = nextBetId
+		market.placeBet(betId,userId,betSize,betPrice,betType,runnerId)
+		betId
+	}
+	
+	/** Cancels a bet on a betting exchange market.
+	 * 
+	 * @param betId Unique id of a bet to be cancelled.
+	 * 
+	 * @return amount cancelled
+	*/
+	def cancelBet(betId:Long):Double = {
+		market.cancelBet(betId)
 	}
 
 	/**Returns best toBack/toLay prices for market runner.
@@ -55,13 +67,13 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	 * Double.NaN is returned if price is not available.
 	 * @return 
 	 * */
-	def getBestPrices(runnerId: Long): Tuple2[Double,Double] = market.getBestPrices(runnerId)
+	def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice,IRunnerPrice] = market.getBestPrices(runnerId)
 
 	/**Returns best toBack/toLay prices for market.
 	 * 
 	 * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
 	 */
-	def getBestPrices():Map[Long,Tuple2[Double,Double]] = {
+	def getBestPrices():Map[Long,Tuple2[IRunnerPrice,IRunnerPrice]] = {
 			market.getBestPrices()
 	}
 
@@ -85,7 +97,7 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 
 	def risk():MarketExpectedProfit = {
 			val matchedBets = getBets(true)
-			val probs = ProbabilityCalculator.calculate(getBestPrices, 1)
+			val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 			ExpectedProfitCalculator.calculate(matchedBets, probs,commission)
 	}
 

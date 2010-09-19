@@ -32,8 +32,8 @@ class SimpleTrader2 extends ITrader{
 			
 				val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-			if(bestPrices._1<50 && !bestPrices._1.isNaN && !bestPrices._2.isNaN) {
-				ctx.placeBet(2,1/((1/bestPrices._2)-0.01),BACK,runner.runnerId)
+			if(bestPrices._1.price<50 && !bestPrices._1.price.isNaN && !bestPrices._2.price.isNaN) {
+				ctx.placeBet(2,1/((1/bestPrices._2.price)-0.01),BACK,runner.runnerId)
 			}
 				
 		}	
