@@ -29,18 +29,18 @@ class SimpleTrader extends ITrader{
 
 		/**Add data to a time line chart.*/
 		val bestPrices = ctx.getBestPrices(ctx.runners.head.runnerId)
-		ctx.addChartValues(eventTimestamp -> (bestPrices._1 :: bestPrices._2 :: Nil))
+		ctx.addChartValues(eventTimestamp -> (bestPrices._1.price :: bestPrices._2.price :: Nil))
 
 		for(runner <- ctx.runners) {
 			val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-			if(bestPrices._1>2) {
-				ctx.placeBet(2,bestPrices._1,BACK,runner.runnerId)
-				ctx.placeBet(2,bestPrices._1 - 0.02,LAY,runner.runnerId)
+			if(bestPrices._1.price>2) {
+				ctx.placeBet(2,bestPrices._1.price,BACK,runner.runnerId)
+				ctx.placeBet(2,bestPrices._1.price - 0.02,LAY,runner.runnerId)
 			}
-			if(bestPrices._2<2.2) {
-				ctx.placeBet(2,bestPrices._2,LAY,runner.runnerId)
-				ctx.placeBet(2,bestPrices._2 + 0.02,BACK,runner.runnerId)
+			if(bestPrices._2.price<2.2) {
+				ctx.placeBet(2,bestPrices._2.price,LAY,runner.runnerId)
+				ctx.placeBet(2,bestPrices._2.price + 0.02,BACK,runner.runnerId)
 			}
 		}	
 

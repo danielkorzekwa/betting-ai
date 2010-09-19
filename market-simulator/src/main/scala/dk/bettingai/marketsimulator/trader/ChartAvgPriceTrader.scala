@@ -32,7 +32,7 @@ class ChartAvgPriceTrader extends ITrader{
 		val chartValues = for{
 			runnerId <- ctx.runners.map(_.runnerId) 
 			val bestPrices = ctx.getBestPrices(runnerId)	
-			val chartValue = PriceUtil.avgPrice(bestPrices)
+			val chartValue = PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2 .price)
 		} yield chartValue
 		ctx.addChartValues(eventTimestamp -> chartValues)
 	}
