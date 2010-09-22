@@ -51,8 +51,10 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 	 * @param betPrice
 	 * @param betType
 	 * @param runnerId
+	 * 
+	 * @return The bet that was placed.
 	 */
-	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long) {
+	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet = {
 		require(betSize>0, "Bet size must be >0, betSize=" + betSize)
 		require(runners.exists(s => s.runnerId==runnerId),"Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 		require(!betsIds.contains(betId),"Bet for betId=%s already exists".format(betId))
@@ -71,19 +73,9 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 		case BACK => getRunnerBets(runnerId,backBets)
 		}
 
-		betsIds += betId
-		if(pricesToBeMatched.hasNext) {
-			matchBet2(betSize,pricesToBeMatched.next)
-		}
-		else {
-			val newBet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
-			betsToBeAdded.getOrElseUpdate(betPrice,ListBuffer()) += newBet
-		}
+			def matchBet(newBet:IBet,priceToMatch:Double):Unit = {
 
-		def matchBet2(unmatchedSize:Double,priceToCancel:Double):Unit = {
-				val newBet = new Bet(betId,userId, unmatchedSize, betPrice, betType, U,marketId,runnerId)
-
-				val priceBets = betsToBeMatched.getOrElseUpdate(priceToCancel,ListBuffer())
+				val priceBets = betsToBeMatched.getOrElseUpdate(priceToMatch,ListBuffer())
 				if(!priceBets.isEmpty) {
 					/**Get bet to be matched and remove it from the main list of bets - it will be added later as a result of matching.*/
 					val betToBeMatched = priceBets.head
@@ -97,18 +89,27 @@ class Market(val marketId:Long, val marketName:String,val eventName:String,val n
 					/**Find unmatched portion for a bet being placed.*/
 					val unmatchedPortion = matchingResult.find(b => b.betId==betId && b.betStatus==U)
 					if(!unmatchedPortion.isEmpty) {
-						matchBet2(unmatchedPortion.get.betSize,priceToCancel)
+						matchBet(new Bet(betId,userId, unmatchedPortion.get.betSize, betPrice, betType, U,marketId,runnerId),priceToMatch)
 					}
 				}
 				else {
 					if(pricesToBeMatched.hasNext) {
-						matchBet2(unmatchedSize,pricesToBeMatched.next)
+						matchBet(newBet,pricesToBeMatched.next)
 					}
 					else {
 						betsToBeAdded.getOrElseUpdate(betPrice,ListBuffer()) += newBet
 					}
 				}
 		}
+		
+		betsIds += betId
+		
+		val bet = new Bet(betId,userId, betSize, betPrice, betType, U,marketId,runnerId)
+		
+		if(pricesToBeMatched.hasNext) matchBet(bet,pricesToBeMatched.next)
+		else betsToBeAdded.getOrElseUpdate(betPrice,ListBuffer()) += bet
+		
+		bet
 	}
 
 	/** Cancels a bet on a betting exchange market.
