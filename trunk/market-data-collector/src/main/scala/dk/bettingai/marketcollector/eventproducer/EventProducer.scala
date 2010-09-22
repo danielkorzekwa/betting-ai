@@ -60,7 +60,6 @@ class EventProducer extends IEventProducer{
 			case e:Exception => {
 				val runners = validatedMarketRunners.keys.map(runnerId => new Market.Runner(runnerId,"n/a")).toList
 				betex.createMarket(marketId, "n/a", "n/a", 1, new Date(0), runners)
-				betex.findMarket(marketId)
 			}
 			}
 
