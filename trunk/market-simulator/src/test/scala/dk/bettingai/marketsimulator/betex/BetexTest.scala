@@ -14,10 +14,12 @@ class BetexTest {
 	 * */
 
 	@Test def testCreateMarket {
-		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		val newMarket = betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		assertEquals(1,betex.getMarkets.size)
 
 		val marketFromBetex = betex.getMarkets()(0)
+		
+		assertEquals(newMarket,marketFromBetex)
 		assertEquals(10,marketFromBetex.marketId)
 		assertEquals("Match Odds",marketFromBetex.marketName)
 		assertEquals("Man Utd vs Arsenal",marketFromBetex.eventName)

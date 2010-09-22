@@ -12,8 +12,9 @@ trait IBetex {
 	 * 
 	 * @param market
 	 * 
+	 * @return Created market
 	 */
-	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,runners:List[IMarket.IRunner])
+	def createMarket(marketId:Long,marketName:String,eventName:String,numOfWinners:Int,marketTime:Date,runners:List[IMarket.IRunner]):IMarket
 	
 	/**Finds market for market id.
 	 * 
