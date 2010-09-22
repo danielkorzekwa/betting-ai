@@ -13,6 +13,7 @@ import dk.bettingai.marketsimulator.betex._
  */
 class ChartAvgPriceTrader extends ITrader{
 
+	
 	/**It is called once on trader initialisation.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
@@ -32,7 +33,7 @@ class ChartAvgPriceTrader extends ITrader{
 		val chartValues = for{
 			runnerId <- ctx.runners.map(_.runnerId) 
 			val bestPrices = ctx.getBestPrices(runnerId)	
-			val chartValue = PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2 .price)
+			val chartValue = 1/PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2 .price)
 		} yield chartValue
 		ctx.addChartValues(eventTimestamp -> chartValues)
 	}

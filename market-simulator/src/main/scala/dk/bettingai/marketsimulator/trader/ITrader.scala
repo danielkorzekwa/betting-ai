@@ -50,9 +50,9 @@ object ITrader {
 	* @param betType
 	* @param runnerId
 	* 
-	* @return bet id
+  * @return The bet that was placed.
 	*/
-	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Long
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet
 	
 	/** Cancels a bet on a betting exchange market.
 	 * 
@@ -61,6 +61,14 @@ object ITrader {
 	 * @return amount cancelled
 	*/
 	def cancelBet(betId:Long):Double
+	
+	/**Place hedge bet on a market runner to make ifwin/iflose profits even. Either back or lay bet is placed on best available price.
+	 * 
+	 * @param runnerId
+	 * 
+	 * @return Hedge bet that was placed or none if no hedge bet was placed.
+	 */
+	def placeHedgeBet(runnerId:Long):Option[IBet]
 	
 	/**Returns all bets placed by user on that market.
 	 *

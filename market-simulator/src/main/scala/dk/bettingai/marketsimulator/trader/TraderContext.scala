@@ -1,6 +1,7 @@
 package dk.bettingai.marketsimulator.trader
 
 import dk.bettingai.marketsimulator.betex.api._
+import dk.bettingai.marketsimulator.betex._
 import ITrader._
 import IBet.BetTypeEnum._
 import IMarket._
@@ -45,11 +46,12 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	 * @param betPrice
 	 * @param betType
 	 * @param runnerId
+	 * 
+	 * @return The bet that was placed.
 	 */
-	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Long = {
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet = {
 		val betId = nextBetId
 		market.placeBet(betId,userId,betSize,betPrice,betType,runnerId)
-		betId
 	}
 	
 	/** Cancels a bet on a betting exchange market.
@@ -62,6 +64,31 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 		market.cancelBet(betId)
 	}
 
+	/**Place hedge bet on a market runner to make ifwin/iflose profits even. Either back or lay bet is placed on best available price.
+	 * 
+	 * @param runnerId
+	 * 
+	 * @return Hedge bet that was placed or none if no hedge bet was placed.
+	 */
+	def placeHedgeBet(runnerId:Long):Option[IBet] = {
+		val riskReport = risk()
+		val ifWin = riskReport.ifWin(runnerId)
+		val ifLose = riskReport.ifLose(runnerId)
+		val bestPrices = getBestPrices(runnerId)
+		
+		if(ifWin>ifLose && !bestPrices._2.price.isNaN) {
+			val betPrice = bestPrices._2.price
+			val betSize = (ifWin-ifLose)/betPrice
+			Option(placeBet(betSize,betPrice,LAY,runnerId))
+		}
+		else if(ifLose>ifWin && !bestPrices._1.price.isNaN) {
+			val betPrice = bestPrices._1.price
+			val betSize = (ifLose-ifWin)/betPrice
+			Option(placeBet(betSize,betPrice,BACK,runnerId))
+		}
+		else None
+	}
+	
 	/**Returns best toBack/toLay prices for market runner.
 	 * Element 1 - best price to back, element 2 - best price to lay
 	 * Double.NaN is returned if price is not available.
