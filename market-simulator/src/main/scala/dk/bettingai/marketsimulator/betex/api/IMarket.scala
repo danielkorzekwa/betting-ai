@@ -39,8 +39,10 @@ trait IMarket {
 	* @param betPrice
 	* @param betType
 	* @param runnerId
+	* 
+	* @return The bet that was placed.
 	*/
-	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long)
+	def placeBet(betId:Long,userId: Long, betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet
 	
 	/** Cancels a bet on a betting exchange market.
 	 * 
