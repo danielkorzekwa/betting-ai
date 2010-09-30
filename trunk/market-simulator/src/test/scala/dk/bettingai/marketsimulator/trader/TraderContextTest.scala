@@ -15,9 +15,61 @@ class TraderContextTest {
 
 	private var lastBetId=0l
 	private val nextBetId = () => {lastBetId+=1;lastBetId}
+	val ctx = new TraderContext(nextBetId(),200,market,0)
+
+	/**
+	 * Test scenarios for fillBet
+	 * 
+	 */
+	@Test def testFillBet {
+		val bet1 = ctx.fillBet(2,3,BACK,11).get
+
+		assertEquals(2,bet1.betSize,0)
+		assertEquals(3,bet1.betPrice,0)
+		assertEquals(BACK,bet1.betType)
+		assertEquals(11,bet1.runnerId)
+
+		val bet2 = ctx.fillBet(6,3,BACK,11).get
+
+		assertEquals(4,bet2.betSize,0)
+		assertEquals(3,bet2.betPrice,0)
+		assertEquals(BACK,bet2.betType)
+		assertEquals(11,bet2.runnerId)
+
+		val bet3 = ctx.fillBet(6,3,BACK,11)
+
+		assertEquals(None,bet3)
+
+		val bet4 = ctx.fillBet(6,3.1,BACK,11).get
+
+		assertEquals(6,bet4.betSize,0)
+		assertEquals(3.1,bet4.betPrice,0)
+		assertEquals(BACK,bet4.betType)
+		assertEquals(11,bet4.runnerId)
+
+		val bet5 = ctx.fillBet(6,3.1,BACK,12).get
+
+		assertEquals(6,bet5.betSize,0)
+		assertEquals(3.1,bet5.betPrice,0)
+		assertEquals(BACK,bet5.betType)
+		assertEquals(12,bet5.runnerId)
+
+		val bet6 = ctx.fillBet(6,3,LAY,11).get
+
+		assertEquals(6,bet6.betSize,0)
+		assertEquals(3,bet6.betPrice,0)
+		assertEquals(LAY,bet6.betType)
+		assertEquals(11,bet6.runnerId)
+
+	}
+
+	/**
+	 * Test scenarios for placeHedgeBet
+	 * 
+	 */
 
 	@Test def testPlaceHedgeBetNoHedgeBetNoPricesToBet {
-		val ctx = new TraderContext(nextBetId(),200,market,0)
+
 		market.placeBet(nextBetId(),201l,2,3,LAY,11l)
 		ctx.placeBet(2,3,BACK,11l)
 
@@ -26,7 +78,6 @@ class TraderContextTest {
 	}
 
 	@Test def testPlaceHedgeBetLayHedgeBetIsPlaced {
-		val ctx = new TraderContext(nextBetId(),200,market,0)
 		market.placeBet(nextBetId(),201l,2,3,LAY,11l)
 		market.placeBet(nextBetId(),201l,2,4,BACK,11l)
 		ctx.placeBet(2,3,BACK,11l)
@@ -45,7 +96,6 @@ class TraderContextTest {
 	}
 
 	@Test def testPlaceHedgeBetBackHedgeBetIsPlaced {
-		val ctx = new TraderContext(nextBetId(),200,market,0)
 		market.placeBet(nextBetId(),201l,2,3,LAY,11l)
 		market.placeBet(nextBetId(),201l,2,4,BACK,11l)
 		ctx.placeBet(1.5,4,LAY,11l)
