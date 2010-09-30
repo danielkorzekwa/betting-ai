@@ -4,9 +4,11 @@ import dk.bettingai.marketsimulator.betex.api._
 import dk.bettingai.marketsimulator.betex._
 import ITrader._
 import IBet.BetTypeEnum._
+import IBet.BetStatusEnum._
 import IMarket._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.risk._
+import dk.bettingai.marketsimulator.betex.BetUtil._
 
 /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
  * 
@@ -52,6 +54,24 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet = {
 		val betId = nextBetId
 		market.placeBet(betId,userId,betSize,betPrice,betType,runnerId)
+	}
+	
+	/** Places a bet on a betting exchange market.
+	 * 
+	 * @param betSizeLimit Total user unmatched volume that should be achieved after calling this method. 
+	 * For example is unmatched volume is 2 and betSizeLimit is 5 then bet with bet size 3 is placed. 
+	 * @param betPrice
+	 * @param betType
+	 * @param runnerId
+	 * 
+	 * @return The bet that was placed or None if nothing has been placed.
+	 */
+	def fillBet(betSizeLimit:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Option[IBet] = {
+		val betId = nextBetId
+		
+		val bets = getBets(false).filter(b=> b.betStatus==U && b.betPrice==betPrice && b.betType==betType && b.runnerId==runnerId)
+		val fillBetSize = betSizeLimit-totalStake(bets)
+		if(fillBetSize>0) Option(placeBet(fillBetSize,betPrice,betType,runnerId)) else None
 	}
 	
 	/** Cancels a bet on a betting exchange market.

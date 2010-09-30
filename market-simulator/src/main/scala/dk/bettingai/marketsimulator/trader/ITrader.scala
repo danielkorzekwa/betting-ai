@@ -54,6 +54,18 @@ object ITrader {
 	*/
 	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):IBet
 	
+	/** Places a bet on a betting exchange market.
+	 * 
+	 * @param betSizeLimit Total user unmatched volume that should be achieved after calling this method. 
+	 * For example is unmatched volume is 2 and betSizeLimit is 5 then bet with bet size 3 is placed. 
+	 * @param betPrice
+	 * @param betType
+	 * @param runnerId
+	 * 
+	 * @return The bet that was placed or None if nothing has been placed.
+	 */
+	def fillBet(betSizeLimit:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Option[IBet]
+	
 	/** Cancels a bet on a betting exchange market.
 	 * 
 	 * @param betId Unique id of a bet to be cancelled.
