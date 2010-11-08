@@ -46,9 +46,12 @@ def validate(priceRanges: List[PriceRange])(price:Double,rounding:PriceRoundEnum
 
 /**Increment price.*/
 def priceUp(priceRanges: List[PriceRange],price:Double):Double = validate(priceRanges)(price + 0.01, PriceRoundEnum.ROUND_UP)
+def priceUp(price:Double):Double = validate(getPriceRanges)(price + 0.01, PriceRoundEnum.ROUND_UP)
+
 
 /**Decrement price.*/
 def priceDown(priceRanges: List[PriceRange],price:Double):Double = validate(priceRanges)(price - 0.01, PriceRoundEnum.ROUND_DOWN)
+def priceDown(price:Double):Double = validate(getPriceRanges)(price - 0.01, PriceRoundEnum.ROUND_DOWN)
 
 /**Returns list of betfair price ranges.*/
 def getPriceRanges:List[PriceRange] = {

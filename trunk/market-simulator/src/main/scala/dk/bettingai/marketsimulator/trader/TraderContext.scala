@@ -59,7 +59,7 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	/** Places a bet on a betting exchange market.
 	 * 
 	 * @param betSizeLimit Total user unmatched volume that should be achieved after calling this method. 
-	 * For example is unmatched volume is 2 and betSizeLimit is 5 then bet with bet size 3 is placed. 
+	 * For example is unmatched volume is 2 and betSizeLimit is 5 then bet with bet size 3 is placed. Minimum bet size is 2 
 	 * @param betPrice
 	 * @param betType
 	 * @param runnerId
@@ -71,7 +71,7 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 		
 		val bets = getBets(false).filter(b=> b.betStatus==U && b.betPrice==betPrice && b.betType==betType && b.runnerId==runnerId)
 		val fillBetSize = betSizeLimit-totalStake(bets)
-		if(fillBetSize>0) Option(placeBet(fillBetSize,betPrice,betType,runnerId)) else None
+		if(fillBetSize>=2) Option(placeBet(fillBetSize,betPrice,betType,runnerId)) else None
 	}
 	
 	/** Cancels a bet on a betting exchange market.
