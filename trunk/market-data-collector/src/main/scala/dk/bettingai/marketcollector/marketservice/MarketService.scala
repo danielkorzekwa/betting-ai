@@ -4,6 +4,10 @@ import java.util.Date
 import dk.bot.betfairservice._
 import scala.collection.JavaConversions._
 import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.api._
+import IBet._
+import BetTypeEnum._
+import BetStatusEnum._
 import Market._
 import dk.bot.betfairservice.model._
 import IMarketService._
@@ -83,5 +87,39 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 			val runners = bfMarketDetails.getRunners.map(r => new RunnerDetails(r.getSelectionId,r.getSelectionName)).toList
 			val marketDetails = new MarketDetails(bfMarketDetails.getMarketId,bfMarketDetails.getMarketName(), bfMarketDetails.getMenuPath(),bfMarketDetails.getNumOfWinners, bfMarketDetails.getMarketTime, runners)
 			marketDetails
+	}
+	
+	def getUserMatchedBets(marketId:Long,matchedSince:Date): List[IBet] = {
+		val muBets = betfairService.getMUBets(BFBetStatus.MU,marketId.toInt,matchedSince)
+		def betType(b:BFMUBet):BetTypeEnum = b.getBetType match {
+			case BFBetType.B => BACK
+			case BFBetType.L => LAY
+		}
+		def betStatus(b:BFMUBet):BetStatusEnum = b.getBetStatus match {
+			case BFBetStatus.M => M 
+			case BFBetStatus.U => U 
+			case _ => throw new IllegalArgumentException("Not supported bet status")
+		}
+		val bets = muBets.map(b => new Bet(b.getBetId(),-1, b.getSize(), b.getPrice(), betType(b), betStatus(b),b.getMarketId,b.getSelectionId)).toList
+		bets
+	}
+	
+	/** Places a bet on a betting exchange market.
+	 * 
+	 * @param betSize
+	 * @param betPrice
+	 * @param betType
+	 * @param runnerId
+	 * @param marketId
+	 * 
+	 * @return The bet that was placed.
+	 */
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, marketId:Long, runnerId:Long):IBet = {
+		def betTypeValue(b:BetTypeEnum):BFBetType = betType match {
+			case BACK => BFBetType.B
+			case LAY => BFBetType.L
+		}
+		val betResult = betfairService.placeBet(marketId.toInt,runnerId.toInt,betTypeValue(betType),betPrice,betSize,true)
+		Bet(betResult.getBetId,-1l,betResult.getSize(),betResult.getPrice(),betType,marketId,runnerId)
 	}
 }

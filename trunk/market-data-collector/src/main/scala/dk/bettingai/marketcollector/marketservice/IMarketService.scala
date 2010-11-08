@@ -2,6 +2,10 @@ package dk.bettingai.marketcollector.marketservice
 
 import java.util.Date
 import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.api._
+import IBet._
+import BetTypeEnum._
+import BetStatusEnum._
 import Market._
 import IMarketService._
 import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
@@ -53,4 +57,18 @@ trait IMarketService {
 	def getMarketRunners(marketId:Long):MarketRunners
 	
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails
+	
+	def getUserMatchedBets(marketId:Long,matchedSince:Date): List[IBet]
+	
+	/** Places a bet on a betting exchange market.
+	 * 
+	 * @param betSize
+	 * @param betPrice
+	 * @param betType
+	 * @param marketId
+	 * @param runnerId
+	 * 
+	 * @return The bet that was placed.
+	 */
+	def placeBet(betSize:Double, betPrice:Double, betType:BetTypeEnum, marketId:Long,runnerId:Long):IBet 
 }
