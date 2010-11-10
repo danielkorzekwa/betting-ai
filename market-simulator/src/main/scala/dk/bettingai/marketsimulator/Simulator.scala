@@ -62,18 +62,19 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 					val in = new BufferedReader(new FileReader(marketEvents));
 
 					/**Process all market events.*/
-					def processMarketEvents(marketEvent:String,traderContext:ITraderContext,eventTimestamp:Long):Unit = {
+					def processMarketEvents(marketEvent:String,traderContext:TraderContext,eventTimestamp:Long):Unit = {
 
 							val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
-
+							traderContext.setEventTimestamp(processedEventTimestamp)
+							
 							/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-							if(processedEventTimestamp>eventTimestamp) trader.execute(processedEventTimestamp,traderContext)
+							if(processedEventTimestamp>eventTimestamp) trader.execute(traderContext)
 
 							/**Recursive  call.*/
 							val nextMarketEvent = in.readLine
 							if(nextMarketEvent==null) {
 								/**Process remaining events*/
-								if(processedEventTimestamp<=eventTimestamp) trader.execute(processedEventTimestamp,traderContext)
+								if(processedEventTimestamp<=eventTimestamp) trader.execute(traderContext)
 							}
 							else processMarketEvents(nextMarketEvent,traderContext,processedEventTimestamp)
 					}
@@ -85,6 +86,8 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 					val market = betex.findMarket(marketId)
 					val traderContext = new TraderContext(nextBetId(),traderUserId,market,commission)
 					trader.init(traderContext)
+					
+					/**Process remaining market events.*/
 					val marketEvent = in.readLine
 					if(marketEvent!=null) processMarketEvents(marketEvent,traderContext,processedEventTimestamp)
 					val traderContexts = if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress) else Nil

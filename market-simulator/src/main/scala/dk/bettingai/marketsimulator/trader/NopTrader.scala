@@ -20,8 +20,7 @@ class NopTrader extends ITrader{
 	
 	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
-	 * @param eventTimestamp Time stamp of market event
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 */
-	def execute(eventTimestamp:Long,ctx: ITraderContext) = {/**Do nothing.*/}
+	def execute(ctx: ITraderContext) = {/**Do nothing.*/}
 }
