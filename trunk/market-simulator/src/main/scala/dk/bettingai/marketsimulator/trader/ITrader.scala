@@ -24,11 +24,15 @@ object ITrader {
 	val marketTime:Date
 	val runners:List[IRunner]
 		
-	/**Set labels for all chart series.*/
-	def setChartLabels(chartLabels:List[String])
-			
-	/**Add chart values to time line chart. Key - time stamp, value - list of values for all series in the same order as labels.*/
-	def addChartValues(chartValues:Tuple2[Long,List[Double]])
+	/**Time stamp of market event */
+	def getEventTimestamp:Long
+	
+	/**Add chart value to time line chart
+	 * 
+	 * @param label Label of chart series
+	 * @param value Value to be added to chart series
+	 */
+	def addChartValue(label:String, value:Double)
 	
 	/**Returns best toBack/toLay prices for market runner.
 	* Element 1 - best price to back, element 2 - best price to lay
@@ -113,10 +117,9 @@ trait ITrader {
 	
 	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
-	 * @param eventTimestamp Time stamp of market event
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 */
-	def execute(eventTimestamp:Long,ctx: ITraderContext)
+	def execute(ctx: ITraderContext)
 	
 
 }

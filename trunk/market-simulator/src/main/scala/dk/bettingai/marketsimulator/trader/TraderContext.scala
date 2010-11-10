@@ -23,25 +23,39 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 	val numOfWinners = market.numOfWinners
 	val marketTime = market.marketTime
 	val runners = market.runners
+  private var _eventTimestamp = -1l
+  
+  def setEventTimestamp(eventTimestamp:Long) {_eventTimestamp = eventTimestamp}
+  def getEventTimestamp = _eventTimestamp
 
-	var chartLabels = List[String]()
-	/**Key - time stamp, value - list of values for all series in the same order as labels.*/
-	val chartData = new scala.collection.mutable.ListBuffer[Tuple2[Long,List[Double]]]()
-
+	/** key - timestamp, value Map[chartLabel,value]*/
+	val chartData = collection.mutable.LinkedHashMap[Long,collection.mutable.Map[String,Double]]()
+	val chartLabels = collection.mutable.LinkedHashSet[String]()
 	/**Returns labels for all chart series.*/
-	def getChartLabels:List[String] = chartLabels
-
-	/**Set labels for all chart series.*/
-	def setChartLabels(chartLabels:List[String]) {this.chartLabels = chartLabels}
+	def getChartLabels:List[String] = chartLabels.toList
 
 	/**Returns chart values for all time series in the same order as chart labels. 
 	 * Key - time stamp, value - list of values for all series in the same order as labels.*/
-	def getChartValues:List[Tuple2[Long,List[Double]]] = chartData.toList
+	def getChartValues:List[Tuple2[Long,List[Double]]] = {
+		val chartValues = for {
+			(timestamp,values) <- chartData
+			val timestampValues = chartLabels.toList.map(l => values.getOrElse(l,Double.NaN))
+			
+		} yield Tuple2(timestamp,timestampValues)
+		chartValues.toList
+	}
 
-	/**Add chart values to time line chart. Key - time stamp, value - list of values for all series in the same order as labels.*/
-	def addChartValues(chartValues:Tuple2[Long,List[Double]]) {chartData += chartValues}
-
-
+	/**Add chart value to time line chart
+	 * 
+	 * @param label Label of chart series
+	 * @param value Value to be added to chart series
+	 */
+	def addChartValue(label:String, value:Double) = {
+		chartLabels += label
+		val timestampChartValues = chartData.getOrElseUpdate(getEventTimestamp,collection.mutable.Map[String,Double]())
+		timestampChartValues += label -> value
+	}
+	
 	/** Places a bet on a betting exchange market.
 	 * 
 	 * @param betSize
