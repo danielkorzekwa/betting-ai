@@ -41,8 +41,10 @@
 	<modules>
 		<!-- <module>betting-oracle</module> -->
 		<module>market-simulator</module>
+		<module>trader-examples</module>
 		<module>market-data-collector</module>
 		<module>betting-ai-launcher</module>
+		
 	</modules>
 
 	<!-- Properties -->
