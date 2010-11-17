@@ -109,7 +109,7 @@ object ITrader {
 }
 trait ITrader {
 
-	/**It is called once on trader initialisation.
+	/**It is called once for every analysed market.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 * */
