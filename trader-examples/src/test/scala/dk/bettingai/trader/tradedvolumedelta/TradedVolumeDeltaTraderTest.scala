@@ -11,7 +11,7 @@ import Assert._
 class TradedVolumeDeltaTraderTest {
 
 	@Test def test {
-		val inputArgs = Array("marketDataDir=" + getClass.getResource("").getFile, "traderImpl=dk.bettingai.trader.tradedvolumedelta.TradedVolumeDeltaTrader")
+		val inputArgs = Array("htmlReportDir=./target/reports/TradedVolumeDeltaTraderTest","marketDataDir=" + getClass.getResource("").getFile, "traderImpl=dk.bettingai.trader.tradedvolumedelta.TradedVolumeDeltaTrader")
 		dk.bettingai.marketsimulator.SimulatorApp.main(inputArgs)	
 	}
 }
