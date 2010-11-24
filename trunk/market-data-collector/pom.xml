@@ -22,7 +22,6 @@
 		<dependency>
 			<groupId>dk.flexibet</groupId>
 			<artifactId>flexibet-betfair</artifactId>
-			<version>0.6</version>
 		</dependency>
 
 		<dependency>
