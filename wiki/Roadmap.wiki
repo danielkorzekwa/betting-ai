@@ -8,7 +8,7 @@ Betting AI version 1.1 (releases on 23 July 2010)
 
     * Goal - Run market simulation for simple trader implementation (place bet if price>2) and real market data. 
 
-Betting AI version 1.2 (RELEASED ON 24 November 2010)
+Betting AI version 1.2 (RELEASED on 24 November 2010)
 
     * Goal 1 - Run market simulation for simple AI trader and real market data. 
     * Goal 2 - Improve performance of market simulation.
@@ -19,8 +19,9 @@ prices,etc.
 
 Betting AI version 1.3 (release planned on 30 December 2010)
     * Integrate market simulator with complex event processing (Esper) to calculate some metrics, e.g. derivatives or to recognize patterns
-    * Create and test trading strategies adopting meta-heuristics (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics)
-    * Create and test trading strategies adopting AI (http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
+    * Proof of concept. Create and test trading strategies adopting meta-heuristics (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics)
+    * Proof of concept. Create and test trading strategies adopting AI (http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
+    * Compare efficiency of trading strategies between meta-heuristics and simple AI (back propagation)
 
 Future
     * Web interface to Market Simulator.
