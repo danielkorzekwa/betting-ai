@@ -17,7 +17,7 @@ Betting AI version 1.2 (RELEASED on 24 November 2010)
 prices,etc.
     * Goal 5 - Generate html reports for market simulation with some useful graphs.
 
-Betting AI version 1.3 (release planned on 30 December 2010)
+Betting AI version 1.3 (release planned on 30 January 2011)
     * Integrate market simulator with complex event processing (Esper) to calculate some metrics, e.g. derivatives or to recognize patterns
     * Proof of concept. Create and test trading strategies adopting meta-heuristics (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics)
     * Proof of concept. Create and test trading strategies adopting AI (http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
