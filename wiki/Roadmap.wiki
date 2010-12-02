@@ -6,7 +6,7 @@ Betting AI version 1.0 ( RELEASED on 16 June 2010)
 
 -----------------------------------------------------------------------------------------
 
-Betting AI version 1.1 (releases on 23 July 2010)
+Betting AI version 1.1 (RELEASED on 23 July 2010)
 
     * Goal - Run market simulation for simple trader implementation (place bet if price>2) and real market data. 
 
