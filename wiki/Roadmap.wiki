@@ -1,3 +1,5 @@
+---
+
 Betting AI version 1.0 ( RELEASED on 16 June 2010)
 
     * Goal - Proof of concept. Run market simulation for very simple market data that contains a few events to create market and place/cancel bets. Simulation will be executed for simple trader implementation that places a bet if price is bigger than 2. 
