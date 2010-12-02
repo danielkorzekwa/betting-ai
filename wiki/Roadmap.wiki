@@ -1,4 +1,4 @@
----
+---- 
 
 Betting AI version 1.0 ( RELEASED on 16 June 2010)
 
