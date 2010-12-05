@@ -9,18 +9,11 @@ import ITrader._
  *
  */
 class NopTrader extends ITrader{
-
-	/**It is called once on trader initialisation.
-	 * 
-	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
-	 * */
-	def init(ctx: ITraderContext) {
-		//do nothing
-	}
 	
 	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 */
 	def execute(ctx: ITraderContext) = {/**Do nothing.*/}
+	
 }

@@ -102,6 +102,7 @@ class SimulatorIntegrationTest {
 
 		assertEquals(3,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(1,marketRiskReport(0).unmatchedBetsNumber,0)
+
 	}
 
 	@Test def testOneMatchedBetAFewMatchedBets {
@@ -122,6 +123,9 @@ class SimulatorIntegrationTest {
 
 		assertEquals(7,marketRiskReport(0).matchedBetsNumber,0)
 		assertEquals(7,marketRiskReport(0).unmatchedBetsNumber,0)
+		
+		 assertEquals(1,trader.initCalledTimes)
+		 assertEquals(1,trader.afterCalledTimes)
 	}
 
 	@Test def testOneMatchedBetsOnTwoMarkets {
@@ -145,5 +149,8 @@ class SimulatorIntegrationTest {
 		assertEquals(1.058,marketRiskReport(1).marketExpectedProfit.marketExpectedProfit,0.001)
 		assertEquals(2,marketRiskReport(1).matchedBetsNumber,0)
 		assertEquals(2,marketRiskReport(1).unmatchedBetsNumber,0)
+		
+		 assertEquals(2,trader.initCalledTimes)
+		 assertEquals(2,trader.afterCalledTimes)
 	}
 }

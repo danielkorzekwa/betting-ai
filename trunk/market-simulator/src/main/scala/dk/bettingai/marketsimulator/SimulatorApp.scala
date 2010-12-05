@@ -93,7 +93,7 @@ object SimulatorApp  {
 			reportHead.append("\n var rawdata%s =%s".format(riskReport.marketId,rawData))
 			reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(riskReport.marketId,riskReport.marketId))
 			reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(riskReport.marketId,riskReport.marketId))
-			reportHead.append("\n chart%s.draw(data%s, {'legendPosition': 'newRow',displayAnnotations: true,'scaleType': 'maximized'});".format(riskReport.marketId,riskReport.marketId))
+			reportHead.append("\n chart%s.draw(data%s, {'dateFormat' : 'HH:mm:ss MMMM dd, yyyy', 'legendPosition': 'newRow',displayAnnotations: true,'scaleType': 'maximized'});".format(riskReport.marketId,riskReport.marketId))
 
 			reportBody.append("<br/>%s/%s<br/>".format(riskReport.marketName,riskReport.eventName))
 			reportBody.append("<br/><div id='chart_div%s' style='width: 800px; height: 480px;'></div>".format(riskReport.marketId))
