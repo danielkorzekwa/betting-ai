@@ -39,7 +39,7 @@ class TradedVolumeDeltaShareTrader extends ITrader{
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
 	 * */
-	def init(ctx: ITraderContext) {
+	override def init(ctx: ITraderContext) {
     epService.initialize()
 	  stmtTradedVolumeDelta = epService.getEPAdministrator().createEPL(exprTradedVolumeDelta)
 	}
