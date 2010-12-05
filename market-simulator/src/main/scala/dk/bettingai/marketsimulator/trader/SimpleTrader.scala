@@ -12,14 +12,17 @@ import ITrader._
  */
 class SimpleTrader extends ITrader{
 
-	/**It is called once on trader initialisation.
-	 * 
-	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
-	 * */
-	def init(ctx: ITraderContext) {
+	var initCalledTimes = 0
+	var afterCalledTimes = 0
+	/**It is called once for every analysed market.
+   * 
+   * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
+   * */
+  override def init(ctx: ITraderContext) {
+	initCalledTimes += 1
 	}
-
-	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
+	
+		/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
 	 */
@@ -33,7 +36,7 @@ class SimpleTrader extends ITrader{
 		for(runner <- ctx.runners) {
 			val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-			if(bestPrices._1.price>2) {
+			if(bestPrices._1.price>2.0) {
 				ctx.placeBet(2,bestPrices._1.price,BACK,runner.runnerId)
 				ctx.placeBet(2,bestPrices._1.price - 0.02,LAY,runner.runnerId)
 			}
@@ -44,4 +47,13 @@ class SimpleTrader extends ITrader{
 		}	
 
 	}
+	
+	 /**It is called once for every analysed market, after market simulation is finished.
+   * 
+   * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
+   * */
+  override def after(ctx: ITraderContext) {
+  	afterCalledTimes += 1
+  }
+
 }

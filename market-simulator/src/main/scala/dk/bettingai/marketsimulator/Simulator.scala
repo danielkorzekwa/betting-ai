@@ -21,13 +21,13 @@ import java.io.FileReader
  *
  */
 object Simulator {
-	
-		/**
-			 * @param chartLabels Labels for all chart series.
-			 * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels.
-			 */
+
+	/**
+	 * @param chartLabels Labels for all chart series.
+	 * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels.
+	 */
 	class MarketRiskReport(val marketId:Long,val marketName:String,val eventName:String,val marketExpectedProfit:MarketExpectedProfit,
-val matchedBetsNumber:Long,val unmatchedBetsNumber:Long,	val chartLabels:List[String],val chartValues:List[Tuple2[Long,List[Double]]]) extends IMarketRiskReport {
+			val matchedBetsNumber:Long,val unmatchedBetsNumber:Long,	val chartLabels:List[String],val chartValues:List[Tuple2[Long,List[Double]]]) extends IMarketRiskReport {
 		override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s, chartLabels=%s, chartValues=%s]".format(marketId,marketName,eventName,marketExpectedProfit,matchedBetsNumber,unmatchedBetsNumber,chartLabels,chartValues)
 	}
 
@@ -35,15 +35,15 @@ val matchedBetsNumber:Long,val unmatchedBetsNumber:Long,	val chartLabels:List[St
 
 class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends ISimulator{
 
-/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
- * 
- * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
- * @param trader
- * @param traderUserId
- * @param historicalDataUserId
- * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
- * @param commision Commission on winnings in percentage.
- */
+	/** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
+	 * 
+	 * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
+	 * @param trader
+	 * @param traderUserId
+	 * @param historicalDataUserId
+	 * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
+	 * @param commision Commission on winnings in percentage.
+	 */
 	def runSimulation(marketData:Map[Long,File], trader:ITrader,traderUserId:Int,historicalDataUserId:Int,p: (Int) => Unit,commission:Double):List[IMarketRiskReport] = {
 
 			var nextBetIdValue=1
@@ -66,7 +66,7 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 
 							val processedEventTimestamp = marketEventProcessor.process(marketEvent,nextBetId(),historicalDataUserId)
 							traderContext.setEventTimestamp(processedEventTimestamp)
-							
+
 							/**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
 							if(processedEventTimestamp>eventTimestamp) trader.execute(traderContext)
 
@@ -82,16 +82,18 @@ class Simulator(marketEventProcessor:MarketEventProcessor,betex:IBetex) extends 
 					/**Process CREATE_MARKET EVENT*/
 					val createMarketEvent = in.readLine	
 					if(createMarketEvent!=null) {
-					val processedEventTimestamp = marketEventProcessor.process(createMarketEvent,nextBetId(),historicalDataUserId)
-					val market = betex.findMarket(marketId)
-					val traderContext = new TraderContext(nextBetId(),traderUserId,market,commission)
-					trader.init(traderContext)
-					
-					/**Process remaining market events.*/
-					val marketEvent = in.readLine
-					if(marketEvent!=null) processMarketEvents(marketEvent,traderContext,processedEventTimestamp)
-					val traderContexts = if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress) else Nil
-					traderContext :: traderContexts
+						val processedEventTimestamp = marketEventProcessor.process(createMarketEvent,nextBetId(),historicalDataUserId)
+						val market = betex.findMarket(marketId)
+						val traderContext = new TraderContext(nextBetId(),traderUserId,market,commission)
+						trader.init(traderContext)
+
+						/**Process remaining market events.*/
+						val marketEvent = in.readLine
+						if(marketEvent!=null) processMarketEvents(marketEvent,traderContext,processedEventTimestamp)
+						trader.after(traderContext)
+						
+						val traderContexts = if(marketDataIterator.hasNext) processMarketData(marketIndex+1,newProgress) else Nil
+						traderContext :: traderContexts
 					}
 					else Nil
 			}

@@ -13,13 +13,6 @@ import ITrader._
 class SimpleTrader2 extends ITrader{
 	var i=0
 
-	/**It is called once on trader initialisation.
-	 * 
-	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
-	 * */
-	def init(ctx: ITraderContext) {
-		//do nothing
-	}
 	/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
 	 * 
 	 * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
@@ -37,4 +30,5 @@ class SimpleTrader2 extends ITrader{
 		}	
 
 	}
+	
 }
