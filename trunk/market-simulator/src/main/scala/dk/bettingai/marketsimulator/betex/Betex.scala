@@ -36,5 +36,8 @@ class Betex extends IBetex{
 
 /**Returns all markets.*/
 	def getMarkets(): List[IMarket] = markets.values.toList
+	
+	/**Removes all markets and bets.*/
+	def clear():Unit = markets.clear()
 
 }

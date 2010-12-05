@@ -27,4 +27,7 @@ trait IBetex {
 	/**Returns all markets on a betting exchange.*/
 	def getMarkets(): List[IMarket]
 	
+	/**Removes all markets and bets.*/
+	def clear():Unit
+	
 }

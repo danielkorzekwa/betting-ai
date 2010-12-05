@@ -18,7 +18,7 @@ class BetexTest {
 		assertEquals(1,betex.getMarkets.size)
 
 		val marketFromBetex = betex.getMarkets()(0)
-		
+
 		assertEquals(newMarket,marketFromBetex)
 		assertEquals(10,marketFromBetex.marketId)
 		assertEquals("Match Odds",marketFromBetex.marketName)
@@ -78,7 +78,7 @@ class BetexTest {
 
 		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
-		
+
 		assertEquals(10,betex.findMarket(10).marketId)
 		assertEquals("Man Utd vs Arsenal",betex.findMarket(10).eventName)
 
@@ -87,4 +87,17 @@ class BetexTest {
 
 	}
 
+	/**
+	 * Tests for clear 
+	 * */
+	
+	@Test def clear {
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
+
+		assertEquals(2,betex.getMarkets.size)
+		betex.clear()
+		assertEquals(0,betex.getMarkets.size)
+
+	}
 }
