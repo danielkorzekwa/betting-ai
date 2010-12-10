@@ -22,6 +22,8 @@ class HillClimbingPriceTraderTest {
 	val trader = new HillClimbingPriceTrader()
 
 	@Test def test {
+		
+		/**If this trader is run for long enough then it is trapped in a local maximum at price 2.54.*/
 		for(i <- 1 to 5) {
 			betex.clear()
 			simulator.runSimulation(marketDataSources, trader, traderUserId, historicalDataUserId, p => {}, commission)
