@@ -9,6 +9,7 @@ import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import scala.util._
 import org.slf4j.LoggerFactory
+import org.apache.commons.math.random._
 
 /** Simple trading strategy based on price variable only. It is searching for optimal price adopting hill climbing algorithm (http://en.wikipedia.org/wiki/Hill_climbing). 
  *  This trader is just a proof of concept for hill climbing approach and doesn't represents any bigger value.
@@ -24,8 +25,8 @@ class HillClimbingPriceTrader extends ITrader {
   val runnerId = 4207432
 
   val rand = new Random(System.currentTimeMillis)
-  var bestPrice = Double.NaN
-  var bestExpectedProfit = Double.NaN
+  var bestPrice = 2.22
+  var bestExpectedProfit = Double.MinValue
   var candidate = Double.NaN
 
   /**It is called once for every analysed market.
@@ -33,7 +34,7 @@ class HillClimbingPriceTrader extends ITrader {
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def init(ctx: ITraderContext) {
-    candidate = priceDown(1 / rand.nextDouble)
+  	if(rand.nextBoolean) candidate = priceUp(bestPrice) else candidate = priceDown(bestPrice)
   }
 
   /**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
@@ -45,8 +46,7 @@ class HillClimbingPriceTrader extends ITrader {
 
     if (ctx.marketId == marketId) {
       val bestPrices = ctx.getBestPrices(runnerId)
-      if (bestPrices._2.price < candidate) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
-      else ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
+      if (bestPrices._1.price > candidate) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
     }
   }
 
@@ -55,7 +55,7 @@ class HillClimbingPriceTrader extends ITrader {
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def after(ctx: ITraderContext) {
-    if (bestPrice.isNaN || ctx.risk.marketExpectedProfit > bestExpectedProfit) {
+    if (ctx.risk.marketExpectedProfit > bestExpectedProfit) {
       bestPrice = candidate
       bestExpectedProfit = ctx.risk.marketExpectedProfit
 
