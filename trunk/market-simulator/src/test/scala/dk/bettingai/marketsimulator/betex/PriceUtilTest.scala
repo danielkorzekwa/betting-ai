@@ -56,7 +56,22 @@ class PriceUtilTest {
 		assertEquals(5.0,PriceUtil.priceDown(PriceUtil.getPriceRanges,5.01),0)
 		assertEquals(110,PriceUtil.priceDown(PriceUtil.getPriceRanges,120),0)
 	}
+	
+	@Test def testMovePriceUpNumOfSteps {
+		assertEquals(2.96,PriceUtil.move(2.96,0),0)
+		assertEquals(2.98,PriceUtil.move(2.96,1),0)
+		assertEquals(3.00,PriceUtil.move(2.96,2),0)
+		assertEquals(3.05,PriceUtil.move(2.96,3),0)
+		assertEquals(3.0,PriceUtil.move(3.05,-1),0)
+		assertEquals(2.98,PriceUtil.move(3.05,-2),0)
+		assertEquals(2.96,PriceUtil.move(3.05,-3),0)
+		
+		assertEquals(2.28,PriceUtil.move(2.22,3),0)
+		assertEquals(2.3,PriceUtil.move(2.22,4),0)
+	}
+	
 
+	
 	@Test def testAvgPrice {
 		assertEquals(2, PriceUtil.avgPrice(1.5->3.0),0)
 	}
