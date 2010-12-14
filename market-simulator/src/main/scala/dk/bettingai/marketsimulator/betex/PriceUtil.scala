@@ -1,6 +1,7 @@
 package dk.bettingai.marketsimulator.betex
 
 import PriceUtil._
+import org.apache.commons.math.util._
 /**Exchange price utils.
  * 
  */
@@ -41,7 +42,18 @@ def validate(priceRanges: List[PriceRange])(price:Double,rounding:PriceRoundEnum
 			}
 	}
 
-	(validatedPrice*100)/100
+	MathUtils.round((validatedPrice*100)/100,2)
+}
+
+/** Move the price either up or down by a given number of steps.
+ * 
+ * @param numOfSteps How many times price should be moved up.
+ */
+def move(price:Double,numOfSteps:Int):Double = {
+	
+	if(numOfSteps>0) move(priceUp(price),numOfSteps-1)	
+	else if(numOfSteps<0) move(priceDown(price),numOfSteps+1)
+	else price
 }
 
 /**Increment price.*/
