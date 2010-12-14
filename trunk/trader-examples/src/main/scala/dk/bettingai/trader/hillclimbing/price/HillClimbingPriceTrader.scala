@@ -33,9 +33,7 @@ class HillClimbingPriceTrader extends ITrader {
    * 
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
-  override def init(ctx: ITraderContext) {
-  	if(rand.nextBoolean) candidate = priceUp(bestPrice) else candidate = priceDown(bestPrice)
-  }
+  override def init(ctx: ITraderContext) { candidate = move(bestPrice,rand.nextInt(11)-5) }
 
   /**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
    * 
@@ -60,6 +58,6 @@ class HillClimbingPriceTrader extends ITrader {
       bestExpectedProfit = ctx.risk.marketExpectedProfit
 
       log.info("Best price found = " + candidate + ", profit=" + bestExpectedProfit)
-    } else log.info("Best price not found = " + candidate + ", profit=" + ctx.risk.marketExpectedProfit)
+    } else log.info("Best price not found = " + candidate + ", profit=" + ctx.risk.marketExpectedProfit + ", current best [price/profit]=" + bestPrice + "/" + bestExpectedProfit)
   }
 }

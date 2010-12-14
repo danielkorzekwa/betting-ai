@@ -1,4 +1,4 @@
-package dk.bettingai.trader.hillclimbing.price
+package dk.bettingai.trader.hillclimbing.steepestascent.price
 
 import org.junit._
 import Assert._
@@ -7,7 +7,7 @@ import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator._
 import java.io.File
 
-class HillClimbingPriceTraderTest {
+class SteepestAscentHillClimbingPriceTraderTest {
 
 	val betex = new Betex()
 	val marketEventProcessor = new MarketEventProcessorImpl(betex)
@@ -16,7 +16,7 @@ class HillClimbingPriceTraderTest {
 
 	val marketDataDir = new File("./src/test/resources/one_hr_10mins_before_inplay")
 	val marketDataSources = Map (marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f) : _*)
-	val trader = new HillClimbingPriceTrader()
+	val trader = new SteepestAscentHillClimbingPriceTrader()
 
 	@Test def test {
 		
