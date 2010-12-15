@@ -17,6 +17,7 @@ object ITrader {
   /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.*/
   trait ITraderContext {
 
+  	val userId: Int
     val marketId: Long
     val marketName: String
     val eventName: String
@@ -105,6 +106,13 @@ object ITrader {
     def getRunnerTradedVolume(runnerId: Long): IRunnerTradedVolume
 
     def risk(): MarketExpectedProfit
+    
+    /**Registers new trader and return trader context. 
+     * This context can be used to trigger some custom traders that are registered manually by a master trader, 
+     * e.g. when testing some evolution algorithms for which more than one trader is required.
+     * @return trader context
+     */
+    def registerTrader():ITraderContext
   }
 }
 trait ITrader {

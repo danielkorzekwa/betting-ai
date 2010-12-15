@@ -56,14 +56,16 @@ object SimulatorApp  {
 		/**Create market simulator.*/
 		val betex = new Betex()
 		val marketEventProcessor = new MarketEventProcessorImpl(betex)
-		val simulator = new Simulator(marketEventProcessor,betex)
+		
+			/**Commission on winnings that is used when generating expected profit report.*/
+		val commission = 0.05;
+		val simulator = new Simulator(marketEventProcessor,betex,commission)
 
 		/**Run market simulator.*/
 		console.print(" Simulation progress:")
 		val time = System.currentTimeMillis
-		/**Commission on winnings that is used when generating expected profit report.*/
-		val commission = 0.05;
-		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],100,1000,p => console.print(" " + p + "%"),commission)
+	
+		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],p => console.print(" " + p + "%"))
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))

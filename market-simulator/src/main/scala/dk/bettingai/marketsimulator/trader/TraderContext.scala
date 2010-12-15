@@ -9,6 +9,7 @@ import IMarket._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.betex.BetUtil._
+import dk.bettingai.marketsimulator._
 
 /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
  * 
@@ -16,7 +17,7 @@ import dk.bettingai.marketsimulator.betex.BetUtil._
  *
  * @param commision Commission on winnings in percentage.
  */
-class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Double) extends ITraderContext {
+class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, commission:Double, simulator:Simulator) extends ITraderContext {
 	val marketId = market.marketId
 	val marketName = market.marketName
 	val eventName = market.eventName
@@ -161,5 +162,12 @@ class TraderContext(nextBetId: => Long,userId:Int, market:IMarket, commission:Do
 			val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 			ExpectedProfitCalculator.calculate(matchedBets, probs,commission)
 	}
+	
+	 /**Registers new trader and return trader context. 
+     * This context can be used to trigger some custom traders that are registered manually by a master trader, 
+     * e.g. when testing some evolution algorithms for which more than one trader is required.
+     * @return trader context
+     */
+    def registerTrader():ITraderContext = simulator.registerTrader(market)
 
 }
