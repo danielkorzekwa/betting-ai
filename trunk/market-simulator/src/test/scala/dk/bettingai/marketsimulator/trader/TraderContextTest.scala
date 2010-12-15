@@ -15,7 +15,7 @@ class TraderContextTest {
 
 	private var lastBetId=0l
 	private val nextBetId = () => {lastBetId+=1;lastBetId}
-	val ctx = new TraderContext(nextBetId(),200,market,0)
+	val ctx = new TraderContext(nextBetId(),200,market,0,null)
 
 	/**
 	 * Test scenarios for fillBet
