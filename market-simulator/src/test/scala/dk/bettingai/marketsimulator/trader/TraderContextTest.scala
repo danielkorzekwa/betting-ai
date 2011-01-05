@@ -7,6 +7,7 @@ import api._
 import Market._
 import IBet.BetTypeEnum._
 import java.util.Date
+import dk.bettingai.marketsimulator._
 
 class TraderContextTest {
 
@@ -15,7 +16,8 @@ class TraderContextTest {
 
 	private var lastBetId=0l
 	private val nextBetId = () => {lastBetId+=1;lastBetId}
-	val ctx = new TraderContext(nextBetId(),200,market,0,null)
+	val ctx = new TraderContext(nextBetId(),200,market,0,new Simulator(null,null,0.05))
+	ctx.setEventTimestamp(1234)
 
 	/**
 	 * Test scenarios for fillBet
@@ -111,6 +113,13 @@ class TraderContextTest {
 		assertEquals(None,nextHedgeBet)
 		assertEquals(-0.5,ctx.risk.ifWin(11),0)
 		assertEquals(-0.5,ctx.risk.ifLose(11),0)
+	}
+	
+	/**Tests scenarios for registerTrader*/
+	
+	@Test def testRegisterTrader {
+		val traderContext = ctx.registerTrader
+		assertEquals(1234, traderContext.getEventTimestamp)
 	}
 
 }

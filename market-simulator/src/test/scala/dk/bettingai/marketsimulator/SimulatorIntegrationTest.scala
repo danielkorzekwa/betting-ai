@@ -50,6 +50,8 @@ class SimulatorIntegrationTest {
 
     assertEquals(0, marketRiskReport(0).matchedBetsNumber, 0)
     assertEquals(0, marketRiskReport(0).unmatchedBetsNumber, 0)
+    
+    assertEquals(12345, trader.initTimestamp)
   }
 
   @Test
