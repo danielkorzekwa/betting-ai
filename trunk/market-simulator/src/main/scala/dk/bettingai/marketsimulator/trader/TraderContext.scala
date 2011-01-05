@@ -168,6 +168,10 @@ class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, commissio
      * e.g. when testing some evolution algorithms for which more than one trader is required.
      * @return trader context
      */
-    def registerTrader():ITraderContext = simulator.registerTrader(market)
+    def registerTrader():ITraderContext = {
+    	val ctx = simulator.registerTrader(market)
+    	ctx.setEventTimestamp(_eventTimestamp)
+    	ctx
+    }
 
 }

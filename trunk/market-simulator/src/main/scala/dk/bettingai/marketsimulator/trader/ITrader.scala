@@ -27,7 +27,7 @@ object ITrader {
 
     /**Time stamp of market event */
     def getEventTimestamp: Long
-
+    def setEventTimestamp(eventTimestamp:Long)
     /**Add chart value to time line chart
      * 
      * @param label Label of chart series

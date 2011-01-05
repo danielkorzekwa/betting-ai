@@ -97,6 +97,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       val processedEventTimestamp = marketEventProcessor.process(createMarketEvent, nextBetId(), historicalDataUserId)
       val market = betex.findMarket(marketId)
       val traderContext = new TraderContext(nextBetId(), traderUserId, market, commission,this)
+      traderContext.setEventTimestamp(processedEventTimestamp)
       trader.init(traderContext)
 
       @tailrec

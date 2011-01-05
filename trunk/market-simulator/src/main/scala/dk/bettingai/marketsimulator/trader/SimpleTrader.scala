@@ -12,6 +12,8 @@ import ITrader._
  */
 class SimpleTrader extends ITrader{
 
+	var initTimestamp = -1l
+	
 	var initCalledTimes = 0
 	var afterCalledTimes = 0
 	/**It is called once for every analysed market.
@@ -20,6 +22,7 @@ class SimpleTrader extends ITrader{
    * */
   override def init(ctx: ITraderContext) {
 	initCalledTimes += 1
+	initTimestamp = ctx.getEventTimestamp
 	}
 	
 		/**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
