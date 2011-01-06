@@ -24,7 +24,9 @@ object ITrader {
     val numOfWinners: Int
     val marketTime: Date
     val runners: List[IRunner]
-
+    
+  	val commission:Double
+  	
     /**Time stamp of market event */
     def getEventTimestamp: Long
     def setEventTimestamp(eventTimestamp:Long)

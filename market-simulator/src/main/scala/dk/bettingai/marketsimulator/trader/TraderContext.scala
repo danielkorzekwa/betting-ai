@@ -17,7 +17,7 @@ import dk.bettingai.marketsimulator._
  *
  * @param commision Commission on winnings in percentage.
  */
-class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, commission:Double, simulator:Simulator) extends ITraderContext {
+class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, val commission:Double, simulator:Simulator) extends ITraderContext {
 	val marketId = market.marketId
 	val marketName = market.marketName
 	val eventName = market.eventName
