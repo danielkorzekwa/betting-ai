@@ -1,6 +1,7 @@
 package dk.bettingai.marketsimulator.risk
 
 import dk.bettingai.marketsimulator.betex.api._
+import scala.collection._
 
 /**This trait represents a function that calculates market expected profit from bets and probabilities.
  * 

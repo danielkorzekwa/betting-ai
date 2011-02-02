@@ -7,6 +7,8 @@ import dk.bettingai.marketsimulator.risk._
 import java.io.File
 import dk.bettingai.marketsimulator.trader.ITrader._
 import dk.bettingai.marketsimulator.betex.api._
+import scala.collection._
+
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
  * @author korzekwad

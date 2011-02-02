@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator.betex.api
 import java.util.Date
 import IBet.BetTypeEnum._
 import IMarket._
+import scala.collection._
 /**This trait represents a market on a betting exchange. Market is a place that bets can be placed on, for example football match between Man Utd and Arsenal.
  * 
  * @author korzekwad

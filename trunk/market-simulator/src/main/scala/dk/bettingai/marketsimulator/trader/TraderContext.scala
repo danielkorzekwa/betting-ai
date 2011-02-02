@@ -10,7 +10,7 @@ import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.betex.BetUtil._
 import dk.bettingai.marketsimulator._
-
+import scala.collection._
 /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
  * 
  * @author korzekwad

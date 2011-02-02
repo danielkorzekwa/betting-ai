@@ -1,5 +1,7 @@
 package dk.bettingai.marketsimulator.risk
 
+import scala.collection._
+
 /** 
  * @param marketExpcetedProfit Market expected profit from bets and probabilities 
  * @param runnersIfWin If wins values for all market runners. IfWin = What was the market profit if the runner would win.

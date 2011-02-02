@@ -98,6 +98,46 @@ class MarketTestGetBestPrices {
 		assertEquals(0,bestPrices._2.totalToBack,0)
 		assertEquals(8,bestPrices._2.totalToLay,0)
 	}
+	
+	@Test def testGetBestPricesPlaceAndCancelBets {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		
+		market.placeBet(101,122,25,2.7,BACK,11)
+		market.placeBet(102,122,8,2.6,LAY,11)
+		
+		market.cancelBets(122,25,2.7,BACK,11)
+		market.cancelBets(122,8,2.6,LAY,11)
+
+		val bestPrices = market.getBestPrices(11)
+		assertEquals(Double.NaN,bestPrices._1.price,0)
+		assertEquals(0,bestPrices._1.totalToBack,0)
+		assertEquals(0,bestPrices._1.totalToLay,0)
+		
+		assertEquals(Double.NaN,bestPrices._2.price,0)
+		assertEquals(0,bestPrices._2.totalToBack,0)
+		assertEquals(0,bestPrices._2.totalToLay,0)
+	}
+	
+	@Test def testGetBestPricesPlaceAndCancelBet {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		
+		market.placeBet(101,122,25,2.7,BACK,11)
+		market.placeBet(102,122,8,2.6,LAY,11)
+		
+		market.cancelBet(101)
+		market.cancelBet(102)
+
+		val bestPrices = market.getBestPrices(11)
+		assertEquals(Double.NaN,bestPrices._1.price,0)
+		assertEquals(0,bestPrices._1.totalToBack,0)
+		assertEquals(0,bestPrices._1.totalToLay,0)
+		
+		assertEquals(Double.NaN,bestPrices._2.price,0)
+		assertEquals(0,bestPrices._2.totalToBack,0)
+		assertEquals(0,bestPrices._2.totalToLay,0)
+	}
 
 	@Test def testGetBestPricesToLayPriceIsNotAvailable {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
