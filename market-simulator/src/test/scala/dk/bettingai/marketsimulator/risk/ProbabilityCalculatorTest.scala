@@ -2,15 +2,16 @@ package dk.bettingai.marketsimulator.risk
 
 import org.junit._
 import Assert._
+import scala.collection._
 
 class ProbabilityCalculatorTest {
 
 	@Test def calculateNoPrices {
-		assertEquals(0,ProbabilityCalculator.calculate(Map(),1).size)
+		assertEquals(0,ProbabilityCalculator.calculate(Map[Long,Tuple2[Double,Double]](),1).size)
 	}
 
 	@Test(expected=classOf[IllegalArgumentException]) def calculateNumOfWinnersLessThan1 {
-		ProbabilityCalculator.calculate(Map(),0)
+		ProbabilityCalculator.calculate(Map[Long,Tuple2[Double,Double]](),0)
 	}
 
 	/**

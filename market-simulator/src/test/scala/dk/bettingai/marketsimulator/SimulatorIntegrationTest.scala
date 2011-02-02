@@ -10,6 +10,7 @@ import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.betex.Market._
 import java.util.Date
+import scala.collection._
 
 class SimulatorIntegrationTest {
 
@@ -27,7 +28,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataEmpty/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(11l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(11l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(0, marketRiskReport.size)
   }
 
@@ -36,7 +37,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataCreateMarketOnly/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(1, marketRiskReport.size)
 
     assertEquals(10, marketRiskReport(0).marketId)
@@ -59,7 +60,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(1, marketRiskReport.size)
 
     assertEquals(10, marketRiskReport(0).marketId)
@@ -80,7 +81,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceBackBet/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(1, marketRiskReport.size)
 
     assertEquals(10, marketRiskReport(0).marketId)
@@ -101,7 +102,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceAndCancelLayBet/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(1, marketRiskReport.size)
 
     assertEquals(10, marketRiskReport(0).marketId)
@@ -123,7 +124,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceAFewBets/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), trader, (progress:Int) => {})
     assertEquals(1, marketRiskReport.size)
 
     assertEquals(10, marketRiskReport(0).marketId)
@@ -148,7 +149,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile10, 20l -> marketEventsFile20), trader, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile10, 20l -> marketEventsFile20), trader, (progress:Int) => {})
     assertEquals(2, marketRiskReport.size)
 
     assertEquals(20, marketRiskReport(0).marketId)
@@ -174,7 +175,7 @@ class SimulatorIntegrationTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
     val traderUnderTest = new SimpleTraderWithChildren()
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), traderUnderTest, p => {})
+    val marketRiskReport = simulator.runSimulation(Map(10l -> marketEventsFile), traderUnderTest, (progress:Int) => {})
 
     assertEquals(-0.625, traderUnderTest.getTotalMarketExpectedProfit, 0.001)
 

@@ -15,6 +15,7 @@ import java.io.File
 import java.io.BufferedReader
 import java.io.FileReader
 import scala.annotation._
+import scala.collection._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 

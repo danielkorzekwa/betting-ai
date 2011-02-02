@@ -4,10 +4,13 @@ import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
+import scala.collection._
+import dk.bettingai.marketsimulator.betex.api._
+
 class ExpectedProfitCalculatorTest {
 
 	@Test def testCalculateNoBets {
-		val expectedProfit = ExpectedProfitCalculator.calculate(List(), Map(11l->1.5,12l->3),0)
+		val expectedProfit = ExpectedProfitCalculator.calculate(List[IBet](), Map(11l->1.5,12l->3d),0)
 		assertEquals(0,expectedProfit.marketExpectedProfit,0)
 		assertEquals(2,expectedProfit.runnersIfWin.size)
 		assertEquals(0,expectedProfit.runnersIfWin(11),0)

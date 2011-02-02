@@ -11,6 +11,7 @@ import org.apache.commons.math.util.MathUtils._
 import ISimulator._
 import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
+import scala.collection._
 
 /**Google visualization imports*/
 import com.google.visualization.datasource._
@@ -65,7 +66,7 @@ object SimulatorApp  {
 		console.print(" Simulation progress:")
 		val time = System.currentTimeMillis
 	
-		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],p => console.print(" " + p + "%"))
+		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],(progress:Int) => console.print(" " + progress + "%"))
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))

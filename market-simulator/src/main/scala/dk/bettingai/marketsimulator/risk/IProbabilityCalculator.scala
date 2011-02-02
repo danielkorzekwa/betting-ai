@@ -1,5 +1,7 @@
 package dk.bettingai.marketsimulator.risk
 
+import scala.collection._
+
 /**This trait represents a function that calculates market probabilities from market prices.
  * 
  * @author korzekwad

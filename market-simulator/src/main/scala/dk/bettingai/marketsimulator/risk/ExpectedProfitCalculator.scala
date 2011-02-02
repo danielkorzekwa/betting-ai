@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator.risk
 
 import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
+import scala.collection._
 
 /**This object represents a function that calculates market expected profit from bets and probabilities.
  * 

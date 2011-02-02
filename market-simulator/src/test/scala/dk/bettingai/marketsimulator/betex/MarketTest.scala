@@ -179,6 +179,7 @@ class MarketTest {
 
 		/**Unmatched bets on runner 12.*/
 		market.placeBet(105,122,13,2.1,LAY,12)
+		market.placeBet(106,122,15,2.4,BACK,12)
 
 		val runnerPrices = market.getRunnerPrices(11)
 
