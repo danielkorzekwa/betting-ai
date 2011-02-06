@@ -27,10 +27,11 @@ object Market {
 }
 
 class Market(val marketId: Long, val marketName: String, val eventName: String, val numOfWinners: Int, val marketTime: Date, val runners: List[IMarket.IRunner]) extends IMarket {
+
   /**key - runnerId, value - runnerBackBetsPerPrice*/
-  private val backBets = scala.collection.mutable.Map[Long, scala.collection.mutable.Map[Double, ListBuffer[IBet]]]()
+  private val backBets = new UnmatchedBackBets()
   /**key - runnerId, value - runnerLayBetsPerPrice*/
-  private val layBets = scala.collection.mutable.Map[Long, scala.collection.mutable.Map[Double, ListBuffer[IBet]]]()
+  private val layBets = new UnmatchedLayBets()
 
   private val matchedBets = ListBuffer[IBet]()
   private val betsIds = scala.collection.mutable.Set[Long]()
@@ -59,59 +60,25 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     require(runners.exists(s => s.runnerId == runnerId), "Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
     require(!betsIds.contains(betId), "Bet for betId=%s already exists".format(betId))
 
-    val pricesToBeMatched = betType match {
-      case LAY => getRunnerBets(runnerId, backBets).keys.filter(p => p <= betPrice).toList.sortWith((a, b) => a < b).iterator
-      case BACK => getRunnerBets(runnerId, layBets).keys.filter(p => p >= betPrice).toList.sortWith((a, b) => a > b).iterator
-    }
-    val betsToBeMatched: scala.collection.mutable.Map[Double, ListBuffer[IBet]] = betType match {
-      case LAY => getRunnerBets(runnerId, backBets)
-      case BACK => getRunnerBets(runnerId, layBets)
-    }
+    betsIds += betId
 
-    val betsToBeAdded: scala.collection.mutable.Map[Double, ListBuffer[IBet]] = betType match {
-      case LAY => getRunnerBets(runnerId, layBets)
-      case BACK => getRunnerBets(runnerId, backBets)
-    }
+    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId)
 
-    def matchBet(newBet: IBet, priceToMatch: Double): Unit = {
-
-      val priceBets = betsToBeMatched.getOrElse(priceToMatch, ListBuffer())
-      if (!priceBets.isEmpty) {
-
-        /**Get bet to be matched and remove it from the main list of bets - it will be added later as a result of matching.*/
-        val betToBeMatched = priceBets.head
-        priceBets.remove(0)
-
-        /**Do the bets matching.*/
-        val matchingResult = newBet.matchBet(betToBeMatched)
-        matchingResult.filter(b => b.betStatus == U && b.betId != betId).foreach(b => priceBets.insert(0, b))
-        matchingResult.filter(b => b.betStatus == M).foreach(b => matchedBets += b)
-
-        /**Make sure that priceBetsMap doesn't contain entries with empty bets list.*/
-        if (priceBets.isEmpty) betsToBeMatched.remove(priceToMatch)
-
-        /**Find unmatched portion for a bet being placed.*/
-        val unmatchedPortion = matchingResult.find(b => b.betId == betId && b.betStatus == U)
-        if (!unmatchedPortion.isEmpty) {
-          matchBet(new Bet(betId, userId, unmatchedPortion.get.betSize, betPrice, betType, U, marketId, runnerId), priceToMatch)
-        }
-      } else {
-        if (pricesToBeMatched.hasNext) {
-          matchBet(newBet, pricesToBeMatched.next)
-        } else {
-          betsToBeAdded.getOrElseUpdate(betPrice, ListBuffer()) += newBet
-        }
+    betType match {
+      case BACK => {
+        val betMatchingResults = layBets.matchBet(newBet)
+        betMatchingResults.unmatchedBet.foreach(b => backBets.addBet(b))
+        matchedBets ++= betMatchingResults.matchedBets
+      }
+      case LAY => {
+        val betMatchingResults = backBets.matchBet(newBet)
+        betMatchingResults.unmatchedBet.foreach(b => layBets.addBet(b))
+        matchedBets ++= betMatchingResults.matchedBets
       }
     }
 
-    betsIds += betId
+    newBet
 
-    val bet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId)
-
-    if (pricesToBeMatched.hasNext) matchBet(bet, pricesToBeMatched.next)
-    else betsToBeAdded.getOrElseUpdate(betPrice, ListBuffer()) += bet
-
-    bet
   }
 
   /** Cancels a bet on a betting exchange market.
@@ -150,7 +117,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     }
 
     val value = for {
-      betsMap <- backBets.values
+      betsMap <- backBets.unmatchedBets.values
       val s = cancelBet(betsMap)
       if (s > 0)
     } yield s
@@ -159,7 +126,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
       value.head
     } else {
       val value = for {
-        betsMap <- layBets.values
+        betsMap <- layBets.unmatchedBets.values
         val s = cancelBet(betsMap)
         if (s > 0)
       } yield s
@@ -185,41 +152,12 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
    */
   def cancelBets(userId: Long, betsSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): Double = {
 
-    val bets = betType match {
-      case BACK => backBets
-      case LAY => layBets
+    val amountCancelled = betType match {
+      case BACK => backBets.cancelBets(userId, betsSize, betPrice, runnerId)
+      case LAY => layBets.cancelBets(userId, betsSize, betPrice, runnerId)
     }
 
-    val runnerBets = bets.getOrElseUpdate(runnerId, scala.collection.mutable.Map[Double, ListBuffer[IBet]]())
-    val priceBets = runnerBets.getOrElse(betPrice, new ListBuffer[IBet]())
-
-    val betsToBeCancelled = priceBets.filter(b => b.userId == userId).reverseIterator
-
-    def cancelRecursively(amountToCancel: Double, amountCancelled: Double): Double = {
-      val betToCancel = betsToBeCancelled.next
-      val betCanceledAmount = if (amountToCancel >= betToCancel.betSize) {
-        priceBets -= betToCancel
-        betToCancel.betSize
-      } else {
-        val updatedBet = Bet(betToCancel.betId, betToCancel.userId, betToCancel.betSize - amountToCancel, betToCancel.betPrice, betToCancel.betType, betToCancel.marketId, betToCancel.runnerId)
-        priceBets.update(priceBets.indexOf(betToCancel, 0), updatedBet)
-        amountToCancel
-      }
-      val newAmountToCancel = amountToCancel - betCanceledAmount
-      val newAmountCancelled = amountCancelled + betCanceledAmount
-      if (betsToBeCancelled.hasNext && newAmountToCancel > 0) cancelRecursively(newAmountToCancel, newAmountCancelled)
-      else newAmountCancelled
-    }
-
-    val totalCancelled = if (betsToBeCancelled.hasNext) cancelRecursively(betsSize, 0) else 0
-
-    /**Make sure that there are no empty entries in priceBetsMap*/
-    if (totalCancelled > 0) {
-      val pricesWithEmptyBets = runnerBets.filter { case (price, bets) => bets.isEmpty }.keys
-      pricesWithEmptyBets.foreach(price => runnerBets.remove(price))
-    }
-
-    totalCancelled
+    amountCancelled
   }
 
   /** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
@@ -231,8 +169,8 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
   def getRunnerPrices(runnerId: Long): List[IMarket.IRunnerPrice] = {
     require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-    val allBackBetsList = getRunnerBets(runnerId, backBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
-    val allLayBetsList = getRunnerBets(runnerId, layBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
+    val allBackBetsList = getRunnerBets(runnerId, backBets.unmatchedBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
+    val allLayBetsList = getRunnerBets(runnerId, layBets.unmatchedBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
 
     val betsByPriceMap = (allBackBetsList.toList ::: allLayBetsList.toList).toList.groupBy(b => b.betPrice)
 
@@ -249,23 +187,8 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
     require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-    val runnerLayBetsMap = getRunnerBets(runnerId, layBets)
-    val runnerBackBetsMap = getRunnerBets(runnerId, backBets)
-
-    val pricesToBack = runnerLayBetsMap.keys
-    val pricesToLay = runnerBackBetsMap.keys
-
-    val bestPriceToBack = if (!pricesToBack.isEmpty) {
-      val price = pricesToBack.max
-      val totalStake = BetUtil.totalStake(runnerLayBetsMap(price).toList)
-      new RunnerPrice(price, totalStake, 0d)
-
-    } else new RunnerPrice(Double.NaN, 0d, 0d)
-    val bestPriceToLay = if (!pricesToLay.isEmpty) {
-      val price = pricesToLay.min
-      val totalStake = BetUtil.totalStake(runnerBackBetsMap(price).toList)
-      new RunnerPrice(price, 0d, totalStake)
-    } else new RunnerPrice(Double.NaN, 0d, 0d)
+    val bestPriceToBack = layBets.getBestPrice(runnerId)
+    val bestPriceToLay = backBets.getBestPrice(runnerId)
 
     new Tuple2(bestPriceToBack, bestPriceToLay)
 
@@ -295,24 +218,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
    *
    *@param userId
    */
-  def getBets(userId: Int): List[IBet] = {
-
-    val allBackBets = for {
-      runnerBackBetsMap <- backBets.values
-      val runnerBets = runnerBackBetsMap.values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList).filter(b => b.userId == userId)
-    } yield runnerBets
-
-    val allLayBets = for {
-      runnerLayBetsMap <- layBets.values
-      val runnerBets = runnerLayBetsMap.values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList).filter(b => b.userId == userId)
-    } yield runnerBets
-
-    val allBackBetsList = allBackBets.foldLeft(List[IBet]())((a, b) => a ::: b)
-    val allLayBetsList = allLayBets.foldLeft(List[IBet]())((a, b) => a ::: b)
-
-    allBackBetsList ::: allLayBetsList ::: matchedBets.filter(b => b.userId == userId).toList
-
-  }
+  def getBets(userId: Int): List[IBet] = backBets.getBets(userId) ::: layBets.getBets(userId) ::: matchedBets.filter(b => b.userId == userId).toList
 
   /**Returns all bets placed by user on that market.
    *
