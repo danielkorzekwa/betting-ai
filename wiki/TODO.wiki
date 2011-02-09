@@ -1,1 +1,3 @@
   * Optimise reading market data files using java.nio and scala Streams - http://www.jayconrod.com/cgi/view_post.py?27
+
+  * Replace File with EventStream trait (def runSimulation(marketData: Map[Long, File], trader: ITrader, p: (Int) => Unit))
