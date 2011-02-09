@@ -1,1 +1,1 @@
-  * Optimise reading market data files - http://www.jayconrod.com/cgi/view_post.py?27
+  * Optimise reading market data files using java.nio and scala Streams - http://www.jayconrod.com/cgi/view_post.py?27
