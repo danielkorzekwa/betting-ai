@@ -166,6 +166,36 @@ class MarketTest {
 		assertEquals(0, runnerPrices(3).totalToBack,0)
 		assertEquals(25, runnerPrices(3).totalToLay,0)
 	}
+	
+	@Test  def testGetRunnerPricesForUnmatchedBetsOnlyPlacedInDifferentOrder {
+		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+
+		market.placeBet(101,121,3,2.2,LAY,11)
+		market.placeBet(102,122,5,2.2,LAY,11)
+		market.placeBet(100,122,13,2.1,LAY,11)
+		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(103,121,8,2.4,BACK,11)
+		
+		val runnerPrices = market.getRunnerPrices(11)
+
+		assertEquals(4,runnerPrices.size)
+
+		assertEquals(2.1, runnerPrices(0).price,0)
+		assertEquals(13, runnerPrices(0).totalToBack,0)
+		assertEquals(0, runnerPrices(0).totalToLay,0)
+
+		assertEquals(2.2, runnerPrices(1).price,0)
+		assertEquals(8, runnerPrices(1).totalToBack,0)
+		assertEquals(0, runnerPrices(1).totalToLay,0)
+
+		assertEquals(2.4, runnerPrices(2).price,0)
+		assertEquals(0, runnerPrices(2).totalToBack,0)
+		assertEquals(8, runnerPrices(2).totalToLay,0)
+
+		assertEquals(2.5, runnerPrices(3).price,0)
+		assertEquals(0, runnerPrices(3).totalToBack,0)
+		assertEquals(25, runnerPrices(3).totalToLay,0)
+	}
 
 	@Test  def testGetRunnerPricesForUnmatchedBetsOnMoreThanOneRunner {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))

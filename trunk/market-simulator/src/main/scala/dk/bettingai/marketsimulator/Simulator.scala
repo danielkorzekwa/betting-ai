@@ -54,7 +54,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
 
   /** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
    * 
-   * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
+   * @param marketData Contains market events that the market simulation is executed for. Key - marketId, value - market events
    * @param trader
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */

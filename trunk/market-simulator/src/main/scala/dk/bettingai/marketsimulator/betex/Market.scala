@@ -78,7 +78,6 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     }
 
     newBet
-
   }
 
   /** Cancels a bet on a betting exchange market.
@@ -90,53 +89,10 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
    */
   def cancelBet(betId: Long): Double = {
 
-    def cancelBet2(bets: ListBuffer[IBet]): Double = {
-      val betToBeCancelled = bets.find(b => b.betId == betId)
-      if (!betToBeCancelled.isEmpty) {
-        bets -= betToBeCancelled.get
-        betToBeCancelled.get.betSize
-      } else {
-        0
-      }
-    }
-
-    def cancelBet(bets: scala.collection.mutable.Map[Double, ListBuffer[IBet]]): Double = {
-
-      val value = for {
-        bets <- bets.values
-        val s = cancelBet2(bets)
-        if (s > 0)
-      } yield s
-
-      if (!value.isEmpty) {
-        /**Make sure that there are no empty entries in priceBetsMap*/
-        val pricesWithEmptyBets = bets.filter { case (price, bets) => bets.isEmpty }.keys
-        pricesWithEmptyBets.foreach(price => bets.remove(price))
-        value.head
-      } else 0
-    }
-
-    val value = for {
-      betsMap <- backBets.unmatchedBets.values
-      val s = cancelBet(betsMap)
-      if (s > 0)
-    } yield s
-
-    if (!value.isEmpty) {
-      value.head
-    } else {
-      val value = for {
-        betsMap <- layBets.unmatchedBets.values
-        val s = cancelBet(betsMap)
-        if (s > 0)
-      } yield s
-
-      if (!value.isEmpty) {
-        value.head
-      } else {
-        throw new NoSuchElementException("Bet not found for bet id=" + betId)
-      }
-
+    val backCancelledAmount = backBets.cancelBet(betId)
+    if (backCancelledAmount > 0) backCancelledAmount else {
+      val layCancelledAmount = layBets.cancelBet(betId)
+      if (layCancelledAmount > 0) layCancelledAmount else throw new NoSuchElementException("Bet not found for bet id=" + betId)
     }
   }
 
@@ -169,8 +125,8 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
   def getRunnerPrices(runnerId: Long): List[IMarket.IRunnerPrice] = {
     require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
-    val allBackBetsList = getRunnerBets(runnerId, backBets.unmatchedBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
-    val allLayBetsList = getRunnerBets(runnerId, layBets.unmatchedBets).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
+    val allBackBetsList = backBets.getBets(runnerId)
+    val allLayBetsList = layBets.getBets(runnerId)
 
     val betsByPriceMap = (allBackBetsList.toList ::: allLayBetsList.toList).toList.groupBy(b => b.betPrice)
 
@@ -233,5 +189,27 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     }
     bets
   }
+
+ 	/**Returns bet for a number o criteria.
+	 * 
+	 * @param userId
+	 * @param betStatus
+	 * @param betType
+	 * @param betPrice
+	 * @param runnerId
+	 */
+	def getBets(userId: Int,betStatus: BetStatusEnum, betType: BetTypeEnum, betPrice: Double, runnerId:Long):List[IBet] = {
+
+    val bets = betStatus match {
+      case U => betType match {
+          case BACK => backBets.getBets(betPrice, runnerId)
+          case LAY => layBets.getBets(betPrice, runnerId)
+        }
+      case M => matchedBets.filter(b => b.betType == betType && b.betPrice == betPrice && b.runnerId == runnerId).toList
+    }
+
+    bets.filter(b => b.userId==userId)
+  }
+
   override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId, marketName, eventName, numOfWinners, marketTime, runners)
 }
