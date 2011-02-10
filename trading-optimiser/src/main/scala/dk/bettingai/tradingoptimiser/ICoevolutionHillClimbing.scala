@@ -19,7 +19,9 @@ object ICoevolutionHillClimbing {
    *   trader - Trader implementation.
    *   fitness - Current expected profit achieved by this trader.
    **/
-  class Solution[T <: ITrader](trader: T, fitness: Double)
+  class Solution[T <: ITrader](trader: T, fitness: Double) {
+	  override def toString = "Solution [trader=%s, fitness=%s".format(trader,fitness)
+  }
 }
 trait ICoevolutionHillClimbing {
 
