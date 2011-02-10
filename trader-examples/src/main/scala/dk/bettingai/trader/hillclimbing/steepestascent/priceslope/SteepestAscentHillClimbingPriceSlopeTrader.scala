@@ -65,15 +65,17 @@ object SteepestAscentHillClimbingPriceSlopeTrader {
 
         val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
-        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId))
-        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+        if (!bestPrices._1.price.isNaN) {
+          val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId))
+          val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+          if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
+        }
 
-        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId))
-        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
-
-        if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
-        if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
-
+        if (!bestPrices._2.price.isNaN) {
+          val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId))
+          val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
+          if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
+        }
       }
 
     }
@@ -98,7 +100,7 @@ class SteepestAscentHillClimbingPriceSlopeTrader extends ITrader {
    * */
   override def init(ctx: ITraderContext) {
     log.info("Initilising trader for market=" + ctx.marketId)
-  	/** Born 5 traders and search for the best solution.*/
+    /** Born 5 traders and search for the best solution.*/
     children = for {
       i <- 0 until 5
       val backPriceSlopeSignal = bestBackPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
@@ -126,7 +128,7 @@ class SteepestAscentHillClimbingPriceSlopeTrader extends ITrader {
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def after(ctx: ITraderContext) {
-    
+
     val bestChild = children.reduceLeft((c1, c2) => if (c1._2.risk.marketExpectedProfit > c2._2.risk.marketExpectedProfit) c1 else c2)
 
     if (bestChild._2.risk.marketExpectedProfit > bestExpectedProfit) {
