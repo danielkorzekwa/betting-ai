@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator.betex.api
 
 import java.util.Date
 import IBet.BetTypeEnum._
+import IBet.BetStatusEnum._
 import IMarket._
 import scala.collection._
 /**This trait represents a market on a betting exchange. Market is a place that bets can be placed on, for example football match between Man Utd and Arsenal.
@@ -102,4 +103,14 @@ trait IMarket {
 	 * otherwise all unmatched and matched bets for user are returned.
 	 */
 	def getBets(userId:Int,matchedBetsOnly:Boolean):List[IBet]
+	
+	/**Returns bet for a number o criteria.
+	 * 
+	 * @param userId
+	 * @param betStatus
+	 * @param betType
+	 * @param betPrice
+	 * @param runnerId
+	 */
+	def getBets(userId: Int,betStatus: BetStatusEnum, betType: BetTypeEnum, betPrice: Double, runnerId:Long):List[IBet]
 }

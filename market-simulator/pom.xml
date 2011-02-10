@@ -86,11 +86,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.specs</groupId>
-			<artifactId>specs</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.jmock</groupId>
 			<artifactId>jmock</artifactId>
 			<scope>test</scope>

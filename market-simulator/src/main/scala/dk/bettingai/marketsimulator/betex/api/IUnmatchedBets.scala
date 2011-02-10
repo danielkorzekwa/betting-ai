@@ -7,6 +7,7 @@ import IMarket._
 import IBet.BetStatusEnum._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.betex._
+import scala.annotation.tailrec
 
 /**This trait represents unmatched back or lay bets. 
  * It also acts as a bet matching engine taking a bet and matching it against unmatched bets in a model.
@@ -20,7 +21,7 @@ object IUnmatchedBets {
 
   /**This class represents a result of matching a bet against unmatched bets, e.g. matching back bet against lay bets.
    * 
-   * @param unmatchedBet Unmatched portion of a bet that was matched against unmatched bets. If a bet is not matched at all then unmatchedBet is none.
+   * @param unmatchedBet Unmatched portion of a bet that was matched against unmatched bets. If a bet is fully matched then unmatchedBet is None.
    * @param matchedBets List of all back and lay matched bets. Examples: 
    * If a bet is fully matched against another bet then matchedBets list contains two matched bets. 
    * If a bet is matched against 2 unmatched bets then matchedBets contains 3 matched bets.
@@ -34,17 +35,15 @@ object IUnmatchedBets {
 
 trait IUnmatchedBets {
   /**key - runnerId, value - runnerBackBetsPerPrice*/
-  val unmatchedBets = scala.collection.mutable.Map[Long, scala.collection.mutable.Map[Double, ListBuffer[IBet]]]()
+  private val unmatchedBets = scala.collection.mutable.Map[Long, scala.collection.mutable.Map[Double, ListBuffer[IBet]]]()
 
   /**Returns Map[price,bets] for runnerId*/
-  protected def getRunnerBets(runnerId: Long, bets: mutable.Map[Long, mutable.Map[Double, ListBuffer[IBet]]]): mutable.Map[Double, ListBuffer[IBet]] = {
-    bets.getOrElseUpdate(runnerId, scala.collection.mutable.Map[Double, ListBuffer[IBet]]())
+  protected def getRunnerBets(runnerId: Long): mutable.Map[Double, ListBuffer[IBet]] = {
+    unmatchedBets.getOrElseUpdate(runnerId, scala.collection.mutable.Map[Double, ListBuffer[IBet]]())
   }
-  
-  protected def getPricesToBeMatched(runnerId:Long, price:Double):Iterator[Double]
 
   /**Add unmatched bet to a model. Only bet of a type, of which this instance of UnmatchedBets is parameterised by, can be added to a model, otherwise exception should be thrown.*/
-  def addBet(bet: IBet) = getRunnerBets(bet.runnerId, unmatchedBets).getOrElseUpdate(bet.betPrice, ListBuffer()) += bet
+  def addBet(bet: IBet) = getRunnerBets(bet.runnerId).getOrElseUpdate(bet.betPrice, ListBuffer()) += bet
 
   /**Match a bet against unmatched bets in a model.
    * 
@@ -52,15 +51,16 @@ trait IUnmatchedBets {
    * @return Result of bet matching @see BetMatchingResult
    */
   def matchBet(bet: IBet): BetMatchingResult = {
-	    val pricesToBeMatched = getPricesToBeMatched(bet.runnerId, bet.betPrice)
+    val pricesToBeMatched = getPricesToBeMatched(bet.runnerId, bet.betPrice)
 
-    val betsToBeMatched = getRunnerBets(bet.runnerId, unmatchedBets)
+    val betsToBeMatched = getRunnerBets(bet.runnerId)
 
+    /**Result of bet matching.*/
     val matchedBets = ListBuffer[IBet]()
-
     var unmatchedBet: Option[IBet] = None
 
-    def matchBet(newBet: IBet, priceToMatch: Double): Unit = {
+    @tailrec
+    def matchBetRec(newBet: IBet, priceToMatch: Double): Unit = {
 
       val priceBets = betsToBeMatched.getOrElse(priceToMatch, ListBuffer())
       if (!priceBets.isEmpty) {
@@ -80,24 +80,24 @@ trait IUnmatchedBets {
         /**Find unmatched portion for a bet being placed.*/
         val unmatchedPortion = matchingResult.find(b => b.betId == bet.betId && b.betStatus == U)
         if (!unmatchedPortion.isEmpty) {
-          matchBet(new Bet(bet.betId, bet.userId, unmatchedPortion.get.betSize, bet.betPrice, bet.betType, U, bet.marketId, bet.runnerId), priceToMatch)
+          matchBetRec(new Bet(bet.betId, bet.userId, unmatchedPortion.get.betSize, bet.betPrice, bet.betType, U, bet.marketId, bet.runnerId), priceToMatch)
         }
       } else {
         if (pricesToBeMatched.hasNext) {
-          matchBet(newBet, pricesToBeMatched.next)
+          matchBetRec(newBet, pricesToBeMatched.next)
         } else {
           unmatchedBet = Some(newBet)
         }
       }
     }
 
-    if (pricesToBeMatched.hasNext) matchBet(bet, pricesToBeMatched.next)
+    if (pricesToBeMatched.hasNext) matchBetRec(bet, pricesToBeMatched.next)
     else unmatchedBet = Some(bet)
 
     new BetMatchingResult(unmatchedBet, matchedBets.toList)
   }
 
-  /**Returns all unmatched bets placed by user on that market.
+  /**Returns all unmatched bets user id.
    *
    *@param userId
    */
@@ -109,8 +109,18 @@ trait IUnmatchedBets {
 
     List.flatten(unmatchedBetsList.toList)
   }
+  
+   /**Returns all unmatched bets for a runner id*/
+  def getBets(runnerId:Long):List[IBet] = getRunnerBets(runnerId).values.foldLeft(List[IBet]())((a, b) => a.toList ::: b.toList)
 
-   /** Cancels bets on a betting exchange market.
+   /**Returns bet for a number o criteria.
+	 * 
+	 * @param betPrice
+	 * @param runnerId
+	 */
+	def getBets(betPrice: Double, runnerId:Long):List[IBet] = getRunnerBets(runnerId).getOrElse(betPrice,new ListBuffer()).toList
+	
+  /** Cancels bets on a betting exchange market.
    * 
    * @param userId 
    * @param betsSize Total size of bets to be cancelled.
@@ -121,12 +131,14 @@ trait IUnmatchedBets {
    */
   def cancelBets(userId: Long, betsSize: Double, betPrice: Double, runnerId: Long): Double = {
 
-    val runnerBets = unmatchedBets.getOrElseUpdate(runnerId, scala.collection.mutable.Map[Double, ListBuffer[IBet]]())
+    val runnerBets = getRunnerBets(runnerId)
     val priceBets = runnerBets.getOrElse(betPrice, new ListBuffer[IBet]())
 
+    /**Cancel bets with lowest priority first (worst position in a bets queue)*/
     val betsToBeCancelled = priceBets.filter(b => b.userId == userId).reverseIterator
 
-    def cancelRecursively(amountToCancel: Double, amountCancelled: Double): Double = {
+    @tailrec
+    def cancelRec(amountToCancel: Double, amountCancelled: Double): Double = {
       val betToCancel = betsToBeCancelled.next
       val betCanceledAmount = if (amountToCancel >= betToCancel.betSize) {
         priceBets -= betToCancel
@@ -138,25 +150,75 @@ trait IUnmatchedBets {
       }
       val newAmountToCancel = amountToCancel - betCanceledAmount
       val newAmountCancelled = amountCancelled + betCanceledAmount
-      if (betsToBeCancelled.hasNext && newAmountToCancel > 0) cancelRecursively(newAmountToCancel, newAmountCancelled)
+      if (betsToBeCancelled.hasNext && newAmountToCancel > 0) cancelRec(newAmountToCancel, newAmountCancelled)
       else newAmountCancelled
     }
 
-    val totalCancelled = if (betsToBeCancelled.hasNext) cancelRecursively(betsSize, 0) else 0
+    val totalCancelled = if (betsToBeCancelled.hasNext) cancelRec(betsSize, 0) else 0
 
     /**Make sure that there are no empty entries in priceBetsMap*/
-    if (totalCancelled > 0) {
-      val pricesWithEmptyBets = runnerBets.filter { case (price, bets) => bets.isEmpty }.keys
-      pricesWithEmptyBets.foreach(price => runnerBets.remove(price))
-    }
+    if (totalCancelled > 0 && priceBets.isEmpty) runnerBets.remove(betPrice)
 
     totalCancelled
   }
-  
-  /**Returns best unmatched price
+
+  /** Cancels a bet on a betting exchange market.
+   *
+   * @param betId Unique id of a bet to be cancelled.
+   * 
+   * @return amount cancelled
+   * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
+   */
+  def cancelBet(betId: Long): Double = {
+
+    /**Finds a bet for a betId in a map of pricesBets
+     * @throws RuntimeException is thrown if more than one bet is found
+     */
+    def findBet(pricesBets: scala.collection.mutable.Map[Double, ListBuffer[IBet]]): Option[IBet] = {
+
+      val foundBets = for {
+        priceBets <- pricesBets.values;
+        val foundBet = priceBets.find(b => b.betId == betId);
+        if (foundBet.isDefined)
+      } yield foundBet
+
+      foundBets match {
+        case Nil => None
+        case x :: Nil => x
+        case x :: xs => throw new IllegalStateException("Duplicate bets found=" + foundBets)
+      }
+    }
+
+    /**Find a bet for a betId across all runners.*/
+    val foundBets = for {
+      pricesBets <- unmatchedBets.values
+      val foundBet = findBet(pricesBets)
+      if (foundBet.isDefined)
+    } yield foundBet.get
+
+    /**Canncel a bet.*/
+    val sizeCancelled: Double = foundBets match {
+      case Nil => 0
+      case bet :: Nil => {
+    	  val priceBets = unmatchedBets(bet.runnerId)(bet.betPrice)
+         priceBets -= bet
+        /**Make sure that there are no empty entries in priceBetsMap*/
+         if(priceBets.isEmpty) unmatchedBets(bet.runnerId).remove(bet.betPrice)
+        bet.betSize
+      }
+      case x :: xs => throw new IllegalStateException("Duplicate bets found=" + foundBets)
+    }
+
+    sizeCancelled
+  }
+
+  /**Returns best unmatched price.
    * 
    * @return Double.NaN is returned if price is not available.
    * */
   def getBestPrice(runnerId: Long): IRunnerPrice
-
+  
+  /**Returns prices used for matching. Different prices in different order are used for matching for back and lay bets.*/
+  protected def getPricesToBeMatched(runnerId: Long, price: Double): Iterator[Double]
+  
 }

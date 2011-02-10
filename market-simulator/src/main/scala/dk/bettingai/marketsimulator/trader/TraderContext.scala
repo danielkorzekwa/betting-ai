@@ -84,7 +84,7 @@ class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, val commi
 	def fillBet(betSizeLimit:Double, betPrice:Double, betType:BetTypeEnum, runnerId:Long):Option[IBet] = {
 		val betId = nextBetId
 		
-		val bets = getBets(false).filter(b=> b.betStatus==U && b.betPrice==betPrice && b.betType==betType && b.runnerId==runnerId)
+		val bets = market.getBets(userId, U, betType, betPrice, runnerId)
 		val fillBetSize = betSizeLimit-totalStake(bets)
 		if(fillBetSize>=2) Option(placeBet(fillBetSize,betPrice,betType,runnerId)) else None
 	}
