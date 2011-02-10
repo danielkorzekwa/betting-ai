@@ -22,6 +22,8 @@ object CoevolutionHillClimbingTest {
         if (bestPrices._1.price > price) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
     }
+    
+    override def toString = "PriceTrader [price=%s]".format(price)
   }
 }
 
@@ -36,7 +38,7 @@ class CoevolutionHillClimbingTest {
 	val maxGenerationNum = 10
 	@Test def test {
 		 
-		val progress = (iter:Int,best:Solution[PriceTrader],current:Solution[PriceTrader]) => println("Iter number=" + iter + ", best=" + best.price + ",current=" + current.price)
+		val progress = (iter:Int,best:Solution[PriceTrader],current:Solution[PriceTrader]) => println("Iter number=" + iter + ", best=" + best + ",current=" + current)
 		val bestSolution = CoevolutionHillClimbing.optimise(marketDataSources,trader, (t:PriceTrader) => t, populationSize, maxGenerationNum, progress)
 		
 		println("Best solution price=" + bestSolution.price)	
