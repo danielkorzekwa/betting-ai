@@ -66,25 +66,25 @@ object SimulatorApp  {
 		console.print(" Simulation progress:")
 		val time = System.currentTimeMillis
 	
-		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader],(progress:Int) => console.print(" " + progress + "%"))
+		val marketRiskReports = simulator.runSimulation(inputData._1,inputData._2.asInstanceOf[ITrader] :: Nil,(progress:Int) => console.print(" " + progress + "%"))
 
 		/**Print market simulation report.*/
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
 
 		console.print("\nSaving simulation html report...")
-		generateHtmlReport(marketRiskReports, inputData._3)
+		generateHtmlReport(marketRiskReports.head.marketReports , inputData._3)
 		console.print("DONE")
 
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
 		console.print("\nCommission on winnings=" + round(commission*100,2) + "%")
-		printMarketReport(marketRiskReports,console)
+		printMarketReport(marketRiskReports.head.marketReports,console)
 		console.print("\n------------------------------------------------------------------------------------")
 
-		printMarketReportSummary(marketRiskReports, console)
+		printMarketReportSummary(marketRiskReports.head, console)
 		console.println("")
 	}
 
-	private def generateHtmlReport(marketRiskReports:List[IMarketRiskReport], htmlReportDir:String) {
+	private def generateHtmlReport(marketRiskReports:List[MarketRiskReport], htmlReportDir:String) {
 		val in = this.getClass.getResourceAsStream("/sim_report_template.html")
 		val simReportTemplate = Source.fromInputStream(in).mkString
 
@@ -146,7 +146,7 @@ object SimulatorApp  {
 			response
 	}
 
-	private def printMarketReport(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
+	private def printMarketReport(marketRiskReports:List[MarketRiskReport],console:PrintStream) {
 		printMarketRiskReport(0,0)
 		def printMarketRiskReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
 			if(marketReportIndex < marketRiskReports.size) {
@@ -166,11 +166,8 @@ object SimulatorApp  {
 		}
 	}
 
-	private def printMarketReportSummary(marketRiskReports:List[IMarketRiskReport],console:PrintStream) {
-		val totalExpectedProfit = marketRiskReports.foldLeft(0d)(_ + _.marketExpectedProfit.marketExpectedProfit)
-		val aggrMatchedBets = marketRiskReports.foldLeft(0l)(_ + _.matchedBetsNumber)
-		val aggrUnmatchedBets = marketRiskReports.foldLeft(0l)(_ + _.unmatchedBetsNumber)
-		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit,2),aggrMatchedBets,aggrUnmatchedBets))
+	private def printMarketReportSummary(traderReport:TraderReport,console:PrintStream) {
+		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(traderReport.totalExpectedProfit,2),traderReport.aggrMatchedBets,traderReport.aggrUnmatchedBets))
 	}
 
 	private def printHeader(console:PrintStream) {
