@@ -19,8 +19,8 @@ object ICoevolutionHillClimbing {
    *   trader - Trader implementation.
    *   fitness - Current expected profit achieved by this trader.
    **/
-  class Solution[T <: ITrader](trader: T, fitness: Double) {
-	  override def toString = "Solution [trader=%s, fitness=%s".format(trader,fitness)
+	case class Solution[T <: ITrader](trader: T, fitness: Double) {
+	  override def toString = "Solution [trader=%s, fitness=%s]".format(trader,fitness)
   }
 }
 trait ICoevolutionHillClimbing {
@@ -31,11 +31,11 @@ trait ICoevolutionHillClimbing {
    * @param trader Trader to be optimised.
    * @param mutate Takes trader as input and creates mutated trader.
    * @param populationSize Number of individuals in every generation.
-   * @param maxGenerationNum Maximum number of generations that optimisation is executed for.
+   * @param generationNum Number of generations that optimisation is executed for.
    * @param progress The current progress of optimisation, it is called after every generation and returns 
    *                (current number of generation, the best solution so far, best solution for the current generation)
    *                  
    * @return Best trader found.
    **/
-  def optimise[T <: ITrader](marketData: Map[Long, File], trader: T, mutate: (T) => T, populationSize: Int, maxGenerationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): T
+  def optimise[T <: ITrader](marketData: Map[Long, File], trader: T, mutate: (T) => T, populationSize: Int,generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T]
 }
