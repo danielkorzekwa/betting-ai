@@ -6,7 +6,6 @@ import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import ITrader._
 import IMarket._
-import Simulator._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.risk._
@@ -21,21 +20,6 @@ import scala.collection._
  * 
  * @author korzekwad
  *
- */
-object Simulator {
-
-  /**
-   * @param chartLabels Labels for all chart series.
-   * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels.
-   */
-  class MarketRiskReport(val marketId: Long, val marketName: String, val eventName: String, val marketExpectedProfit: MarketExpectedProfit,
-    val matchedBetsNumber: Long, val unmatchedBetsNumber: Long, val chartLabels: List[String], val chartValues: List[Tuple2[Long, List[Double]]]) extends IMarketRiskReport {
-    override def toString() = "MarketRiskReport [marketId=%s, marketName=%s, eventName=%s, marketExpectedProfit=%s, matchedBetsNumber=%s, unmatchedBetsNumber=%s, chartLabels=%s, chartValues=%s]".format(marketId, marketName, eventName, marketExpectedProfit, matchedBetsNumber, unmatchedBetsNumber, chartLabels, chartValues)
-  }
-
-}
-
-/**
  * 
  * @param MarketEventProcessor
  * @param betex
@@ -52,13 +36,13 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
   val historicalDataUserId = nextTraderUserId()
   val traderUserId = nextTraderUserId()
 
-  /** Processes market events, analyses trader implementation and returns analysis report for trader implementation.
+   /** Processes market events, analyses traders and returns analysis reports.
    * 
-   * @param marketData Contains market events that the market simulation is executed for. Key - marketId, value - market events
-   * @param trader
+   * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
+   * @param traders Traders to analyse, all are analysed on the same time, so they compete against each other
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */
-  def runSimulation(marketData: Map[Long, File], trader: ITrader, p: (Int) => Unit): List[IMarketRiskReport] = {
+  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): List[TraderReport] = {
 
     val numOfMarkets = marketData.size
 
@@ -75,7 +59,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
         if (newProgress > prevProgress) p(newProgress)
         
         /**Process market data.*/
-        processMarketFile(marketId, marketFile, trader, commission)
+        processMarketFile(marketId, marketFile, traders.head, commission)
       }
       
       if (!traderContext.isEmpty)
@@ -83,7 +67,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
 
     p(100)
     val riskReport = betex.getMarkets.map(market => calculateRiskReport(traderUserId, market, traderContexts.find(_.marketId == market.marketId).get, commission))
-    riskReport
+    TraderReport(traders.head,riskReport) :: Nil
   }
 
   /**Process all market events.*/
@@ -136,7 +120,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
    * @param commision Commission on winnings in percentage.
    * @return
    */
-  private def calculateRiskReport(traderUserId: Int, market: IMarket, traderContext: TraderContext, commission: Double): IMarketRiskReport = {
+  private def calculateRiskReport(traderUserId: Int, market: IMarket, traderContext: TraderContext, commission: Double): MarketRiskReport = {
 
     val marketPrices = market.getBestPrices().mapValues(prices => prices._1.price -> prices._2.price)
     val marketProbs = ProbabilityCalculator.calculate(marketPrices, market.numOfWinners)
