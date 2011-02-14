@@ -16,12 +16,24 @@ import scala.collection._
  */
 object ISimulator {
 
-	case class TraderReport(trader:ITrader, marketReports: List[MarketRiskReport]) {
-		def totalExpectedProfit = marketReports.foldLeft(0d)(_ + _.marketExpectedProfit.marketExpectedProfit)
-		def aggrMatchedBets = marketReports.foldLeft(0l)(_ + _.matchedBetsNumber)
-		def aggrUnmatchedBets = marketReports.foldLeft(0l)(_ + _.unmatchedBetsNumber)
-	}
-	
+  case class SimulationReport(marketReports: List[MarketReport])
+
+  case class MarketReport(
+    val marketId: Long,
+    val marketName: String,
+    val eventName: String,
+    traderReports: List[TraderReport])
+
+  case class TraderReport(
+    /**Market expected profit based on bets and market probabilities.*/
+    val marketExpectedProfit: MarketExpectedProfit,
+    val matchedBetsNumber: Long,
+    val unmatchedBetsNumber: Long,
+    /**Labels for all chart series.*/
+    val chartLabels: List[String],
+    /**Key - time stamp, value - list of values for all series in the same order as labels.*/
+    val chartValues: List[Tuple2[Long, List[Double]]])
+
   class MarketRiskReport(
     val marketId: Long,
     val marketName: String,
@@ -47,7 +59,7 @@ trait ISimulator {
    * @param traders Traders to analyse, all they are analysed on the same time, so they compete against each other
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */
-  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): List[TraderReport]
+  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport
 
   /**Registers new trader and return trader context. 
    * This context can be used to trigger some custom traders that are registered manually by a master trader, 
