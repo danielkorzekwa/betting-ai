@@ -72,34 +72,35 @@ object SimulatorApp  {
 		console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis-time)))
 
 		console.print("\nSaving simulation html report...")
-		generateHtmlReport(marketRiskReports.head.marketReports , inputData._3)
+		generateHtmlReport(marketRiskReports.marketReports , inputData._3)
 		console.print("DONE")
 
 		console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
 		console.print("\nCommission on winnings=" + round(commission*100,2) + "%")
-		printMarketReport(marketRiskReports.head.marketReports,console)
+		printMarketReport(marketRiskReports.marketReports,console)
 		console.print("\n------------------------------------------------------------------------------------")
 
-		printMarketReportSummary(marketRiskReports.head, console)
+		printMarketReportSummary(marketRiskReports, console)
 		console.println("")
 	}
 
-	private def generateHtmlReport(marketRiskReports:List[MarketRiskReport], htmlReportDir:String) {
+	private def generateHtmlReport(marketReports:List[MarketReport], htmlReportDir:String) {
 		val in = this.getClass.getResourceAsStream("/sim_report_template.html")
 		val simReportTemplate = Source.fromInputStream(in).mkString
 
 		val reportHead = new StringBuilder()
 		val reportBody = new StringBuilder()
 
-		for(riskReport <- marketRiskReports) {
-			val rawData = generateDataTableJson(riskReport.chartLabels,riskReport.chartValues)
-			reportHead.append("\n var rawdata%s =%s".format(riskReport.marketId,rawData))
-			reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(riskReport.marketId,riskReport.marketId))
-			reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(riskReport.marketId,riskReport.marketId))
-			reportHead.append("\n chart%s.draw(data%s, {'dateFormat' : 'HH:mm:ss MMMM dd, yyyy', 'legendPosition': 'newRow',displayAnnotations: true,'scaleType': 'maximized'});".format(riskReport.marketId,riskReport.marketId))
+		for(marketReport <- marketReports) {
+			val traderReport = marketReport.traderReports.head
+			val rawData = generateDataTableJson(traderReport.chartLabels,traderReport.chartValues)
+			reportHead.append("\n var rawdata%s =%s".format(marketReport.marketId,rawData))
+			reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(marketReport.marketId,marketReport.marketId))
+			reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(marketReport.marketId,marketReport.marketId))
+			reportHead.append("\n chart%s.draw(data%s, {'dateFormat' : 'HH:mm:ss MMMM dd, yyyy', 'legendPosition': 'newRow',displayAnnotations: true,'scaleType': 'maximized'});".format(marketReport.marketId,marketReport.marketId))
 
-			reportBody.append("<br/>%s/%s<br/>".format(riskReport.marketName,riskReport.eventName))
-			reportBody.append("<br/><div id='chart_div%s' style='width: 800px; height: 480px;'></div>".format(riskReport.marketId))
+			reportBody.append("<br/>%s/%s<br/>".format(marketReport.marketName,marketReport.eventName))
+			reportBody.append("<br/><div id='chart_div%s' style='width: 800px; height: 480px;'></div>".format(marketReport.marketId))
 
 		}
 		val formmatedReport = simReportTemplate.format(reportHead,reportBody)
@@ -146,19 +147,20 @@ object SimulatorApp  {
 			response
 	}
 
-	private def printMarketReport(marketRiskReports:List[MarketRiskReport],console:PrintStream) {
+	private def printMarketReport(marketReports:List[MarketReport],console:PrintStream) {
 		printMarketRiskReport(0,0)
 		def printMarketRiskReport(marketReportIndex:Int,expAggrProfit:Double):Unit = {
-			if(marketReportIndex < marketRiskReports.size) {
-				val marketRiskReport = marketRiskReports(marketReportIndex)
-				val newExpAggrProfit = expAggrProfit	+ marketRiskReport.marketExpectedProfit.marketExpectedProfit
-				val maxRisk = marketRiskReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 < b._2) a else b)
-				val minRisk = marketRiskReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 > b._2) a else b)
+			if(marketReportIndex < marketReports.size) {
+				val marketRiskReport = marketReports(marketReportIndex)
+				val traderReport = marketRiskReport.traderReports.head
+				val newExpAggrProfit = expAggrProfit	+ traderReport.marketExpectedProfit.marketExpectedProfit
+				val maxRisk = traderReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 < b._2) a else b)
+				val minRisk = traderReport.marketExpectedProfit.runnersIfWin.reduceLeft((a,b) => if(a._2 > b._2) a else b)
 				console.print("\n%s %s: %s minProfit/prob=%s/%s maxProfit/prob=%s/%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s"
 						.format(marketRiskReport.marketId,marketRiskReport.marketName,marketRiskReport.eventName,round(maxRisk._2 ,2),
-								round(marketRiskReport.marketExpectedProfit.probabilities(maxRisk._1),2),round(minRisk._2 ,2),round(marketRiskReport.marketExpectedProfit.probabilities(minRisk._1),2),
-								round(marketRiskReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),
-								marketRiskReport.matchedBetsNumber,marketRiskReport.unmatchedBetsNumber))
+								round(traderReport.marketExpectedProfit.probabilities(maxRisk._1),2),round(minRisk._2 ,2),round(traderReport.marketExpectedProfit.probabilities(minRisk._1),2),
+								round(traderReport.marketExpectedProfit.marketExpectedProfit,2),round(newExpAggrProfit,2),
+								traderReport.matchedBetsNumber,traderReport.unmatchedBetsNumber))
 
 								/**Recursive call.*/
 								printMarketRiskReport(marketReportIndex+1,newExpAggrProfit)
@@ -166,8 +168,12 @@ object SimulatorApp  {
 		}
 	}
 
-	private def printMarketReportSummary(traderReport:TraderReport,console:PrintStream) {
-		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(traderReport.totalExpectedProfit,2),traderReport.aggrMatchedBets,traderReport.aggrUnmatchedBets))
+	private def printMarketReportSummary(simulationReport:SimulationReport,console:PrintStream) {
+		  def totalExpectedProfit = simulationReport.marketReports.foldLeft(0d)(_ + _.traderReports.head.marketExpectedProfit.marketExpectedProfit)
+    def aggrMatchedBets = simulationReport.marketReports.foldLeft(0l)(_ + _.traderReports.head.matchedBetsNumber)
+    def aggrUnmatchedBets = simulationReport.marketReports.foldLeft(0l)(_ + _.traderReports.head.unmatchedBetsNumber)
+		
+		console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit,2),aggrMatchedBets,aggrUnmatchedBets))
 	}
 
 	private def printHeader(console:PrintStream) {

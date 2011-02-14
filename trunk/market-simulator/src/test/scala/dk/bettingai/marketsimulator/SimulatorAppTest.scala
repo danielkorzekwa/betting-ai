@@ -46,8 +46,8 @@ class SimulatorAppTest {
 		println(new String(consoleStream.toByteArray))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
-		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Fulham vs Wigan minProfit/prob=-0.8/0.5 maxProfit/prob=1.9/0.5 expProfit=0.55 expAggrProfit=0.55 mBets=1 uBets=1"))
-		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Man Utd vs Arsenal minProfit/prob=0.38/0.34 maxProfit/prob=1.33/0.66 expProfit=1.01 expAggrProfit=1.56 mBets=2 uBets=2"))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Man Utd vs Arsenal minProfit/prob=0.38/0.34 maxProfit/prob=1.33/0.66 expProfit=1.01 expAggrProfit=1.01 mBets=2 uBets=2"))
+		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Match Odds: Fulham vs Wigan minProfit/prob=-0.8/0.5 maxProfit/prob=1.9/0.5 expProfit=0.55 expAggrProfit=1.56 mBets=1 uBets=1"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("TotalExpectedProfit=1.56 TotalMatchedBets=3 TotalUnmachedBets=3"))
 	}
 	

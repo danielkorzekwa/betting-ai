@@ -32,109 +32,115 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
   def nextBetId = () => { nextBetIdValue += 1; nextBetIdValue }
 
   var lastTraderUserId = 1
-  def nextTraderUserId()= {lastTraderUserId += 1; lastTraderUserId }
+  def nextTraderUserId() = { lastTraderUserId += 1; lastTraderUserId }
   val historicalDataUserId = nextTraderUserId()
-  val traderUserId = nextTraderUserId()
 
-   /** Processes market events, analyses traders and returns analysis reports.
+  /** Processes market events, analyses traders and returns analysis reports.
    * 
    * @param marketDataContains market events that the market simulation is executed for. Key - marketId, value - market events
    * @param traders Traders to analyse, all are analysed on the same time, so they compete against each other
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */
-  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): List[TraderReport] = {
+  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport = {
 
     val numOfMarkets = marketData.size
 
     p(0)
 
-    /**Run simulation and return list of all market contexts that are used to build simulation report.*/
-    val traderContexts = for {
+    /**Run simulation and return list of all market reports.*/
+    val marketReports = for {
       ((marketId, marketFile), marketIndex) <- marketData.zipWithIndex
 
-      val traderContext = {
+      val marketReport = {
         /**Update progress listener.*/
-      	val prevProgress = ((marketIndex - 1).max(0) * 100) / numOfMarkets
+        val prevProgress = ((marketIndex - 1).max(0) * 100) / numOfMarkets
         val newProgress = (marketIndex * 100) / numOfMarkets
         if (newProgress > prevProgress) p(newProgress)
-        
+
         /**Process market data.*/
-        processMarketFile(marketId, marketFile, traders.head, commission)
+        processMarketFile(marketId, marketFile, traders)
       }
-      
-      if (!traderContext.isEmpty)
-    } yield traderContext.get
+
+      if (marketReport.isDefined)
+    } yield marketReport.get
 
     p(100)
-    val riskReport = betex.getMarkets.map(market => calculateRiskReport(traderUserId, market, traderContexts.find(_.marketId == market.marketId).get, commission))
-    TraderReport(traders.head,riskReport) :: Nil
+
+    SimulationReport(marketReports.toList)
   }
 
-  /**Process all market events.*/
-  private def processMarketFile(marketId: Long, marketFile: File, trader: ITrader, commission: Double): Option[TraderContext] = {
+  /**Process all market events and returns market reports.*/
+  private def processMarketFile(marketId: Long, marketFile: File, traders: List[ITrader]): Option[MarketReport] = {
 
     val marketDataReader = new BufferedReader(new FileReader(marketFile))
 
     /**Process CREATE_MARKET EVENT*/
     val createMarketEvent = marketDataReader.readLine
-    
-    val ctx = if (createMarketEvent != null) {
+
+    val marketReport = if (createMarketEvent != null) {
       val processedEventTimestamp = marketEventProcessor.process(createMarketEvent, nextBetId(), historicalDataUserId)
       val market = betex.findMarket(marketId)
-      val traderContext = new TraderContext(nextBetId(), traderUserId, market, commission,this)
-      traderContext.setEventTimestamp(processedEventTimestamp)
-      trader.init(traderContext)
+
+      val traderContexts: List[Tuple2[ITrader, TraderContext]] = for (trader <- traders) yield trader -> new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this)
+      traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
+      traderContexts.foreach { case (trader, ctx) => trader.init(ctx) }
 
       @tailrec
-      def processMarketEvents(marketEvent: String, traderContext: TraderContext, eventTimestamp: Long): Unit = {
+      def processMarketEvents(marketEvent: String, eventTimestamp: Long): Unit = {
 
         val processedEventTimestamp = marketEventProcessor.process(marketEvent, nextBetId(), historicalDataUserId)
-        traderContext.setEventTimestamp(processedEventTimestamp)
+        traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
 
         /**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
-        if (processedEventTimestamp > eventTimestamp) trader.execute(traderContext)
+        if (processedEventTimestamp > eventTimestamp) traderContexts.foreach { case (trader, ctx) => trader.execute(ctx) }
 
         /**Recursive  call.*/
         val nextMarketEvent = marketDataReader.readLine
         if (nextMarketEvent == null) {
           /**Process remaining events*/
-          if (processedEventTimestamp <= eventTimestamp) trader.execute(traderContext)
-        } else processMarketEvents(nextMarketEvent, traderContext, processedEventTimestamp)
+          if (processedEventTimestamp <= eventTimestamp) traderContexts.foreach { case (trader, ctx) => trader.execute(ctx) }
+        } else processMarketEvents(nextMarketEvent, processedEventTimestamp)
       }
-      
+
       /**Process remaining market events.*/
       val marketEvent = marketDataReader.readLine
-      if (marketEvent != null) processMarketEvents(marketEvent, traderContext, processedEventTimestamp)
-      trader.after(traderContext)
+      if (marketEvent != null) processMarketEvents(marketEvent, processedEventTimestamp)
+      traderContexts.foreach { case (trader, ctx) => trader.after(ctx) }
 
-      Option(traderContext)
+      /**Create market report.*/
+      Option(createMarketReport(marketId, traderContexts))
     } else None
 
-    ctx
+    marketReport
   }
-  /**Calculates market expected profit based on all bets that are placed by the trader implementation on all betting exchange markets.
+
+  /** Calculates market expected profit based on all bets that are placed by traders on all betting exchange markets.
    * 
-   * @param traderUserId
-   * @param market
+   * @param marketId
    * @param traderContext
-   * @param commision Commission on winnings in percentage.
-   * @return
+   * @return Market report with market expected profit for all traders and with a few others statistics.
    */
-  private def calculateRiskReport(traderUserId: Int, market: IMarket, traderContext: TraderContext, commission: Double): MarketRiskReport = {
+  private def createMarketReport(marketId: Long, traderContexts: List[Tuple2[ITrader, TraderContext]]): MarketReport = {
+    val market = betex.findMarket(marketId)
 
-    val marketPrices = market.getBestPrices().mapValues(prices => prices._1.price -> prices._2.price)
-    val marketProbs = ProbabilityCalculator.calculate(marketPrices, market.numOfWinners)
-    val matchedBets = market.getBets(traderUserId).filter(_.betStatus == M)
-    val unmatchedBets = market.getBets(traderUserId).filter(_.betStatus == U)
-    val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission)
+    val traderReports = for {
+      (trader, traderCtx) <- traderContexts
 
-    new MarketRiskReport(market.marketId, market.marketName, market.eventName, marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderContext.getChartLabels, traderContext.getChartValues)
+      val marketPrices = market.getBestPrices().mapValues(prices => prices._1.price -> prices._2.price)
+      val marketProbs = ProbabilityCalculator.calculate(marketPrices, market.numOfWinners)
+      val matchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == M)
+      val unmatchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == U)
+      val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission)
+
+    } yield TraderReport(marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
+
+    MarketReport(market.marketId, market.marketName, market.eventName, traderReports)
   }
-  
+
   /**Registers new trader and return trader context. 
-     * This context can be used to trigger some custom traders that are registered manually by a master trader, 
-     * e.g. when testing some evolution algorithms for which more than one trader is required.
-     * @return trader context
-     */
-    def registerTrader(market:IMarket):ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission,this)
+   * This context can be used to trigger some custom traders that are registered manually by a master trader, 
+   * e.g. when testing some evolution algorithms for which more than one trader is required.
+   * @return trader context
+   */
+  def registerTrader(market: IMarket): ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this)
 }
