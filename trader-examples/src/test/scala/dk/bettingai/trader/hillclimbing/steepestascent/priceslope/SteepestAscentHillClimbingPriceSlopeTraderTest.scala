@@ -27,7 +27,7 @@ class SteepestAscentHillClimbingPriceSlopeTraderTest {
 		
 		for(i <- 1 to 10) {
 			betex.clear()
-			simulator.runSimulation(marketDataSources, trader, p => {})
+			simulator.runSimulation(marketDataSources, trader :: Nil, p => {})
 		}
 	}
 	
