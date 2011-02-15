@@ -3,6 +3,9 @@ package dk.bettingai.tradingoptimiser
 import dk.bettingai.marketsimulator.trader._
 import ICoevolutionHillClimbing._
 import java.io.File
+import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.marketevent._
+import dk.bettingai.marketsimulator._
 
 /** Search for optimal trader using co-evolution based hill climbing gradient algorithm. Algorithm 6 from Essentials of metaheuristics book 
  *  (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics) with a one difference that individuals in population compete 
@@ -39,13 +42,27 @@ object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
       /**Evaluate fitness for all individuals.
        * @returns Fitness for the best individual.
        */
-      def fitness(population: Seq[T]): Solution[T] = Solution(population.head, 2)
+      def fitness(population: Seq[T]): Solution[T] = {
+        /**Create simulation environment.*/
+        val betex = new Betex()
+        val marketEventProcessor = new MarketEventProcessorImpl(betex)
+        val commission = 0.05
+        val simulator = new Simulator(marketEventProcessor, betex, commission)
+
+        /**Run simulation and find the best solution.*/
+        val simulationReport = simulator.runSimulation(marketData, population.toList, p => {})
+        val traders = simulationReport.marketReports.head.traderReports.map(_.trader)
+        val tradersFitness: List[Tuple2[ITrader, Double]] = traders.map(t => t.trader -> simulationReport.totalExpectedProfit(t.userId))
+        /** Find best trader [trader, fitness]*/
+        val best = tradersFitness.reduceLeft((a, b) => if (a._2 > b._2) a else b)
+        Solution(best._1.asInstanceOf[T], best._2)
+      }
 
       /** Born 10 traders.*/
       val population = for (i <- 1 to populationSize) yield mutate(modelTrader.trader)
 
       val bestOfPopulation = fitness(population)
-      val best = if (bestOfPopulation.fitness > modelTrader.fitness ) bestOfPopulation else modelTrader
+      val best = if (bestOfPopulation.fitness > modelTrader.fitness) bestOfPopulation else modelTrader
       progress(iter, best, bestOfPopulation)
       best
     }

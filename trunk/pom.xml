@@ -44,12 +44,12 @@
 		<module>trader-examples</module>
 		<module>market-data-collector</module>
 		<module>betting-ai-launcher</module>
-		
+		<module>trading-optimiser</module>
 	</modules>
 
 	<!-- Properties -->
 	<properties>
-		<scala.version>2.8.0</scala.version>
+		<scala.version>2.8.1</scala.version>
 		<junit.version>4.4</junit.version>
 		<specs.version>1.2.5</specs.version>
 		<jmock.version>2.5.1</jmock.version>

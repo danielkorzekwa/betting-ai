@@ -43,7 +43,10 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
    */
   def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport = {
 
-    val numOfMarkets = marketData.size
+	/**Register traders on a betting exchange by assigning user ids for them.*/
+	val registeredTraders = traders.map(trader => RegisteredTrader(nextTraderUserId(),trader))
+    
+	val numOfMarkets = marketData.size
 
     p(0)
 
@@ -58,7 +61,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
         if (newProgress > prevProgress) p(newProgress)
 
         /**Process market data.*/
-        processMarketFile(marketId, marketFile, traders)
+        processMarketFile(marketId, marketFile, registeredTraders)
       }
 
       if (marketReport.isDefined)
@@ -70,7 +73,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
   }
 
   /**Process all market events and returns market reports.*/
-  private def processMarketFile(marketId: Long, marketFile: File, traders: List[ITrader]): Option[MarketReport] = {
+  private def processMarketFile(marketId: Long, marketFile: File, traders: List[RegisteredTrader]): Option[MarketReport] = {
 
     val marketDataReader = new BufferedReader(new FileReader(marketFile))
 
@@ -81,7 +84,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       val processedEventTimestamp = marketEventProcessor.process(createMarketEvent, nextBetId(), historicalDataUserId)
       val market = betex.findMarket(marketId)
 
-      val traderContexts: List[Tuple2[ITrader, TraderContext]] = for (trader <- traders) yield trader -> new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this)
+      val traderContexts: List[Tuple2[RegisteredTrader, TraderContext]] = for (trader <- traders) yield trader -> new TraderContext(nextBetId(),trader.userId , market, commission, this)
       traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
       traderContexts.foreach { case (trader, ctx) => trader.init(ctx) }
 
@@ -120,7 +123,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
    * @param traderContext
    * @return Market report with market expected profit for all traders and with a few others statistics.
    */
-  private def createMarketReport(marketId: Long, traderContexts: List[Tuple2[ITrader, TraderContext]]): MarketReport = {
+  private def createMarketReport(marketId: Long, traderContexts: List[Tuple2[RegisteredTrader, TraderContext]]): MarketReport = {
     val market = betex.findMarket(marketId)
 
     val traderReports = for {
@@ -132,7 +135,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       val unmatchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == U)
       val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission)
 
-    } yield TraderReport(marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
+    } yield TraderReport(trader,marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
 
     MarketReport(market.marketId, market.marketName, market.eventName, traderReports)
   }
