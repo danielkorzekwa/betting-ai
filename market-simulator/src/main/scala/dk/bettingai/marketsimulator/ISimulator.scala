@@ -16,15 +16,35 @@ import scala.collection._
  */
 object ISimulator {
 
-  case class SimulationReport(marketReports: List[MarketReport])
+  /**
+   * @param userId The betting exchange user id for registered trader.
+   * @param trader Registered trader.
+   *
+   */
+  case class RegisteredTrader(userId: Int, val trader: ITrader) extends ITrader {
+
+    override def init(ctx: ITraderContext) = trader.init(ctx)
+    def execute(ctx: ITraderContext) = trader.execute(ctx)
+    override def after(ctx: ITraderContext) = trader.after(ctx)
+  }
+
+  case class SimulationReport(marketReports: List[MarketReport]) {
+    /**Returns total expected profit for betting exchange user id.*/
+    def totalExpectedProfit(userId: Int): Double = marketReports.foldLeft(0d)((total, marketReport) => total + marketReport.expectedProfit(userId))
+  }
 
   case class MarketReport(
     val marketId: Long,
     val marketName: String,
     val eventName: String,
-    traderReports: List[TraderReport])
+    traderReports: List[TraderReport]) {
+
+    /**Returns expected profit on a market for a trader user id.*/
+    def expectedProfit(userId: Int): Double = traderReports.find(tr => tr.trader.userId == userId).get.marketExpectedProfit.marketExpectedProfit
+  }
 
   case class TraderReport(
+    val trader: RegisteredTrader,
     /**Market expected profit based on bets and market probabilities.*/
     val marketExpectedProfit: MarketExpectedProfit,
     val matchedBetsNumber: Long,
