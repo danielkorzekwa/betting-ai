@@ -27,7 +27,7 @@ Betting AI version 1.3 (release planned on 30 February 2011)
     * Integrate market simulator with complex event processing (Esper) to calculate some metrics, e.g. derivatives or to recognize patterns
     * Proof of concept. Create and test trading strategies adopting meta-heuristics (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics)
     * Create trading-optimiser component that allows for optimising trading strategies using co-evolution hill climbing gradient algorithm.
-    * Improve performance of Betex
+    * Improve performance of Betting Exchange Engine.
     * Enable market simulations for multiple traders, e.g. two traders can be analysed by competing with each other on a replayed betfair market.
 
 -----------------------------------------------------------------------------------------
