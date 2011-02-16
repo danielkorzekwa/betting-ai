@@ -205,6 +205,12 @@
 				<artifactId>market-data-collector</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>trading-optimiser</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- External dependencies -->
 			<dependency>
