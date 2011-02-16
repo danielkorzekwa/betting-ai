@@ -18,6 +18,11 @@
 			<artifactId>market-simulator</artifactId>
 		</dependency>
 
+	<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>trading-optimiser</artifactId>
+			</dependency>
+
 		<!-- External dependencies -->
 
 		<dependency>
