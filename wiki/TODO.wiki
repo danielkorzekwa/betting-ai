@@ -8,11 +8,7 @@
    
    * Create Simulator companion and add a factory method to initialise default Simulator. Then find and refactor all places where Simulator is created manually. 
 
-   * Find duplicate time event (esper).
-
    * Create Abstract Test Runner for co-evolution tests.
-
-   * Analyse memory usage for PriceSlopeTest and fix memory leak.
 
    * Test co evolution for ifwinlosedelta trader
 
