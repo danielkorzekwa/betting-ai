@@ -32,12 +32,13 @@ class PricePriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Doub
   probEventProps.put("timestamp", "long")
   config.addEventType("ProbEvent", probEventProps)
 
-  val epService: EPServiceProvider = EPServiceProviderManager.getProvider(traderId, config)
+  var epService: EPServiceProvider = _
 
   val expression = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
   var stmt: EPStatement = null
 
   override def init(ctx: ITraderContext) {
+    epService = EPServiceProviderManager.getProvider(traderId, config)
     epService.initialize()
     stmt = epService.getEPAdministrator().createEPL(expression)
   }
@@ -78,8 +79,7 @@ class PricePriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Doub
   }
 
   override def after(ctx: ITraderContext) {
-    epService.initialize()
-    stmt = epService.getEPAdministrator().createEPL(expression)
+    epService.destroy()
   }
 
   override def toString = "PriceSlopeTrader [id=%s, backSlope=%s, laySlope=%s, maxPrice=%s]".format(traderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)

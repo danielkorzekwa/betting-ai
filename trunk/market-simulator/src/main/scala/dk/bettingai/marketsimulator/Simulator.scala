@@ -92,10 +92,12 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       def processMarketEvents(marketEvent: String, eventTimestamp: Long): Unit = {
 
         val processedEventTimestamp = marketEventProcessor.process(marketEvent, nextBetId(), historicalDataUserId)
-        traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
-
-        /**Triggers trader implementation for all markets on a betting exchange, so it can take appropriate bet placement decisions.*/
+        
+        /**Triggers traders for all markets on a betting exchange.
+        * Warning! traders actually should be called within marketEventProcessor.process, after event time stamp is parsed and before event is added to betting exchange.*/
         if (processedEventTimestamp > eventTimestamp) traderContexts.foreach { case (trader, ctx) => trader.execute(ctx) }
+        
+        traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
 
         /**Recursive  call.*/
         val nextMarketEvent = marketDataReader.readLine
