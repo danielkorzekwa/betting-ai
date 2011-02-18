@@ -1,16 +1,8 @@
-  * Optimise reading market data files using java.nio and scala Streams - http://www.jayconrod.com/cgi/view_post.py?27
+It's a temporary place for some ideas, they are moved then to [http://code.google.com/p/betting-ai/issues/list Issues].
 
-  * Replace File with EventStream trait (def runSimulation(marketData: Map[Long, File], trader: ITrader, p: (Int) => Unit))
+ 
 
-   * Make sure that Market Simulator works correctly for multiple traders. Analyse on paper one of unit tests.
 
-   * Create unit test for Simulator Report.
-   
-   * Create Simulator companion and add a factory method to initialise default Simulator. Then find and refactor all places where Simulator is created manually. 
 
-   * Create Abstract Test Runner for co-evolution tests.
-
-   * Test co evolution for ifwinlosedelta trader
-
-   * Test co evolution for price + priceslope + tradedvolume variables
+ 
    
