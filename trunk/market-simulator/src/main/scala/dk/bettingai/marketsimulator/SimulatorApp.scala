@@ -174,8 +174,8 @@ object SimulatorApp {
     	  /**SimulatorApp run simulation for one trader only.*/
         val userId = x.traderReports.head.trader.userId
         def totalExpectedProfit = simulationReport.totalExpectedProfit(userId)
-        def aggrMatchedBets = simulationReport.marketReports.foldLeft(0l)(_ + _.traderReports.head.matchedBetsNumber)
-        def aggrUnmatchedBets = simulationReport.marketReports.foldLeft(0l)(_ + _.traderReports.head.unmatchedBetsNumber)
+        def aggrMatchedBets = simulationReport.totalMatchedBetsNum(userId)
+        def aggrUnmatchedBets = simulationReport.totalUnmatchedBetsNum(userId)
 
         console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit, 2), aggrMatchedBets, aggrUnmatchedBets))
       }

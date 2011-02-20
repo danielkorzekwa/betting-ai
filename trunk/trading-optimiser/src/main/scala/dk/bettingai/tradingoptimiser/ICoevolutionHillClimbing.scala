@@ -16,11 +16,12 @@ import java.io.File
 object ICoevolutionHillClimbing {
 
   /** Data model representing trader implementation and its fitness. 
-   *   trader - Trader implementation.
-   *   fitness - Current expected profit achieved by this trader.
+   *   @param trader Trader implementation.
+   *   @param expectedProfit Current expected profit achieved by this trader.
+   *   @param matchedBetsNumm Total number of matched bets for this trader.
    **/
-	case class Solution[T <: ITrader](trader: T, fitness: Double) {
-	  override def toString = "Solution [trader=%s, fitness=%s]".format(trader,fitness)
+	case class Solution[T <: ITrader](trader: T, expectedProfit: Double,matchedBetsNum: Double) {
+	  override def toString = "Solution [trader=%s, expectedProfit=%s, matchedBetsNum=%s]".format(trader,expectedProfit,matchedBetsNum)
   }
 }
 trait ICoevolutionHillClimbing {
@@ -37,5 +38,5 @@ trait ICoevolutionHillClimbing {
    *                  
    * @return Best trader found.
    **/
-  def optimise[T <: ITrader](marketData: Map[Long, File], trader: T, mutate: (T) => T, populationSize: Int,generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T]
+  def optimise[T <: ITrader](marketData: Map[Long, File], trader: T, mutate: (Solution[T]) => T, populationSize: Int,generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T]
 }

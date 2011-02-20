@@ -59,7 +59,7 @@ class CoevolutionHillClimbingTest {
     val marketDataDir = new File("./src/test/resources/one_hr_10mins_before_inplay")
     val marketDataSources = Map(marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
     val progress = (iter: Int, best: Solution[PriceTrader], current: Solution[PriceTrader]) => log.info("Iter number=" + iter + ", bestSoFar=" + best + ", currentBest=" + current)
-    val mutate = (t: PriceTrader) => new PriceTrader(move(t.price, rand.nextInt(11) - 5))
+    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
     val bestSolution = CoevolutionHillClimbing.optimise(marketDataSources, trader, mutate, populationSize, generationNum, progress)
 
     log.info("Best solution=" + bestSolution)
@@ -73,7 +73,7 @@ class CoevolutionHillClimbingTest {
     val marketDataDir = new File("./src/test/resources/two_hr_10mins_before_inplay")
     val marketDataSources = Map(marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
     val progress = (iter: Int, best: Solution[PriceTrader], current: Solution[PriceTrader]) => log.info("Iter number=" + iter + ", bestSoFar=" + best + ", currentBest=" + current)
-    val mutate = (t: PriceTrader) => new PriceTrader(move(t.price, rand.nextInt(11) - 5))
+    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
     val bestSolution = CoevolutionHillClimbing.optimise(marketDataSources, trader, mutate, populationSize, generationNum, progress)
 
     log.info("Best solution=" + bestSolution)
