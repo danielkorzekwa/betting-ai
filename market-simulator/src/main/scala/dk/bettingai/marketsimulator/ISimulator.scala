@@ -31,6 +31,12 @@ object ISimulator {
   case class SimulationReport(marketReports: List[MarketReport]) {
     /**Returns total expected profit for betting exchange user id.*/
     def totalExpectedProfit(userId: Int): Double = marketReports.foldLeft(0d)((total, marketReport) => total + marketReport.expectedProfit(userId))
+    
+    /**Returns total number of matched bets for userId, which were placed on all betting exchange markets.*/
+    def totalMatchedBetsNum(userId: Int) = marketReports.foldLeft(0l)((total,marketReport) => total + marketReport.matchedBetsNum(userId))
+    
+     /**Returns total number of unmatched bets for userId, which were placed on all betting exchange markets.*/
+    def totalUnmatchedBetsNum(userId: Int) = marketReports.foldLeft(0l)((total,marketReport) => total + marketReport.unmatchedBetsNum(userId))
   }
 
   case class MarketReport(
@@ -41,6 +47,12 @@ object ISimulator {
 
     /**Returns expected profit on a market for a trader user id.*/
     def expectedProfit(userId: Int): Double = traderReports.find(tr => tr.trader.userId == userId).get.marketExpectedProfit.marketExpectedProfit
+    
+     /**Returns total number of matched bets for userId, which were placed on a given betting exchange market.*/
+    def matchedBetsNum(userId: Int) = traderReports.find(tr => tr.trader.userId == userId).get.matchedBetsNumber
+    
+     /**Returns total number of unmatched bets for userId, which were placed on a given betting exchange market.*/
+    def unmatchedBetsNum(userId: Int) = traderReports.find(tr => tr.trader.userId == userId).get.unmatchedBetsNumber
   }
 
   case class TraderReport(

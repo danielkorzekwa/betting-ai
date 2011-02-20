@@ -12,13 +12,20 @@ import dk.bettingai.marketsimulator.betex.PriceUtil._
 /**Run trader implementation.
  * 
  * @author korzekwad
+ * 
+ * Set more memory and active jmx: 
+ * -Xmx512m 
+ * -Dcom.sun.management.jmxremote
+ * 
+ *  bestSoFar=Solution [trader=PriceSlopeTrader [id=trader4, backSlope=-0.01, laySlope=-0.02, maxPrice=2.84], expectedProfit=181.32852996310174, matchedBetsNum=3253.0]
  *
  */
 class PricePriceSlopeTraderTest {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  val trader = new PricePriceSlopeTrader("baseTrader", -0.01, 0.01, 5)
+  /**Number of matched bets for this trader will be zero, it's to test escaping from local maximum.*/
+  val trader = new PricePriceSlopeTrader("baseTrader", -0.21, 0.21, 5)
 
   private val populationSize = 5
   private val generationNum = 5
@@ -33,14 +40,27 @@ class PricePriceSlopeTraderTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
+   // val marketDataDir = new File("c:/daniel/marketdata")
     val marketDataDir = new File("./src/test/resources/two_hr_10mins_before_inplay")
     val marketDataSources = Map(marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
     val progress = (iter: Int, best: Solution[PricePriceSlopeTrader], current: Solution[PricePriceSlopeTrader]) => log.info("Iter number=" + iter + ", bestSoFar=" + best + ", currentBest=" + current)
-    val mutate = (t: PricePriceSlopeTrader) => {
-      val backPriceSlopeSignal = t.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
-      val layPriceSlopeSignal = t.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
-      val maxPrice = move(t.maxPrice, rand.nextInt(11) - 5)
-      new PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
+
+    val mutate = (solution: Solution[PricePriceSlopeTrader]) => {
+
+      /**If numbers of matched bets = 0 then initialise trader with random values to escape from local maximum.*/
+      if (solution.matchedBetsNum > 0) {
+        val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
+        val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
+        val maxPrice = move(solution.trader.maxPrice, rand.nextInt(11) - 5)
+        new PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
+      } else {
+        val backPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
+        val layPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
+        val maxPrice = priceUp(1 / rand.nextDouble)
+        val trader = new PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
+        log.info("Escaping from local maximum (number of matched bets=0). " + trader)
+        trader
+      }
     }
     val bestSolution = CoevolutionHillClimbing.optimise(marketDataSources, trader, mutate, populationSize, generationNum, progress)
 
