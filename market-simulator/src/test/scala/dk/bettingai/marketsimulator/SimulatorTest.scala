@@ -13,9 +13,10 @@ import java.util.Date
 import scala.collection._
 import ISimulator._
 import SimulatorTest._
+import immutable.TreeMap
 
 object SimulatorTest {
-	 def assertMarketReport(marketId: Long, marketName: String, eventName: String, actualMarketReport: MarketReport) {
+  def assertMarketReport(marketId: Long, marketName: String, eventName: String, actualMarketReport: MarketReport) {
     assertEquals(marketId, actualMarketReport.marketId)
     assertEquals(marketName, actualMarketReport.marketName)
     assertEquals(eventName, actualMarketReport.eventName)
@@ -43,7 +44,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataEmpty/10.csv")
 
     /**Run market simulation.*/
-    val marketRiskReport = simulator.runSimulation(Map(11l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketRiskReport = simulator.runSimulation(TreeMap(11l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(0, marketRiskReport.size)
   }
 
@@ -52,7 +53,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataCreateMarketOnly/10.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(1, marketReports.size)
     assertMarketReport(10, "Match Odds", "Man Utd vs Arsenal", marketReports(0))
 
@@ -70,7 +71,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(1, marketReports.size)
     assertMarketReport(10, "Match Odds", "Man Utd vs Arsenal", marketReports(0))
 
@@ -88,7 +89,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceBackBet/10.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(1, marketReports.size)
     assertMarketReport(10, "Match Odds", "Man Utd vs Arsenal", marketReports(0))
 
@@ -104,7 +105,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceAndCancelLayBet/10.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(1, marketReports.size)
     assertMarketReport(10, "Match Odds", "Man Utd vs Arsenal", marketReports(0))
 
@@ -121,7 +122,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceAFewBets/10.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traders, (progress: Int) => {}).marketReports
     assertEquals(1, marketReports.size)
     assertMarketReport(10, "Match Odds", "Man Utd vs Arsenal", marketReports(0))
 
@@ -141,7 +142,7 @@ class SimulatorTest {
     val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile10, 20l -> marketEventsFile20), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), traders, (progress: Int) => {}).marketReports
 
     assertEquals(2, marketReports.size)
 
@@ -165,7 +166,7 @@ class SimulatorTest {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
     val traderUnderTest = new SimpleTraderWithChildren() :: Nil
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile), traderUnderTest, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traderUnderTest, (progress: Int) => {}).marketReports
 
     assertEquals(-0.625, traderUnderTest.head.getTotalMarketExpectedProfit, 0.001)
 
@@ -190,7 +191,7 @@ class SimulatorTest {
 
     val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(10l -> marketEventsFile10, 20l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
 
     assertEquals(2, marketReports.size)
 
@@ -218,6 +219,31 @@ class SimulatorTest {
     assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport2.traderReports(1).trader)
     assertEquals(2, twoTraders(1).initCalledTimes)
     assertEquals(2, twoTraders(1).afterCalledTimes)
+  }
+
+  @Test
+  def testCheckProgressBar {
+
+    val marketEventsFile10 = new File("src/test/resources/twoMarketFiles/10.csv")
+    val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
+    val empyMarketFile1 = new File("src/test/resources/marketDataEmpty/10.csv")
+
+    val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
+    
+    var progressSum=0l
+   val progressBar = (progress: Int) => { progressSum+= progress; progressSum+=progressSum*2;println("market simulation progress=" + progress + "%") }
+    /**Run market simulation.*/
+    val marketReports = simulator.runSimulation(
+      TreeMap(1l -> empyMarketFile1,
+        2l -> empyMarketFile1,
+        3l -> empyMarketFile1,
+        4l -> empyMarketFile1,
+        10l -> marketEventsFile10,
+        20l -> marketEventsFile20)
+      , twoTraders,progressBar).marketReports
+
+    assertEquals(2, marketReports.size)
+    assertEquals(26562, progressSum)
   }
 
   /**

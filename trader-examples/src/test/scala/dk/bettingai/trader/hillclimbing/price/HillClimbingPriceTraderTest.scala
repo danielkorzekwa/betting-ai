@@ -6,6 +6,7 @@ import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator._
 import java.io.File
+import scala.collection.immutable.TreeMap
 
 class HillClimbingPriceTraderTest {
 
@@ -15,7 +16,7 @@ class HillClimbingPriceTraderTest {
 	val simulator = new Simulator(marketEventProcessor,betex,commission)
 
 	val marketDataDir = new File("./src/test/resources/one_hr_10mins_before_inplay")
-	val marketDataSources = Map (marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f) : _*)
+	val marketDataSources = TreeMap (marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f) : _*)
 	val trader = new HillClimbingPriceTrader()
 
 	@Test def test {

@@ -15,7 +15,7 @@ import java.io.BufferedReader
 import java.io.FileReader
 import scala.annotation._
 import scala.collection._
-
+import immutable.TreeMap
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
  * @author korzekwad
@@ -41,7 +41,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
    * @param traders Traders to analyse, all are analysed on the same time, so they compete against each other
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */
-  def runSimulation(marketData: Map[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport = {
+  def runSimulation(marketData: TreeMap[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport = {
 
 	/**Register traders on a betting exchange by assigning user ids for them.*/
 	val registeredTraders = traders.map(trader => RegisteredTrader(nextTraderUserId(),trader))
@@ -52,7 +52,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
 
     /**Run simulation and return list of all market reports.*/
     val marketReports = for {
-      ((marketId, marketFile), marketIndex) <- marketData.zipWithIndex
+      (marketIndex,marketId) <- marketData.keys.zipWithIndex.map{case (mId, index) => (index,mId)}.toList.sorted
 
       val marketReport = {
         /**Update progress listener.*/
@@ -61,7 +61,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
         if (newProgress > prevProgress) p(newProgress)
 
         /**Process market data.*/
-        processMarketFile(marketId, marketFile, registeredTraders)
+        processMarketFile(marketId, marketData(marketId), registeredTraders)
       }
 
       if (marketReport.isDefined)

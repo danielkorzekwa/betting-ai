@@ -8,7 +8,7 @@ import Assert._
  * @author korzekwad
  *
  */
-class TradedVolumeDeltaTraderTest {
+class ProbabilityTraderTest {
 
 	@Test def test {
 		val traderClass = classOf[ProbabilityTrader]

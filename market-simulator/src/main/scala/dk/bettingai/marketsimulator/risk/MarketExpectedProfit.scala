@@ -7,7 +7,7 @@ import scala.collection._
  * @param runnersIfWin If wins values for all market runners. IfWin = What was the market profit if the runner would win.
  * @param probabilities, key - runnerId, value - runner probability
  */
-class MarketExpectedProfit(val marketExpectedProfit:Double,val runnersIfWin:Map[Long,Double],val probabilities:Map[Long,Double]) {
+case class MarketExpectedProfit(val marketExpectedProfit:Double,val runnersIfWin:Map[Long,Double],val probabilities:Map[Long,Double]) {
 
 	def ifLose(runnerId:Long):Double = {
 			val ifWin = runnersIfWin(runnerId)
