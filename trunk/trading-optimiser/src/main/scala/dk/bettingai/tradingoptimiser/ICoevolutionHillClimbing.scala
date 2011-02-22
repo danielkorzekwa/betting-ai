@@ -3,6 +3,7 @@ package dk.bettingai.tradingoptimiser
 import dk.bettingai.marketsimulator.trader._
 import ICoevolutionHillClimbing._
 import java.io.File
+import scala.collection.immutable.TreeMap
 
 /** Search for optimal trader using co-evolution based hill climbing gradient algorithm. Algorithm 6 from Essentials of metaheuristics book 
  *  (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics) with a one difference that individuals in population compete 
@@ -38,5 +39,5 @@ trait ICoevolutionHillClimbing {
    *                  
    * @return Best trader found.
    **/
-  def optimise[T <: ITrader](marketData: Map[Long, File], trader: T, mutate: (Solution[T]) => T, populationSize: Int,generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T]
+  def optimise[T <: ITrader](marketData: TreeMap[Long, File], trader: T, mutate: (Solution[T]) => T, populationSize: Int,generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T]
 }

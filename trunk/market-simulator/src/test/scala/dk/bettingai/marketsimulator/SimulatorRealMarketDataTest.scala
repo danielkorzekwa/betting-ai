@@ -11,6 +11,7 @@ import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.betex.Market._
 import java.util.Date
 import scala.collection._
+import immutable.TreeMap
 import ISimulator._
 import SimulatorTest._
 
@@ -30,7 +31,7 @@ class SimulatorRealMarketDataTest {
     val marketEventsFile20 = new File("src/test/resources/marketRealDataTwoMarkets/101655622.csv")
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(101655610l -> marketEventsFile10, 101655622l -> marketEventsFile20), traders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(101655610l -> marketEventsFile10, 101655622l -> marketEventsFile20), traders, (progress: Int) => {}).marketReports
 
     assertEquals(2, marketReports.size)
 
@@ -62,7 +63,7 @@ class SimulatorRealMarketDataTest {
 
     val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(Map(101655610l -> marketEventsFile10, 101655622l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(101655610l -> marketEventsFile10, 101655622l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
 
     assertEquals(2, marketReports.size)
 

@@ -32,15 +32,13 @@ class PriceSlopeTraderTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
-    val marketDataDir = new File("./src/test/resources/two_hr_10mins_before_inplay")
-    val marketDataSources = Map(marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
-    val progress = (iter: Int, best: Solution[PriceSlopeTrader], current: Solution[PriceSlopeTrader]) => log.info("Iter number=" + iter + ", bestSoFar=" + best + ", currentBest=" + current)
+    val marketDataDir ="./src/test/resources/two_hr_10mins_before_inplay"
     val mutate = (solution: Solution[PriceSlopeTrader]) => {
       val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       new PriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal)
     }
-    val bestSolution = CoevolutionHillClimbing.optimise(marketDataSources, trader, mutate, populationSize, generationNum, progress)
+    val bestSolution = CoevolutionHillClimbing.optimise(marketDataDir, trader, mutate, populationSize, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }

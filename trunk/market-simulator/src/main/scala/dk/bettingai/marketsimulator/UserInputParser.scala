@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator
 import java.io._
 import scala.io._
 import dk.bettingai.marketsimulator.trader._
+import scala.collection.immutable.TreeMap
 
 /**Parses input arguments to the SimulationApp.
  * 
@@ -17,7 +18,7 @@ object UserInputParser {
 	 * @return Element 1 - marketDataFiles, key - marketId, value - marketDataSource, element 2 - traderImplClass, 3 - htmlReportDir
 	 * @throws Illegal argument exception is thrown if any of input argument doesn't exist or is incorrect.
 	 */
-  def parse(args:Array[String]):Tuple3[Map[Long,File],ITrader,String] = {
+  def parse(args:Array[String]):Tuple3[TreeMap[Long,File],ITrader,String] = {
   	/**Parse input parameters.*/
 		val argsMap:Map[String,String] = argsToMap(args)
 
@@ -40,7 +41,7 @@ object UserInputParser {
 		}
 		
 	 val htmlReportDir = argsMap.getOrElse("htmlReportDir","./")
-		(Map(marketDataSources: _*),traderImpl.asInstanceOf[ITrader],htmlReportDir)
+		(TreeMap(marketDataSources: _*),traderImpl.asInstanceOf[ITrader],htmlReportDir)
   }
   
   /**Map list of arguments to map, 

@@ -12,6 +12,7 @@ import ISimulator._
 import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
 import scala.collection._
+import immutable.TreeMap
 
 /**Google visualization imports*/
 import com.google.visualization.datasource._
@@ -45,7 +46,7 @@ object SimulatorApp {
     printHeader(console)
 
     /**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass, 3 - htmlReportDir*/
-    val inputData: Tuple3[Map[Long, File], ITrader, String] = try {
+    val inputData: Tuple3[TreeMap[Long, File], ITrader, String] = try {
       UserInputParser.parse(args)
     } catch {
       case e: Exception => printHelpMessage(console); console.println("\n" + e); return
