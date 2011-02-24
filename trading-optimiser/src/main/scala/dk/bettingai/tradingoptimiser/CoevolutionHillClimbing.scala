@@ -84,9 +84,8 @@ object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
       def fitness(population: Seq[T]): Option[Solution[T]] = {
         /**Create simulation environment.*/
         val betex = new Betex()
-        val marketEventProcessor = new MarketEventProcessorImpl(betex)
         val commission = 0.05
-        val simulator = new Simulator(marketEventProcessor, betex, commission)
+        val simulator = new Simulator(betex, commission)
 
         /**Run simulation and find the best solution.*/
         val simulationReport = simulator.runSimulation(marketData, population.toList, p => {})
