@@ -11,6 +11,7 @@ import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
+import scala.collection._
 
 /**Places back and lay bets based on price slope (linear regression)
  * 
@@ -31,31 +32,34 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
   probEventProps.put("timestamp", "long")
   config.addEventType("ProbEvent", probEventProps)
 
-  var epService: EPServiceProvider = _
+   /**Key market id.*/
+  var epService: mutable.Map[Long, EPServiceProvider] = new mutable.HashMap[Long, EPServiceProvider] with mutable.SynchronizedMap[Long, EPServiceProvider]
 
   val expression = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
-  var stmt: EPStatement = null
+  
+  /**Key - marketId.*/
+  var stmt: mutable.Map[Long, EPStatement] = new mutable.HashMap[Long,EPStatement] with mutable.SynchronizedMap[Long,EPStatement]
 
   override def init(ctx: ITraderContext) {
-	epService = EPServiceProviderManager.getProvider(traderId, config)
-    epService.initialize()
-    stmt = epService.getEPAdministrator().createEPL(expression)
+	epService(ctx.marketId) = EPServiceProviderManager.getProvider(traderId + ":" + ctx.marketId, config)
+    epService(ctx.marketId).initialize()
+    stmt(ctx.marketId) = epService(ctx.marketId).getEPAdministrator().createEPL(expression)
   }
 
   def execute(ctx: ITraderContext) = {
 
     /**Send new time event to esper.*/
-    epService.getEPRuntime().sendEvent(new CurrentTimeEvent(ctx.getEventTimestamp))
+    epService(ctx.marketId).getEPRuntime().sendEvent(new CurrentTimeEvent(ctx.getEventTimestamp))
 
     /**Sent events to esper.*/
     for (runnerId <- ctx.runners.map(_.runnerId)) {
       val bestPrices = ctx.getBestPrices(runnerId)
       val avgPrice = PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2.price)
-      epService.getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "prob" -> 100 / avgPrice, "timestamp" -> ctx.getEventTimestamp / 1000), "ProbEvent")
+      epService(ctx.marketId).getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "prob" -> 100 / avgPrice, "timestamp" -> ctx.getEventTimestamp / 1000), "ProbEvent")
     }
 
     /**Pull epl statement and execute trading strategy.*/
-    for (event <- stmt.iterator) {
+    for (event <- stmt(ctx.marketId).iterator) {
       val runnerId = event.get("runnerId").asInstanceOf[Long]
       val priceSlope = -1 * event.get("slope").asInstanceOf[Double] //convert prob slope to price slope
       val bestPrices = ctx.getBestPrices(runnerId)
@@ -78,7 +82,7 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
   }
 
   override def after(ctx: ITraderContext) {
-    epService.destroy()
+    epService(ctx.marketId).destroy()
   }
 
   override def toString = "PriceSlopeTrader [id=%s, backSlope=%s, laySlope=%s]".format(traderId, backPriceSlopeSignal, layPriceSlopeSignal)
