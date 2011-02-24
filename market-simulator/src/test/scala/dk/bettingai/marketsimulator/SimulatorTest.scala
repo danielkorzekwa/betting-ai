@@ -31,9 +31,8 @@ object SimulatorTest {
 class SimulatorTest {
 
   private val betex = new Betex()
-  private val marketEventProcessor = new MarketEventProcessorImpl(betex)
   private val traders = new SimpleTrader() :: Nil
-  private val simulator = new Simulator(marketEventProcessor, betex, 0)
+  private val simulator = new Simulator(betex, 0)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.
@@ -132,8 +131,8 @@ class SimulatorTest {
     assertEquals(15.6, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(11), 0.001)
     assertEquals(-14.6, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(12), 0.001)
 
-    assertEquals(1, traders.head.initCalledTimes)
-    assertEquals(1, traders.head.afterCalledTimes)
+    assertEquals(1, traders.head.initCalledTimes.get)
+    assertEquals(1, traders.head.afterCalledTimes.get)
   }
 
   @Test
@@ -156,8 +155,8 @@ class SimulatorTest {
     assertEquals(1, marketReports(1).traderReports.size)
     assertTraderReport(0.6, 1, 1, marketReports(1).traderReports(0))
 
-    assertEquals(2, traders.head.initCalledTimes)
-    assertEquals(2, traders.head.afterCalledTimes)
+    assertEquals(2, traders.head.initCalledTimes.get)
+    assertEquals(2, traders.head.afterCalledTimes.get)
 
   }
 
@@ -205,8 +204,8 @@ class SimulatorTest {
     assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport1.traderReports(0).trader)
     assertTraderReport(1.058, 2, 2, marketReport1.traderReports(1))
     assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport1.traderReports(1).trader)
-    assertEquals(2, twoTraders(0).initCalledTimes)
-    assertEquals(2, twoTraders(0).afterCalledTimes)
+    assertEquals(2, twoTraders(0).initCalledTimes.get)
+    assertEquals(2, twoTraders(0).afterCalledTimes.get)
 
     /**Check report for the second market.*/
     val marketReport2 = marketReports(1)
@@ -217,8 +216,8 @@ class SimulatorTest {
     assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport2.traderReports(0).trader)
     assertTraderReport(0.6, 1, 1, marketReport2.traderReports(1))
     assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport2.traderReports(1).trader)
-    assertEquals(2, twoTraders(1).initCalledTimes)
-    assertEquals(2, twoTraders(1).afterCalledTimes)
+    assertEquals(2, twoTraders(1).initCalledTimes.get)
+    assertEquals(2, twoTraders(1).afterCalledTimes.get)
   }
 
   @Test

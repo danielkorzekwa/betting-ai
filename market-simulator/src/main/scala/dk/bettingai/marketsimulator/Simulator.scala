@@ -16,6 +16,10 @@ import java.io.FileReader
 import scala.annotation._
 import scala.collection._
 import immutable.TreeMap
+import scala.actors.Actor
+import Actor._
+import java.util.concurrent.atomic._
+
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
  * @author korzekwad
@@ -26,13 +30,13 @@ import immutable.TreeMap
  * @param commission Commission on winnings in percentage.
  *
  */
-class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commission: Double) extends ISimulator {
+class Simulator(betex: IBetex, commission: Double) extends ISimulator {
 
-  var nextBetIdValue = 1
-  def nextBetId = () => { nextBetIdValue += 1; nextBetIdValue }
+  var nextBetIdValue = new AtomicLong(1)
+  def nextBetId = () => nextBetIdValue.addAndGet(1)
 
-  var lastTraderUserId = 1
-  def nextTraderUserId() = { lastTraderUserId += 1; lastTraderUserId }
+  var lastTraderUserId = new AtomicInteger(1)
+  def nextTraderUserId() = lastTraderUserId.addAndGet(1)
   val historicalDataUserId = nextTraderUserId()
 
   /** Processes market events, analyses traders and returns analysis reports.
@@ -43,38 +47,50 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
    */
   def runSimulation(marketData: TreeMap[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport = {
 
-	/**Register traders on a betting exchange by assigning user ids for them.*/
-	val registeredTraders = traders.map(trader => RegisteredTrader(nextTraderUserId(),trader))
-    
-	val numOfMarkets = marketData.size
+    /**Register traders on a betting exchange by assigning user ids for them.*/
+    val registeredTraders = traders.map(trader => RegisteredTrader(nextTraderUserId(), trader))
+
+    val numOfMarkets = marketData.size
 
     p(0)
 
-    /**Run simulation and return list of all market reports.*/
-    val marketReports = for {
-      (marketIndex,marketId) <- marketData.keys.zipWithIndex.map{case (mId, index) => (index,mId)}.toList.sorted
-
-      val marketReport = {
-        /**Update progress listener.*/
-        val prevProgress = ((marketIndex - 1).max(0) * 100) / numOfMarkets
-        val newProgress = (marketIndex * 100) / numOfMarkets
-        if (newProgress > prevProgress) p(newProgress)
-
-        /**Process market data.*/
-        processMarketFile(marketId, marketData(marketId), registeredTraders)
+    /**Process all markets in parallel and send back market reports.*/
+    for ((marketIndex, marketId) <- marketData.keys.zipWithIndex.map { case (mId, index) => (index, mId) }.toList.sorted) {
+      val slave: Actor = actor {
+        react {
+          case marketId: Long => {
+            val marketReport = processMarketFile(marketId, marketData(marketId), registeredTraders)
+            sender ! marketReport
+          }
+        }
       }
+      slave ! marketId
+    }
 
-      if (marketReport.isDefined)
-    } yield marketReport.get
+    /**Collect market reports from slaves.*/
+    val marketReports = mutable.ListBuffer[Option[MarketReport]]()
+    while (marketReports.size != numOfMarkets) {
+      receive {
+        case marketReport: Option[MarketReport] => {
+          val prevProgress = ((marketReports.size - 1).max(0) * 100) / numOfMarkets
+          marketReports += marketReport
+          val newProgress = ((marketReports.size - 1).max(0) * 100) / numOfMarkets
+          if (newProgress > prevProgress) p(newProgress)
+        }
+      }
+    }
+    val nonEmptyReports = marketReports.filter(r => r.isDefined).map(_.get).toList.sortWith((a,b) => a.marketTime.getTime < b.marketTime.getTime)
 
     p(100)
+    SimulationReport(nonEmptyReports)
 
-    SimulationReport(marketReports.toList)
   }
 
   /**Process all market events and returns market reports.*/
   private def processMarketFile(marketId: Long, marketFile: File, traders: List[RegisteredTrader]): Option[MarketReport] = {
 
+	val marketEventProcessor = new MarketEventProcessorImpl(betex)
+	  
     val marketDataReader = new BufferedReader(new FileReader(marketFile))
 
     /**Process CREATE_MARKET EVENT*/
@@ -84,7 +100,7 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       val processedEventTimestamp = marketEventProcessor.process(createMarketEvent, nextBetId(), historicalDataUserId)
       val market = betex.findMarket(marketId)
 
-      val traderContexts: List[Tuple2[RegisteredTrader, TraderContext]] = for (trader <- traders) yield trader -> new TraderContext(nextBetId(),trader.userId , market, commission, this)
+      val traderContexts: List[Tuple2[RegisteredTrader, TraderContext]] = for (trader <- traders) yield trader -> new TraderContext(nextBetId(), trader.userId, market, commission, this)
       traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
       traderContexts.foreach { case (trader, ctx) => trader.init(ctx) }
 
@@ -92,11 +108,11 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       def processMarketEvents(marketEvent: String, eventTimestamp: Long): Unit = {
 
         val processedEventTimestamp = marketEventProcessor.process(marketEvent, nextBetId(), historicalDataUserId)
-        
+
         /**Triggers traders for all markets on a betting exchange.
-        * Warning! traders actually should be called within marketEventProcessor.process, after event time stamp is parsed and before event is added to betting exchange.*/
+         * Warning! traders actually should be called within marketEventProcessor.process, after event time stamp is parsed and before event is added to betting exchange.*/
         if (processedEventTimestamp > eventTimestamp) traderContexts.foreach { case (trader, ctx) => trader.execute(ctx) }
-        
+
         traderContexts.foreach { case (trader, ctx) => ctx.setEventTimestamp(processedEventTimestamp) }
 
         /**Recursive  call.*/
@@ -137,9 +153,9 @@ class Simulator(marketEventProcessor: MarketEventProcessor, betex: IBetex, commi
       val unmatchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == U)
       val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission)
 
-    } yield TraderReport(trader,marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
+    } yield TraderReport(trader, marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
 
-    MarketReport(market.marketId, market.marketName, market.eventName, traderReports)
+    MarketReport(market.marketId, market.marketName, market.eventName, market.marketTime,traderReports)
   }
 
   /**Registers new trader and return trader context. 

@@ -18,9 +18,8 @@ import SimulatorTest._
 class SimulatorRealMarketDataTest {
 
   private val betex = new Betex()
-  private val marketEventProcessor = new MarketEventProcessorImpl(betex)
   private val traders = new SimpleTrader() :: Nil
-  private val simulator = new Simulator(marketEventProcessor, betex, 0)
+  private val simulator = new Simulator(betex, 0)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.
@@ -49,8 +48,8 @@ class SimulatorRealMarketDataTest {
     assertEquals(11256, marketReports(1).traderReports(0).matchedBetsNumber)
     assertEquals(672, marketReports(1).traderReports(0).unmatchedBetsNumber)
 
-    assertEquals(2, traders.head.initCalledTimes)
-    assertEquals(2, traders.head.afterCalledTimes)
+    assertEquals(2, traders.head.initCalledTimes.get)
+    assertEquals(2, traders.head.afterCalledTimes.get)
   }
 
   /**
@@ -75,8 +74,8 @@ class SimulatorRealMarketDataTest {
     assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport1.traderReports(0).trader)
     assertTraderReport(-402.047, 12379, 752, marketReport1.traderReports(1))
     assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport1.traderReports(1).trader)
-    assertEquals(2, twoTraders(0).initCalledTimes)
-    assertEquals(2, twoTraders(0).afterCalledTimes)
+    assertEquals(2, twoTraders(0).initCalledTimes.get)
+    assertEquals(2, twoTraders(0).afterCalledTimes.get)
 
     /**Check report for the second market.*/
     val marketReport2 = marketReports(1)
@@ -87,7 +86,7 @@ class SimulatorRealMarketDataTest {
     assertTraderReport(-176.796, 11220, 610, marketReport2.traderReports(1))
     assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport2.traderReports(1).trader)
 
-    assertEquals(2, twoTraders(1).initCalledTimes)
-    assertEquals(2, twoTraders(1).afterCalledTimes)
+    assertEquals(2, twoTraders(1).initCalledTimes.get)
+    assertEquals(2, twoTraders(1).afterCalledTimes.get)
   }
 }
