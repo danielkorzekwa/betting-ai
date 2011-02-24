@@ -5,6 +5,8 @@ import Assert._
 import ISimulator._
 import dk.bettingai.marketsimulator.trader.SimpleTrader
 import dk.bettingai.marketsimulator.risk.MarketExpectedProfit
+import java.util.Date
+
 class SimulationReportTest {
 
   private var simulationReport: SimulationReport = _
@@ -13,11 +15,11 @@ class SimulationReportTest {
   def setUp {
     val marketExpectedProfit1 = new MarketExpectedProfit(34, Map(), Map())
     val traderReports1 = TraderReport(RegisteredTrader(100, new SimpleTrader()), marketExpectedProfit1, 3, 6, Nil, Nil) :: Nil
-    val marketReport1 = MarketReport(1, "market 2", "event", traderReports1)
+    val marketReport1 = MarketReport(1, "market 2", "event", new Date(1000),traderReports1)
 
     val marketExpectedProfit2 = new MarketExpectedProfit(24, Map(), Map())
     val traderReports2 = TraderReport(RegisteredTrader(100, new SimpleTrader()), marketExpectedProfit2, 2, 5, Nil, Nil) :: Nil
-    val marketReport2 = MarketReport(1, "market 1", "event", traderReports2)
+    val marketReport2 = MarketReport(1, "market 1", "event", new Date(2000),traderReports2)
     
     val marketReports = marketReport1 :: marketReport2 :: Nil
     simulationReport = SimulationReport(marketReports)

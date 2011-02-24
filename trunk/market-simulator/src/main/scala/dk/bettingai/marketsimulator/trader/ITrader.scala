@@ -10,6 +10,10 @@ import scala.collection._
 
 /**This trait represents a trader that can place bets on a betting exchange.
  * 
+ * Warning! Trader can be executed in parallel for many markets. 
+ * The only one object that is thread safe is TraderContext,which is passed to 'init','execute' and 'after' methods of Trader.
+ * It's a trader's responsibility to make Trader instance level's variables to be thread-safe.
+ *  
  * @author korzekwad
  *
  */

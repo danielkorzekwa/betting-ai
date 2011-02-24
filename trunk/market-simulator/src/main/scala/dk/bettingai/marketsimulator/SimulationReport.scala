@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator
 
 import ISimulator._
 import dk.bettingai.marketsimulator.risk._
+import java.util.Date
 
 /**This class represents the result of market simulation.
  * 
@@ -23,6 +24,7 @@ case class MarketReport(
     val marketId: Long,
     val marketName: String,
     val eventName: String,
+    val marketTime: Date,
     traderReports: List[TraderReport]) {
 
     /**Returns expected profit on a market for a trader user id.*/

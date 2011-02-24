@@ -4,7 +4,7 @@ import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import ITrader._
-
+import  java.util.concurrent.atomic.AtomicInteger
 /** Place back bet if priceToBack>2, place lay bet if priceToLay<2.2. I addition to that trading bets are placed.
  * 
  * @author korzekwad
@@ -14,14 +14,14 @@ class SimpleTrader extends ITrader{
 
 	var initTimestamp = -1l
 	
-	var initCalledTimes = 0
-	var afterCalledTimes = 0
+	var initCalledTimes: AtomicInteger = new AtomicInteger(0)
+	var afterCalledTimes: AtomicInteger = new AtomicInteger(0)
 	/**It is called once for every analysed market.
    * 
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
    * */
   override def init(ctx: ITraderContext) {
-	initCalledTimes += 1
+	initCalledTimes.addAndGet(1)
 	initTimestamp = ctx.getEventTimestamp
 	}
 	
@@ -56,7 +56,7 @@ class SimpleTrader extends ITrader{
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def after(ctx: ITraderContext) {
-  	afterCalledTimes += 1
+  	afterCalledTimes.addAndGet(1)
   }
 
 }
