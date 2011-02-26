@@ -21,24 +21,39 @@ import scala.collection._
  *@param layPriceSlopeSignal Lay bet is placed when priceSlope > layPriceSlopeSignal.
  *@param maxPrice Place back/lay bets if price < maxPrice.
  */
-class PricePriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, val layPriceSlopeSignal: Double, val maxPrice: Double) extends ITrader {
+object PricePriceSlopeTrader {
+  def apply(traderId: String, backPriceSlopeSignal: Double, layPriceSlopeSignal: Double, maxPrice: Double): PricePriceSlopeTrader = {
+    val trader = new PricePriceSlopeTrader()
+    trader.traderId = traderId
+    trader.backPriceSlopeSignal = backPriceSlopeSignal
+    trader.layPriceSlopeSignal = layPriceSlopeSignal
+    trader.maxPrice = maxPrice
+    trader
+  }
+}
+class PricePriceSlopeTrader extends ITrader {
 
-  val config = new Configuration()
+  var traderId = "pricePriceTrader1"
+  var backPriceSlopeSignal = -0.04
+  var layPriceSlopeSignal = -0.04
+  var maxPrice = 1.77
+
+  private val config = new Configuration()
   config.getEngineDefaults().getThreading().setInternalTimerEnabled(false)
 
-  val probEventProps = new java.util.HashMap[String, Object]
+  private val probEventProps = new java.util.HashMap[String, Object]
   probEventProps.put("runnerId", "long")
   probEventProps.put("prob", "double")
   probEventProps.put("timestamp", "long")
   config.addEventType("ProbEvent", probEventProps)
 
   /**Key market id.*/
-  var epService: mutable.Map[Long, EPServiceProvider] = new mutable.HashMap[Long, EPServiceProvider] with mutable.SynchronizedMap[Long, EPServiceProvider]
+  private var epService: mutable.Map[Long, EPServiceProvider] = new mutable.HashMap[Long, EPServiceProvider] with mutable.SynchronizedMap[Long, EPServiceProvider]
 
-  val expression = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
+  private val expression = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
 
   /**Key - marketId.*/
-  var stmt: mutable.Map[Long, EPStatement] = new mutable.HashMap[Long,EPStatement] with mutable.SynchronizedMap[Long,EPStatement]
+  private var stmt: mutable.Map[Long, EPStatement] = new mutable.HashMap[Long, EPStatement] with mutable.SynchronizedMap[Long, EPStatement]
 
   override def init(ctx: ITraderContext) {
     epService += ctx.marketId -> EPServiceProviderManager.getProvider(traderId + ":" + ctx.marketId, config)

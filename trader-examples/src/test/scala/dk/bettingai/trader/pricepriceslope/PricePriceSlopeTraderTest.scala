@@ -25,7 +25,7 @@ class PricePriceSlopeTraderTest {
   private val log = LoggerFactory.getLogger(getClass)
 
   /**Number of matched bets for this trader will be zero, it's to test escaping from local maximum.*/
-  val trader = new PricePriceSlopeTrader("baseTrader", -0.21, 0.21, 5)
+  val trader = PricePriceSlopeTrader("baseTrader", -0.21, 0.21, 5)
 
   private val populationSize = 5
   private val generationNum = 5
@@ -50,12 +50,12 @@ class PricePriceSlopeTraderTest {
         val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
         val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
         val maxPrice = move(solution.trader.maxPrice, rand.nextInt(11) - 5)
-        new PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
+        PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
       } else {
         val backPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
         val layPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
         val maxPrice = priceUp(1 / rand.nextDouble)
-        val trader = new PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
+        val trader = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice)
         log.info("Escaping from local maximum (number of matched bets=0). " + trader)
         trader
       }

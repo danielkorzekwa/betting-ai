@@ -14,6 +14,7 @@ import scala.collection._
 import ISimulator._
 import SimulatorTest._
 import immutable.TreeMap
+import ITrader._
 
 object SimulatorTest {
   def assertMarketReport(marketId: Long, marketName: String, eventName: String, actualMarketReport: MarketReport) {
@@ -180,6 +181,22 @@ class SimulatorTest {
     assertEquals(0, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(12), 0)
   }
 
+  /**It's testing market-slave parallel market simulation. Throwing exception by a trader should not block market simulation.*/
+  @Test
+  def testTraderThrowingException {
+    val marketEventsFile10 = new File("src/test/resources/twoMarketFiles/10.csv")
+    val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
+
+    val trader = new ITrader {
+      def execute(ctx: ITraderContext) = throw new RuntimeException("Trader error - it's just for testing purpose.")
+    }
+
+    /**Run market simulation.*/
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), trader :: Nil, (progress: Int) => {}).marketReports
+
+    assertEquals(0, marketReports.size)
+  }
+
   /**
    * Test scenarios for runSimulation - analysing multiple traders.
    * */
@@ -228,9 +245,9 @@ class SimulatorTest {
     val empyMarketFile1 = new File("src/test/resources/marketDataEmpty/10.csv")
 
     val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
-    
-    var progressSum=0l
-   val progressBar = (progress: Int) => { progressSum+= progress; progressSum+=progressSum*2;println("market simulation progress=" + progress + "%") }
+
+    var progressSum = 0l
+    val progressBar = (progress: Int) => { progressSum += progress; progressSum += progressSum * 2; println("market simulation progress=" + progress + "%") }
     /**Run market simulation.*/
     val marketReports = simulator.runSimulation(
       TreeMap(1l -> empyMarketFile1,
@@ -239,7 +256,7 @@ class SimulatorTest {
         4l -> empyMarketFile1,
         10l -> marketEventsFile10,
         20l -> marketEventsFile20)
-      , twoTraders,progressBar).marketReports
+      , twoTraders, progressBar).marketReports
 
     assertEquals(2, marketReports.size)
     assertEquals(26562, progressSum)
@@ -260,4 +277,5 @@ class SimulatorTest {
     val traderCtx2 = simulator.registerTrader(market)
     assertEquals(4, traderCtx2.userId)
   }
+
 }
