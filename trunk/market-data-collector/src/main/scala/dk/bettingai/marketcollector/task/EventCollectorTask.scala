@@ -61,7 +61,7 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 
 			try {
 				def createFileWriter():FileWriter = {
-						val file = new File(marketDataDir + "/" + marketId)
+						val file = new File(marketDataDir + "/" + marketId + ".csv")
 						val fw = new FileWriter(file, false)
 						val marketDetails = marketService.getMarketDetails(marketId)
 						val createMarketEvent = buildCreateMarketEvent(now.getMillis,marketDetails)

@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils
 import scala.collection.JavaConversions._
 import scala.collection._
 import immutable.TreeMap
+import scala.annotation._
 
 /**Google visualization imports*/
 import com.google.visualization.datasource._
@@ -55,11 +56,9 @@ object SimulatorApp {
     console.print("Simulation is started.")
 
     /**Create market simulator.*/
-    val betex = new Betex()
-   
     /**Commission on winnings that is used when generating expected profit report.*/
     val commission = 0.05;
-    val simulator = new Simulator(betex, commission)
+    val simulator = Simulator(commission)
 
     /**Run market simulator.*/
     console.print(" Simulation progress:")
@@ -146,9 +145,12 @@ object SimulatorApp {
   }
 
   private def printMarketReport(marketReports: List[MarketReport], console: PrintStream) {
-    printMarketRiskReport(0, 0)
+    val marketReportsSize = marketReports.size
+	printMarketRiskReport(0, 0)
+    
+    @tailrec
     def printMarketRiskReport(marketReportIndex: Int, expAggrProfit: Double): Unit = {
-      if (marketReportIndex < marketReports.size) {
+      if (marketReportIndex < marketReportsSize) {
         val marketRiskReport = marketReports(marketReportIndex)
         val traderReport = marketRiskReport.traderReports.head
         val newExpAggrProfit = expAggrProfit + traderReport.marketExpectedProfit.marketExpectedProfit

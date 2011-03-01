@@ -89,7 +89,12 @@ class MarketSimActor(betex: IBetex, nextBetId: () => Long, historicalDataUserId:
       traderContexts.foreach { case (trader, ctx) => trader.after(ctx) }
 
       /**Create market report.*/
-      Option(createMarketReport(marketId, traderContexts))
+      val report = Option(createMarketReport(marketId, traderContexts))
+      
+      /**Remove market from betex after market simulation is finished.*/
+      betex.removeMarket(marketId)
+      
+      report
     } else None
 
     marketReport

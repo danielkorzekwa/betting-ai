@@ -87,6 +87,27 @@ class BetexTest {
 
 	}
 
+	
+	/**Tests for removeMarket*/
+	@Test def removeMarket {
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
+
+		assertEquals(2,betex.getMarkets.size)
+		assertEquals(10,betex.removeMarket(10).get.marketId)
+		assertEquals(1,betex.getMarkets.size)
+		
+		assertEquals(20,betex.removeMarket(20).get.marketId)
+		assertEquals(0,betex.getMarkets.size)
+	}
+	
+	@Test() 
+	def removeNotExistingMarket {
+		betex.createMarket(10,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
+		betex.createMarket(20,"Match Odds","Fulham vs Wigan",1,new Date(2000),List(new Market.Runner(31,"Fulham"),new Market.Runner(42,"Wigan")))
+
+		betex.removeMarket(11).isEmpty
+	}
 	/**
 	 * Tests for clear 
 	 * */

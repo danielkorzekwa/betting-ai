@@ -114,6 +114,9 @@ object ITrader {
 
     def risk(): MarketExpectedProfit
     
+    /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
+    def wealth(bank:Double): MarketExpectedProfit
+    
     /**Registers new trader and return trader context. 
      * This context can be used to trigger some custom traders that are registered manually by a master trader, 
      * e.g. when testing some evolution algorithms for which more than one trader is required.

@@ -20,6 +20,7 @@ import scala.actors.Actor
 import Actor._
 import java.util.concurrent.atomic._
 import MarketSimActor._
+import dk.bettingai.marketsimulator.betex._
 
 /**This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.
  * 
@@ -31,6 +32,15 @@ import MarketSimActor._
  * @param commission Commission on winnings in percentage.
  *
  */
+object Simulator {
+	
+	def apply(commission:Double):Simulator = {
+		val betex = new Betex()
+		val simulator = new Simulator(betex,commission)
+		simulator
+	}
+}
+
 class Simulator(betex: IBetex, commission: Double) extends ISimulator {
 
   var nextBetIdValue = new AtomicLong(1)
@@ -66,12 +76,14 @@ class Simulator(betex: IBetex, commission: Double) extends ISimulator {
 
     /**Collect market reports from slaves.*/
     val marketReports = mutable.ListBuffer[Option[MarketReport]]()
-    while (marketReports.size != numOfMarkets) {
+    var collectedReports = 0
+    while (collectedReports != numOfMarkets) {
       receive {
         case marketReport: Option[MarketReport] => {
-          val prevProgress = ((marketReports.size - 1).max(0) * 100) / numOfMarkets
+          val prevProgress = ((collectedReports - 1).max(0) * 100) / numOfMarkets
           marketReports += marketReport
-          val newProgress = ((marketReports.size - 1).max(0) * 100) / numOfMarkets
+          collectedReports += 1
+          val newProgress = ((collectedReports - 1).max(0) * 100) / numOfMarkets
           if (newProgress > prevProgress) p(newProgress)
         }
       }
