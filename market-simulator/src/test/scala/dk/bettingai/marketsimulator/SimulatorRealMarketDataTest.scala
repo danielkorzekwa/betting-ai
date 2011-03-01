@@ -17,9 +17,8 @@ import SimulatorTest._
 
 class SimulatorRealMarketDataTest {
 
-  private val betex = new Betex()
   private val traders = new SimpleTrader() :: Nil
-  private val simulator = new Simulator(betex, 0)
+  private val simulator = Simulator(0)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.

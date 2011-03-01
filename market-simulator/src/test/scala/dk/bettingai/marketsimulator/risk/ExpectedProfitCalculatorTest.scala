@@ -9,6 +9,8 @@ import dk.bettingai.marketsimulator.betex.api._
 
 class ExpectedProfitCalculatorTest {
 
+	/**Test scenarios for market expected profit.*/
+	
 	@Test def testCalculateNoBets {
 		val expectedProfit = ExpectedProfitCalculator.calculate(List[IBet](), Map(11l->1.5,12l->3d),0)
 		assertEquals(0,expectedProfit.marketExpectedProfit,0)
@@ -199,6 +201,175 @@ class ExpectedProfitCalculatorTest {
 		assertEquals(0,expectedProfit.runnersIfWin(12),0)
 		assertEquals(0,expectedProfit.runnersIfWin(13),0)
 	}
+	
+	/**Test scenarios for wealth.*/
+	@Test def testWealthOneBackBetProbabilityNotChanged {
+		val bets = List(Bet(100,123,10,3,BACK,1,11))
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/3d,12l->1/1.5d)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,100)
+		assertEquals(-0.942,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(2,expectedProfit.runnersIfWin.size)
+		assertEquals(20,expectedProfit.runnersIfWin(11),0)
+		assertEquals(-10,expectedProfit.runnersIfWin(12),0)
+		
+		assertEquals(Double.NaN,ExpectedProfitCalculator.wealth(bets, probabilities,0,9).marketExpectedProfit,0.001)
+		assertEquals(-10,ExpectedProfitCalculator.wealth(bets, probabilities,0,10).marketExpectedProfit,0.001)
+		assertEquals(-0.099,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+	}
+	
+	@Test def testWealthOneLayBetProbabilityNotChanged {
+		val bets = List(Bet(100,123,10,3,LAY,1,11))
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/3d,12l->1/1.5d)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,100)
+		assertEquals(-1.078,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(2,expectedProfit.runnersIfWin.size)
+		assertEquals(-20,expectedProfit.runnersIfWin(11),0)
+		assertEquals(10,expectedProfit.runnersIfWin(12),0)
+		
+		assertEquals(Double.NaN,ExpectedProfitCalculator.wealth(bets, probabilities,0,19).marketExpectedProfit,0.001)
+		assertEquals(-20,ExpectedProfitCalculator.wealth(bets, probabilities,0,20).marketExpectedProfit,0.001)
+		assertEquals(-0.1,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+	}
+	
+	@Test def testWealthOneBackBetProbabilityChanged1 {
+		val bets = List(Bet(100,123,10,5,BACK,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,1000)
+		assertEquals(-1.836,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(-10,expectedProfit.runnersIfWin(11),0)
+		assertEquals(-10,expectedProfit.runnersIfWin(12),0)
+		assertEquals(40,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-10,ExpectedProfitCalculator.wealth(bets, probabilities,0,10).marketExpectedProfit,0.001)
+		assertEquals(-2.456,ExpectedProfitCalculator.wealth(bets, probabilities,0,200).marketExpectedProfit,0.001)
+		assertEquals(-2.079,ExpectedProfitCalculator.wealth(bets, probabilities,0,400).marketExpectedProfit,0.001)
+		assertEquals(-2.000,ExpectedProfitCalculator.wealth(bets, probabilities,0,500).marketExpectedProfit,0.001)
+		assertEquals(-1.878,ExpectedProfitCalculator.wealth(bets, probabilities,0,800).marketExpectedProfit,0.001)
+		assertEquals(-1.836,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+		assertEquals(-1.666,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+	}
+	
+	
+	@Test def testWealthOneLayBetProbabilityChanged1 {
+		val bets = List(Bet(100,123,10,5,LAY,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,1000)
+		assertEquals(1.489,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(10,expectedProfit.runnersIfWin(11),0)
+		assertEquals(10,expectedProfit.runnersIfWin(12),0)
+		assertEquals(-40,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-40,ExpectedProfitCalculator.wealth(bets, probabilities,0,40).marketExpectedProfit,0.001)
+		assertEquals(1.304,ExpectedProfitCalculator.wealth(bets, probabilities,0,500).marketExpectedProfit,0.001)
+		assertEquals(1.578,ExpectedProfitCalculator.wealth(bets, probabilities,0,2000).marketExpectedProfit,0.001)
+		assertEquals(1.649,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000).marketExpectedProfit,0.001)
+		assertEquals(1.664,ExpectedProfitCalculator.wealth(bets, probabilities,0,100000).marketExpectedProfit,0.001)
+		assertEquals(1.666,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+	}
+	
+	
+	@Test def testWealthOneBackBetProbabilityChanged2 {
+		val bets = List(Bet(100,123,100,5,BACK,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,1000)
+		assertEquals(-31.223,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(-100,expectedProfit.runnersIfWin(11),0)
+		assertEquals(-100,expectedProfit.runnersIfWin(12),0)
+		assertEquals(400,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-100,ExpectedProfitCalculator.wealth(bets, probabilities,0,100).marketExpectedProfit,0.001)
+		assertEquals(-65.199,ExpectedProfitCalculator.wealth(bets, probabilities,0,200).marketExpectedProfit,0.001)
+		assertEquals(-46.722,ExpectedProfitCalculator.wealth(bets, probabilities,0,400).marketExpectedProfit,0.001)
+		assertEquals(-42.114,ExpectedProfitCalculator.wealth(bets, probabilities,0,500).marketExpectedProfit,0.001)
+		assertEquals(-34.206,ExpectedProfitCalculator.wealth(bets, probabilities,0,800).marketExpectedProfit,0.001)
+		assertEquals(-31.223,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+		assertEquals(-24.562,ExpectedProfitCalculator.wealth(bets, probabilities,0,2000).marketExpectedProfit,0.001)
+		assertEquals(-18.368,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000).marketExpectedProfit,0.001)
+		assertEquals(-16.839,ExpectedProfitCalculator.wealth(bets, probabilities,0,100000).marketExpectedProfit,0.001)
+		assertEquals(-16.684,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+	}
+	
+	
+	@Test def testWealthOneLayBetProbabilityChanged2 {
+		val bets = List(Bet(100,123,100,5,LAY,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,1000)
+		assertEquals(-5.696,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(100,expectedProfit.runnersIfWin(11),0)
+		assertEquals(100,expectedProfit.runnersIfWin(12),0)
+		assertEquals(-400,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-400,ExpectedProfitCalculator.wealth(bets, probabilities,0,400).marketExpectedProfit,0.001)
+		assertEquals(-54.898,ExpectedProfitCalculator.wealth(bets, probabilities,0,500).marketExpectedProfit,0.001)
+		assertEquals(-13.777,ExpectedProfitCalculator.wealth(bets, probabilities,0,800).marketExpectedProfit,0.001)
+		assertEquals(-5.696,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+		assertEquals(6.947,ExpectedProfitCalculator.wealth(bets, probabilities,0,2000).marketExpectedProfit,0.001)
+		assertEquals(14.893,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000).marketExpectedProfit,0.001)
+		assertEquals(16.492,ExpectedProfitCalculator.wealth(bets, probabilities,0,100000).marketExpectedProfit,0.001)
+		assertEquals(16.649,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+	}
+	
+	@Test def testWealthOneBackBetProbabilityChanged3 {
+		val bets = List(Bet(100,123,1000,5,BACK,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,10000)
+		assertEquals(-312.238,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(-1000,expectedProfit.runnersIfWin(11),0)
+		assertEquals(-1000,expectedProfit.runnersIfWin(12),0)
+		assertEquals(4000,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-1000,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000).marketExpectedProfit,0.001)
+		assertEquals(-651.993,ExpectedProfitCalculator.wealth(bets, probabilities,0,2000).marketExpectedProfit,0.001)
+		assertEquals(-467.224,ExpectedProfitCalculator.wealth(bets, probabilities,0,4000).marketExpectedProfit,0.001)
+		assertEquals(-421.143,ExpectedProfitCalculator.wealth(bets, probabilities,0,5000).marketExpectedProfit,0.001)
+		assertEquals(-342.06,ExpectedProfitCalculator.wealth(bets, probabilities,0,8000).marketExpectedProfit,0.001)
+		assertEquals(-312.238,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000).marketExpectedProfit,0.001)
+		assertEquals(-245.628,ExpectedProfitCalculator.wealth(bets, probabilities,0,20000).marketExpectedProfit,0.001)
+		assertEquals(-183.680,ExpectedProfitCalculator.wealth(bets, probabilities,0,100000).marketExpectedProfit,0.001)
+		assertEquals(-168.399,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+		assertEquals(-166.840,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000000).marketExpectedProfit,0.001)
+	}
+	
+	
+	@Test def testWealthOneLayBetProbabilityChanged3 {
+		val bets = List(Bet(100,123,1000,5,LAY,1,13))
+
+		val probabilities:Map[Long,Double] = Map(11l -> 1d/2,12l -> 1d/3, 13l -> 1d/6)
+		val expectedProfit = ExpectedProfitCalculator.wealth(bets, probabilities,0,10000)
+		assertEquals(-56.961,expectedProfit.marketExpectedProfit,0.001)
+
+		assertEquals(3,expectedProfit.runnersIfWin.size)
+		assertEquals(1000,expectedProfit.runnersIfWin(11),0)
+		assertEquals(1000,expectedProfit.runnersIfWin(12),0)
+		assertEquals(-4000,expectedProfit.runnersIfWin(13),0)
+		
+		assertEquals(-4000,ExpectedProfitCalculator.wealth(bets, probabilities,0,4000).marketExpectedProfit,0.001)
+		assertEquals(-548.981,ExpectedProfitCalculator.wealth(bets, probabilities,0,5000).marketExpectedProfit,0.001)
+		assertEquals(-137.775,ExpectedProfitCalculator.wealth(bets, probabilities,0,8000).marketExpectedProfit,0.001)
+		assertEquals(-56.961,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000).marketExpectedProfit,0.001)
+		assertEquals(69.477,ExpectedProfitCalculator.wealth(bets, probabilities,0,20000).marketExpectedProfit,0.001)
+		assertEquals(148.938,ExpectedProfitCalculator.wealth(bets, probabilities,0,100000).marketExpectedProfit,0.001)
+		assertEquals(164.926,ExpectedProfitCalculator.wealth(bets, probabilities,0,1000000).marketExpectedProfit,0.001)
+		assertEquals(166.493,ExpectedProfitCalculator.wealth(bets, probabilities,0,10000000).marketExpectedProfit,0.001)
+	}
+
 	
 	/**Tests against commission.*/
 	@Test def testCalculateOneBackBetProbabilityNotChangedWithCommission {

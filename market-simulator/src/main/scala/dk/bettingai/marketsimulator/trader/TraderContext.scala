@@ -163,6 +163,13 @@ class TraderContext(nextBetId: => Long,val userId:Int, market:IMarket, val commi
 			ExpectedProfitCalculator.calculate(matchedBets, probs,commission)
 	}
 	
+ /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
+    def wealth(bank:Double): MarketExpectedProfit = {
+    	val matchedBets = getBets(true)
+		val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
+		ExpectedProfitCalculator.wealth(matchedBets, probs,commission,bank)
+    }
+	
 	 /**Registers new trader and return trader context. 
      * This context can be used to trigger some custom traders that are registered manually by a master trader, 
      * e.g. when testing some evolution algorithms for which more than one trader is required.
