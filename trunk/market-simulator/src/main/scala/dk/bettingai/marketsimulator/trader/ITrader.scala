@@ -22,19 +22,19 @@ object ITrader {
   /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.*/
   trait ITraderContext {
 
-  	val userId: Int
+    val userId: Int
     val marketId: Long
     val marketName: String
     val eventName: String
     val numOfWinners: Int
     val marketTime: Date
     val runners: List[IRunner]
-    
-  	val commission:Double
-  	
+
+    val commission: Double
+
     /**Time stamp of market event */
     def getEventTimestamp: Long
-    def setEventTimestamp(eventTimestamp:Long)
+    def setEventTimestamp(eventTimestamp: Long)
     /**Add chart value to time line chart
      * 
      * @param label Label of chart series
@@ -112,17 +112,20 @@ object ITrader {
     /**Returns total traded volume for all prices on all runners in a market.*/
     def getRunnerTradedVolume(runnerId: Long): IRunnerTradedVolume
 
+    /**Returns total traded volume for a given runner.*/
+    def getTotalTradedVolume(runnerId: Long): Double
+
     def risk(): MarketExpectedProfit
-    
+
     /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
-    def wealth(bank:Double): MarketExpectedProfit
-    
+    def wealth(bank: Double): MarketExpectedProfit
+
     /**Registers new trader and return trader context. 
      * This context can be used to trigger some custom traders that are registered manually by a master trader, 
      * e.g. when testing some evolution algorithms for which more than one trader is required.
      * @return trader context
      */
-    def registerTrader():ITraderContext
+    def registerTrader(): ITraderContext
   }
 }
 trait ITrader {
