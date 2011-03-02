@@ -94,7 +94,7 @@ class PricePriceSlopeTrader extends ITrader {
         val bestPrices = ctx.getBestPrices(runnerId)
         val avgPrice = PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2.price)
         epService(ctx.marketId).getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "prob" -> 100 / avgPrice, "timestamp" -> ctx.getEventTimestamp / 1000), "ProbEvent")
-        epService(ctx.marketId).getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "tradedVolume" -> ctx.getRunnerTradedVolume(runnerId).totalTradedVolume, "timestamp" -> ctx.getEventTimestamp / 1000), "TradedVolumeEvent")
+        epService(ctx.marketId).getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "tradedVolume" -> ctx.getTotalTradedVolume(runnerId), "timestamp" -> ctx.getEventTimestamp / 1000), "TradedVolumeEvent")
       }
 
       val risk = ctx.risk

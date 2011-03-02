@@ -33,8 +33,16 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
   /**key - runnerId, value - runnerLayBetsPerPrice*/
   private val layBets = new UnmatchedLayBets()
 
-  private val matchedBets = ListBuffer[IBet]()
+  private val matchedBackBets = ListBuffer[IBet]()
+  private val matchedLayBets = ListBuffer[IBet]()
+
+  /**[runnerId, total traded volume]*/
+  private val totalTradedVolume: mutable.Map[Long, Double] = mutable.Map()
+
   private val betsIds = scala.collection.mutable.Set[Long]()
+
+  /**List of registered listeners (functions) to be triggered every time when a new bet is matched.*/
+  private val matchedBetsListeners = new ListBuffer[(IBet) => Unit]()
 
   require(numOfWinners > 0, "numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
   require(runners.size > 1, "Number of market runners should be bigger than 1, numOfRunners=" + runners.size)
@@ -64,17 +72,33 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
     val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId)
 
-    betType match {
+    /**Match bet.*/
+    val matchedBets = betType match {
       case BACK => {
         val betMatchingResults = layBets.matchBet(newBet)
         betMatchingResults.unmatchedBet.foreach(b => backBets.addBet(b))
-        matchedBets ++= betMatchingResults.matchedBets
+        betMatchingResults.matchedBets
       }
       case LAY => {
         val betMatchingResults = backBets.matchBet(newBet)
         betMatchingResults.unmatchedBet.foreach(b => layBets.addBet(b))
-        matchedBets ++= betMatchingResults.matchedBets
+        betMatchingResults.matchedBets
       }
+    }
+
+    /**Add matched bets.*/
+    for (matchedBet <- matchedBets) {
+      matchedBet.betType match {
+        case BACK => {
+          matchedBackBets += matchedBet
+          /**Add to matched bets totals only back bets to not double count.*/
+          totalTradedVolume(matchedBet.runnerId) = totalTradedVolume.getOrElse(matchedBet.runnerId, 0d) + matchedBet.betSize
+        }
+        case LAY => matchedLayBets += matchedBet
+      }
+
+      /**Trigger matched bets listeners.*/
+      matchedBetsListeners.foreach(l => l(matchedBet))
     }
 
     newBet
@@ -163,18 +187,24 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
 
     /**Take only BACK bets to not double count traded volume (each matched back bet has corresponding matched lay bet.*/
-    val betsByPrice = matchedBets.toList.filter(b => b.betType == BACK && b.runnerId == runnerId).groupBy(b => b.betPrice)
+    val betsByPrice = matchedBackBets.toList.filter(b => b.runnerId == runnerId).groupBy(b => b.betPrice)
 
     /**Map betsByPrice to list of PriceTradedVolume.*/
     val pricesTradedVolume = betsByPrice.map(entry => new RunnerTradedVolume.PriceTradedVolume(entry._1, entry._2.foldLeft(0d)(_ + _.betSize))).toList.sortWith(_.price < _.price)
     new RunnerTradedVolume(pricesTradedVolume)
   }
 
+  /**Returns total traded volume for a given runner.*/
+  def getTotalTradedVolume(runnerId: Long): Double = {
+    require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
+    totalTradedVolume.getOrElse(runnerId, 0)
+  }
+
   /**Returns all bets placed by user on that market.
    *
    *@param userId
    */
-  def getBets(userId: Int): List[IBet] = backBets.getBets(userId) ::: layBets.getBets(userId) ::: matchedBets.filter(b => b.userId == userId).toList
+  def getBets(userId: Int): List[IBet] = backBets.getBets(userId) ::: layBets.getBets(userId) ::: matchedBackBets.filter(b => b.userId == userId).toList ::: matchedLayBets.filter(b => b.userId == userId).toList
 
   /**Returns all bets placed by user on that market.
    *
@@ -184,31 +214,41 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
    */
   def getBets(userId: Int, matchedBetsOnly: Boolean): List[IBet] = {
     val bets = matchedBetsOnly match {
-      case true => matchedBets.filter(b => b.userId == userId).toList
+      case true => matchedBackBets.filter(b => b.userId == userId).toList ::: matchedLayBets.filter(b => b.userId == userId).toList
       case false => getBets(userId)
     }
     bets
   }
 
- 	/**Returns bet for a number o criteria.
-	 * 
-	 * @param userId
-	 * @param betStatus
-	 * @param betType
-	 * @param betPrice
-	 * @param runnerId
-	 */
-	def getBets(userId: Int,betStatus: BetStatusEnum, betType: BetTypeEnum, betPrice: Double, runnerId:Long):List[IBet] = {
+  /**Returns bet for a number o criteria.
+   * 
+   * @param userId
+   * @param betStatus
+   * @param betType
+   * @param betPrice
+   * @param runnerId
+   */
+  def getBets(userId: Int, betStatus: BetStatusEnum, betType: BetTypeEnum, betPrice: Double, runnerId: Long): List[IBet] = {
 
     val bets = betStatus match {
-      case U => betType match {
+      case U =>
+        betType match {
           case BACK => backBets.getBets(betPrice, runnerId)
           case LAY => layBets.getBets(betPrice, runnerId)
         }
-      case M => matchedBets.filter(b => b.betType == betType && b.betPrice == betPrice && b.runnerId == runnerId).toList
+      case M => matchedBackBets.filter(b => b.betPrice == betPrice && b.runnerId == runnerId).toList ::: matchedLayBets.filter(b => b.betPrice == betPrice && b.runnerId == runnerId).toList
     }
 
-    bets.filter(b => b.userId==userId)
+    bets.filter(b => b.userId == userId)
+  }
+
+  /**Register listener on those matched bets, which match filter criteria
+   * 
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addMatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) = {
+    matchedBetsListeners += { (bet: IBet) => if (filter(bet)) listener(bet) }
   }
 
   override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId, marketName, eventName, numOfWinners, marketTime, runners)
