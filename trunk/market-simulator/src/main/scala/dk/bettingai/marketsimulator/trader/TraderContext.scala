@@ -26,6 +26,13 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
   val runners = market.runners
   private var _eventTimestamp = -1l
 
+  /**Creates expected profit engine and register listener on matched bets.*/
+  private val expectedProfitEngine = {
+    val engine = ExpectedProfitEngine()
+    market.addMatchedBetsListener(bet => bet.userId == userId, bet => engine.addBet(bet.betSize,bet.betPrice,bet.betType,bet.runnerId))
+    engine
+  }
+
   def setEventTimestamp(eventTimestamp: Long) { _eventTimestamp = eventTimestamp }
   def getEventTimestamp = _eventTimestamp
 
@@ -159,16 +166,14 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
   def getTotalTradedVolume(runnerId: Long): Double = market.getTotalTradedVolume(runnerId)
 
   def risk(): MarketExpectedProfit = {
-    val matchedBets = getBets(true)
     val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-    ExpectedProfitCalculator.calculate(matchedBets, probs, commission)
+    expectedProfitEngine.calculateExpectedProfit(probs, commission)
   }
 
   /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
   def wealth(bank: Double): MarketExpectedProfit = {
-    val matchedBets = getBets(true)
     val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-    ExpectedProfitCalculator.wealth(matchedBets, probs, commission, bank)
+    expectedProfitEngine.calculateWealth(probs, commission, bank)
   }
 
   /**Registers new trader and return trader context. 

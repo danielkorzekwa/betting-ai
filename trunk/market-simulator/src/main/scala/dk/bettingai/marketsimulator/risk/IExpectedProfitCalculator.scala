@@ -3,7 +3,10 @@ package dk.bettingai.marketsimulator.risk
 import dk.bettingai.marketsimulator.betex.api._
 import scala.collection._
 
-/**This trait represents a function that calculates market expected profit from bets and probabilities.
+/**This trait represents a function that calculates market expected profit and wealth from bets and probabilities.
+ * 
+ * More on expected value: http://en.wikipedia.org/wiki/Expected_value
+ * More on wealth: http://en.wikipedia.org/wiki/Kelly_criterion
  * 
  * @author korzekwad
  *
