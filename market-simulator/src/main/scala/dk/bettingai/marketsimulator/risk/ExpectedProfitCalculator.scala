@@ -4,7 +4,10 @@ import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 import scala.collection._
 
-/**This object represents a function that calculates market expected profit from bets and probabilities.
+/**This trait represents a function that calculates market expected profit and wealth from bets and probabilities.
+ * 
+ * More on expected value: http://en.wikipedia.org/wiki/Expected_value
+ * More on wealth: http://en.wikipedia.org/wiki/Kelly_criterion
  * 
  * @author korzekwad
  *
@@ -40,7 +43,7 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator {
    * @param bets
    * @param probabilities Key - runnerId, value - runner probability.
    * @param commision Commission on winnings in percentage.
-   *   @param u - Utility function that transforms ifWins before calculating expected liability.
+   * @param u - Utility function that transforms ifWins before calculating expected liability.
    * @param r - Utility function that reverses expected liability based on utility function.
    * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
    */
