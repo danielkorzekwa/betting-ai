@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>dk.bettingai</groupId>
 		<artifactId>betting-ai</artifactId>
-		<version>1.3</version>
+		<version>1.4-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>trading-optimiser</artifactId>
