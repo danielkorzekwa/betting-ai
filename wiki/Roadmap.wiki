@@ -35,8 +35,16 @@ Betting AI version 1.3 (RELEASED on 4 March 2011)
 
 -----------------------------------------------------------------------------------------
 
+Betting AI version 1.4 (release planned on 30 July 2011)
+    * More metaheuristic optimisation, evolution algorithms, genetic programming, cooperative evolution, graph based trading optimisation.
+    * Improve performance of market simulation.
+    * Refactoring of Betting Exchange - Introduce abstract types, e.g. replace BetTypeEnum (BACK, LAY) with specialised classes BackBet and LayBet
+    * Simplify using of Complex Event Processing inside of Traders, e.g. add some dsl functions for delta or slope.
+
+-----------------------------------------------------------------------------------------
+
 Future
-    * More metaheuristic optimisation, evolution algorithms, genetic programming, cooperative evolution.
+   
     * Visualisation of trader optimisation.
     * Proof of concept. Create and test trading strategies adopting AI (http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
     * Compare efficiency of trading strategies between meta-heuristics and simple AI (back propagation)
