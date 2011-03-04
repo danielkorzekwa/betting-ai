@@ -24,6 +24,8 @@ import dk.bettingai.marketsimulator.betex.PriceUtil._
  *  275 markets  25/02/2011 07:08:27 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=?, bestSoFar=Solution [trader=PriceSlopeTrader [id=trader?, backSlope=-0.03, laySlope=-+0.02, maxPrice=4.3, maxNumOfWinners=13], expectedProfit=190, matchedBetsNum=50000.0]
  *  275 markets  27/02/2011 07:22:28 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=106, bestSoFar=Solution [trader=PriceSlopeTrader [id=trader100, backSlope=-0.04, laySlope=-0.04, maxPrice=1.78,numOfRunners=5], expectedProfit=215.44786786476382, matchedBetsNum=4126.0], currentBest=Solution [trader=PriceSlopeTrader [id=trader530, backSlope=0.0, laySlope=-0.01, maxPrice=1.16,numOfRunners=10], expectedProfit=0.0, matchedBetsNum=0.0] 
  *  50 markets  01/03/2011 11:19:49 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=829, bestSoFar=Solution [trader=PriceSlopeTrader [id=trader820, backSlope=-0.05, laySlope=-0.03, maxPrice=3.75,mxNumOfRunners=6,minProfitLoss=-62.0,minTradedVolume=405.0], expectedProfit=9.600873255130312, matchedBetsNum=282.0], currentBest=Solution [trader=PriceSlopeTrader [id=trader4144, backSlope=-0.04, laySlope=-0.03, maxPrice=1.46,mxNumOfRunners=11,minProfitLoss=-1.0,minTradedVolume=917.0], expectedProfit=0.062050340423681453, matchedBetsNum=2.0] 
+ *  275 markets 03/03/2011 23:24:14 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=100, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader22, backSlope=-0.05, laySlope=-0.04, maxPrice=1.77,mxNumOfRunners=19,minProfitLoss=-91.0,minTradedVolume=178.0], expectedProfit=13.032986027794397, matchedBetsNum=1655.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader500, backSlope=0.03, laySlope=0.0, maxPrice=1.07,mxNumOfRunners=5,minProfitLoss=-31.0,minTradedVolume=673.0], expectedProfit=0.0, matchedBetsNum=0.0] 
+ *  50 markets  04/03/2011 08:37:57 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=347, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader1127, backSlope=-0.03, laySlope=-0.03, maxPrice=3.45,mxNumOfRunners=6,minProfitLoss=-79.0,minTradedVolume=167.0], expectedProfit=11.973669978370275, matchedBetsNum=647.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader1736, backSlope=0.04, laySlope=0.02, maxPrice=1.75,mxNumOfRunners=11,minProfitLoss=-60.0,minTradedVolume=548.0], expectedProfit=0.06534685785395755, matchedBetsNum=91.0] 
  *
  */
 class PricePriceSlopeTraderRandomTest {
@@ -45,7 +47,7 @@ class PricePriceSlopeTraderRandomTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
-  //  val marketDataDir = "c:/daniel/marketdatafull"
+  //  val marketDataDir = "c:/daniel/marketdata"
     val marketDataDir = "./src/test/resources/two_hr_10mins_before_inplay"
 
     /**Full random mutate only.*/
