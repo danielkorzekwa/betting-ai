@@ -5,7 +5,6 @@ import scala.io._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.risk._
 import java.io.File
-import dk.bettingai.marketsimulator.trader.ITrader._
 import dk.bettingai.marketsimulator.betex.api._
 import scala.collection._
 import immutable.TreeMap

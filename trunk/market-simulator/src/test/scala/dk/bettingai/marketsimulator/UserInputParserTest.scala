@@ -2,6 +2,7 @@ package dk.bettingai.marketsimulator
 
 import org.junit._
 import Assert._
+import dk.bettingai.marketsimulator.trader.examples._
 
 class UserInputParserTest {
 
@@ -28,38 +29,38 @@ class UserInputParserTest {
 	
 	@Test
 	def testTraderImplCorrectDataOneMarketFile { 
-		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader")) 
 		assertEquals(1,inputData._1.size)
 		assertEquals("10.csv",inputData._1(10).getName)
-		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
+		assertTrue(inputData._2.isInstanceOf[NopTrader])
 	}
 	
 	@Test
 	def testTraderImplCorrectDataTwoMarketFiles { 
-		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader")) 
 		assertEquals(2,inputData._1.size)
 		assertEquals("10.csv",inputData._1(10).getName)
 		assertEquals("20.csv",inputData._1(20).getName)
-		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
+		assertTrue(inputData._2.isInstanceOf[NopTrader])
 	}
 	
 	@Test def testHtmlReportDirIsNotDefined {
-		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader")) 
 		
 		assertEquals(2,inputData._1.size)
 		assertEquals("10.csv",inputData._1(10).getName)
 		assertEquals("20.csv",inputData._1(20).getName)
-		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
+		assertTrue(inputData._2.isInstanceOf[NopTrader])
 		assertEquals("./",inputData._3)
 	}
 	
 	@Test def testHtmlReportDirIsDefined {
-		val inputData = UserInputParser.parse(Array("htmlReportDir=./target","marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader")) 
+		val inputData = UserInputParser.parse(Array("htmlReportDir=./target","marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader")) 
 		
 		assertEquals(2,inputData._1.size)
 		assertEquals("10.csv",inputData._1(10).getName)
 		assertEquals("20.csv",inputData._1(20).getName)
-		assertTrue(inputData._2.isInstanceOf[dk.bettingai.marketsimulator.trader.NopTrader])
+		assertTrue(inputData._2.isInstanceOf[NopTrader])
 		assertEquals("./target",inputData._3)
 	}
 }

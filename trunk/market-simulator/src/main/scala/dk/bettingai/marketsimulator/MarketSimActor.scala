@@ -12,7 +12,6 @@ import dk.bettingai.marketsimulator.risk._
 import IBet.BetStatusEnum._
 import scala.annotation._
 import MarketSimActor._
-import ITrader._
 
 /**This is an actor that performs simulation for a given market, then returns simulation report to the sender and finally dies.
  * 
