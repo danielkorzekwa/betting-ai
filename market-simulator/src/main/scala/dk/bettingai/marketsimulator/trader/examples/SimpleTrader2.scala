@@ -1,9 +1,9 @@
-package dk.bettingai.marketsimulator.trader
+package dk.bettingai.marketsimulator.trader.examples
 
+import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
-import ITrader._
 
 /** Places bets on bestPrices - 0.01
  * 

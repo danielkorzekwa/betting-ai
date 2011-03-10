@@ -8,13 +8,13 @@ import dk.bettingai.marketsimulator.betex.api._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
+import examples._
 import dk.bettingai.marketsimulator.betex.Market._
 import java.util.Date
 import scala.collection._
 import ISimulator._
 import SimulatorTest._
 import immutable.TreeMap
-import ITrader._
 
 object SimulatorTest {
   def assertMarketReport(marketId: Long, marketName: String, eventName: String, actualMarketReport: MarketReport) {

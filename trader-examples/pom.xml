@@ -35,13 +35,6 @@
 			<artifactId>commons-math</artifactId>
 		</dependency>
 
-
-		<dependency>
-			<groupId>com.espertech</groupId>
-			<artifactId>esper</artifactId>
-			<version>4.0.0</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>

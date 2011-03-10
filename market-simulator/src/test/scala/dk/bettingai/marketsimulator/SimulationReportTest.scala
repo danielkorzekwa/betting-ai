@@ -3,7 +3,7 @@ package dk.bettingai.marketsimulator
 import org.junit._
 import Assert._
 import ISimulator._
-import dk.bettingai.marketsimulator.trader.SimpleTrader
+import dk.bettingai.marketsimulator.trader.examples.SimpleTrader
 import dk.bettingai.marketsimulator.risk.MarketExpectedProfit
 import java.util.Date
 

@@ -4,7 +4,6 @@ import ISimulator._
 import dk.bettingai.marketsimulator.betex.api._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import IMarket._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._

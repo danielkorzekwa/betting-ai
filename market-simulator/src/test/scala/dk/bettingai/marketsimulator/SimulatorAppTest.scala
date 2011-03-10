@@ -9,7 +9,7 @@ class SimulatorAppTest {
 	/** Check against exceptions only.
 	 * 
 	 */
-	@Test def test = SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataEmpty","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader"))
+	@Test def test = SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataEmpty","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader"))
 
 	@Test def testWrongInputParameters() {
 		val consoleStream = new ByteArrayOutputStream()
@@ -22,7 +22,7 @@ class SimulatorAppTest {
 
 	@Test def testCorrectInputParametersEmptyEventData() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataEmpty","traderImpl=dk.bettingai.marketsimulator.trader.NopTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataEmpty","traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader"),new PrintStream(consoleStream))
 
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
@@ -31,7 +31,7 @@ class SimulatorAppTest {
 
 	@Test def testSimpleTraderAndPlaceBetEvent() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet","traderImpl=dk.bettingai.marketsimulator.trader.examples.SimpleTrader"),new PrintStream(consoleStream))
 
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
@@ -42,7 +42,7 @@ class SimulatorAppTest {
 
 	@Test def testSimpleTraderAndBetsForTwoMarkets() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/twomarketfiles","traderImpl=dk.bettingai.marketsimulator.trader.examples.SimpleTrader"),new PrintStream(consoleStream))
 		println(new String(consoleStream.toByteArray))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
@@ -53,7 +53,7 @@ class SimulatorAppTest {
 	
 	@Test def testSimpleTraderAndRealData() {
 		val consoleStream = new ByteArrayOutputStream()
-		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataPerfTest","traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader"),new PrintStream(consoleStream))
+		SimulatorApp.main(Array("htmlReportDir=./target","marketDataDir=src/test/resources/marketDataPerfTest","traderImpl=dk.bettingai.marketsimulator.trader.examples.SimpleTrader"),new PrintStream(consoleStream))
 		println(new String(consoleStream.toByteArray))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is started"))
 		assertTrue("Wrong output:\n" + new String(consoleStream.toByteArray),new String(consoleStream.toByteArray).contains("Simulation is finished in"))
