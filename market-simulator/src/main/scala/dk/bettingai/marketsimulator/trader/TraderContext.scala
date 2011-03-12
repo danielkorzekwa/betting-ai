@@ -10,13 +10,14 @@ import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.betex.BetUtil._
 import dk.bettingai.marketsimulator._
 import scala.collection._
+import com.espertech.esper.client._
 /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
  * 
  * @author korzekwad
  *
  * @param commision Commission on winnings in percentage.
  */
-class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val commission: Double, simulator: Simulator) extends ITraderContext {
+class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val commission: Double, simulator: Simulator, marketSimActor:MarketSimActor) extends ITraderContext {
   val marketId = market.marketId
   val marketName = market.marketName
   val eventName = market.eventName
@@ -181,9 +182,32 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
    * @return trader context
    */
   def registerTrader(): ITraderContext = {
-    val ctx = simulator.registerTrader(market)
+    val ctx = simulator.registerTrader(market,marketSimActor)
     ctx.setEventTimestamp(_eventTimestamp)
     ctx
   }
 
+      /**Registers Esper(http://esper.codehaus.org/) Event Processing Network.
+     * 
+     * If two EPNs are registered for the same market, e.g. by two traders, the second one is ignored. It means that all traders must reuse the same EPN.
+     *  
+     * @param getEventTypes This function returns the list of event types that form Event Processing Network. Map[eventTypeName, [eventAttributeName, eventAttributeType]].
+     * 
+     * @param getEPLStatements This function returns the list of all Event Processing Language statements that form Event Processing Network. Map[eplID,eplQuery]
+     * 
+     * @param publish This function is called every time when market event time stamp progresses. It should publish all required events on Event Processing Network.
+     * 
+     * @return true if Event Processing Network registration finishes successfully, false is EPN is already registered.
+     */
+    def registerEPN(getEventTypes: => (Map[String,Map[String,Object]]), getEPLStatements: => Map[String,String],publish: (EPServiceProvider) => Unit):Boolean = 
+    	marketSimActor.registerEPN(getEventTypes, getEPLStatements, publish)
+    
+     /**Returns registered EPL statement for a given eplID. 
+     * It could be used to iterate through the current state of EPL statement, e.g. get some delta or avg value from EPN.
+     * 
+     * @param eplID
+     * @return EPStatement
+     * */
+    def getEPNStatement(eplID:String):EPStatement = marketSimActor.getEPNStatement(eplID)
+  
 }

@@ -43,5 +43,5 @@ trait ISimulator {
    * e.g. when testing some evolution algorithms for which more than one trader is required.
    * @return trader context
    */
-  def registerTrader(market: IMarket): ITraderContext
+  def registerTrader(market: IMarket,marketSimActor:MarketSimActor): ITraderContext
 }

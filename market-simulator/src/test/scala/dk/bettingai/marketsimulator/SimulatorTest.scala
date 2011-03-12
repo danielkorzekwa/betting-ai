@@ -271,10 +271,10 @@ class SimulatorTest {
     val runners = new Runner(1, "runner 1") :: new Runner(2, "runner 2") :: Nil
     val market = betex.createMarket(1, "market1", "event name", 1, new Date(0), runners)
 
-    val traderCtx1 = simulator.registerTrader(market)
+    val traderCtx1 = simulator.registerTrader(market,null)
     assertEquals(3, traderCtx1.userId)
 
-    val traderCtx2 = simulator.registerTrader(market)
+    val traderCtx2 = simulator.registerTrader(market,null)
     assertEquals(4, traderCtx2.userId)
   }
 

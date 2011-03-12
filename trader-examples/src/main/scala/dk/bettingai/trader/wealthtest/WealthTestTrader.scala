@@ -4,7 +4,6 @@ import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex._
 
 /**Compares wealth and market expected profit for a simple trading strategy.

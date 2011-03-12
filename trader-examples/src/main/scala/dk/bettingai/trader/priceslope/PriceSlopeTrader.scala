@@ -3,7 +3,6 @@ package dk.bettingai.trader.priceslope
 import com.espertech.esper.client._
 import com.espertech.esper.client.time._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import scala.collection.JavaConversions._

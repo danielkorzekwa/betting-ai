@@ -6,7 +6,6 @@ import IMarket._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import scala.util._
