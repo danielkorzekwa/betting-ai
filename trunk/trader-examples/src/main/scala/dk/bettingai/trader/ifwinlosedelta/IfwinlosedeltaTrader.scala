@@ -5,7 +5,6 @@ import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex._
 
 /** This trader places back and lay bets across all market runners based on ifWin-ifWose indicator.

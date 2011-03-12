@@ -5,7 +5,6 @@ import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import com.espertech.esper.client._

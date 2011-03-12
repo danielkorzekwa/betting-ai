@@ -12,7 +12,10 @@ import scala.collection._
 import java.util.Date
 import com.espertech.esper.client._
 
- /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.*/
+ /**Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
+  * 
+  * @author korzekwad
+  * */
   trait ITraderContext {
 
     val userId: Int
@@ -119,5 +122,27 @@ import com.espertech.esper.client._
      * @return trader context
      */
     def registerTrader(): ITraderContext
+    
+     /**Registers Esper(http://esper.codehaus.org/) Event Processing Network.
+     * 
+     * If two EPNs are registered for the same market, e.g. by two traders, the second one is ignored. It means that all traders must reuse the same EPN.
+     *  
+     * @param getEventTypes This function returns the list of event types that form Event Processing Network. Map[eventTypeName, [eventAttributeName, eventAttributeType]].
+     * 
+     * @param getEPLStatements This function returns the list of all Event Processing Language statements that form Event Processing Network. Map[eplID,eplQuery]
+     * 
+     * @param publish This function is called every time when market event time stamp progresses. It should publish all required events on Event Processing Network.
+     * 
+     * @return true if Event Processing Network registration finishes successfully, false is EPN is already registered.
+     */
+    def registerEPN(getEventTypes: => (Map[String,Map[String,Object]]), getEPLStatements: => Map[String,String],publish: (EPServiceProvider) => Unit):Boolean
+    
+     /**Returns registered EPL statement for a given eplID. 
+     * It could be used to iterate through the current state of EPL statement, e.g. get some delta or avg value from EPN.
+     * 
+     * @param eplID
+     * @return EPStatement
+     * */
+    def getEPNStatement(eplID:String):EPStatement
     
   }

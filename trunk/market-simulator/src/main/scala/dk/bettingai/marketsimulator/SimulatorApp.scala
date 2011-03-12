@@ -150,14 +150,16 @@ object SimulatorApp {
     
     @tailrec
     def printMarketRiskReport(marketReportIndex: Int, expAggrProfit: Double): Unit = {
-      if (marketReportIndex < marketReportsSize) {
+    val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	
+    	if (marketReportIndex < marketReportsSize) {
         val marketRiskReport = marketReports(marketReportIndex)
         val traderReport = marketRiskReport.traderReports.head
         val newExpAggrProfit = expAggrProfit + traderReport.marketExpectedProfit.marketExpectedProfit
         val maxRisk = traderReport.marketExpectedProfit.runnersIfWin.reduceLeft((a, b) => if (a._2 < b._2) a else b)
         val minRisk = traderReport.marketExpectedProfit.runnersIfWin.reduceLeft((a, b) => if (a._2 > b._2) a else b)
-        console.print("\n%s %s: %s minProfit/prob=%s/%s maxProfit/prob=%s/%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s"
-          .format(marketRiskReport.marketId, marketRiskReport.marketName, marketRiskReport.eventName, round(maxRisk._2, 2),
+        console.print("\n%s, %s, %s: %s minProfit/prob=%s/%s maxProfit/prob=%s/%s expProfit=%s expAggrProfit=%s mBets=%s uBets=%s"
+          .format(marketRiskReport.marketId, df.format(marketRiskReport.marketTime), marketRiskReport.marketName, marketRiskReport.eventName, round(maxRisk._2, 2),
             round(traderReport.marketExpectedProfit.probabilities(maxRisk._1), 2), round(minRisk._2, 2), round(traderReport.marketExpectedProfit.probabilities(minRisk._1), 2),
             round(traderReport.marketExpectedProfit.marketExpectedProfit, 2), round(newExpAggrProfit, 2),
             traderReport.matchedBetsNumber, traderReport.unmatchedBetsNumber))

@@ -4,7 +4,6 @@ import org.junit._
 import Assert._
 import java.io.File
 import dk.bettingai.marketsimulator.trader._
-import ITrader._
 import dk.bettingai.marketsimulator.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._

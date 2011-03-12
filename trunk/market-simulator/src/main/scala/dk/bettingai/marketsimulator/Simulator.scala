@@ -64,12 +64,12 @@ class Simulator(betex: IBetex, commission: Double) extends ISimulator {
 
     p(0)
 
-    def createTraderContext(userId:Int, market:IMarket):TraderContext = new TraderContext(nextBetId(), userId, market, commission, this)
+    def createTraderContext(userId:Int, market:IMarket, marketSimActor:MarketSimActor):TraderContext = new TraderContext(nextBetId(), userId, market, commission, this,marketSimActor)
     
     /**Process all markets in parallel and send back market reports.*/
     for ((marketId, marketFile) <- marketData) {
 
-      val slave = new MarketSimActor(betex, nextBetId, historicalDataUserId, commission, createTraderContext).start
+      val slave = new MarketSimActor(marketId,betex, nextBetId, historicalDataUserId, commission, createTraderContext).start
       slave ! MarketSimRequest(marketId, marketFile, registeredTraders)
     }
 
@@ -99,5 +99,5 @@ class Simulator(betex: IBetex, commission: Double) extends ISimulator {
    * e.g. when testing some evolution algorithms for which more than one trader is required.
    * @return trader context
    */
-  def registerTrader(market: IMarket): ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this)
+  def registerTrader(market: IMarket, marketSimActor:MarketSimActor): ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this,marketSimActor)
 }
