@@ -70,26 +70,13 @@ object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
    **/
   def optimise[T <: ITrader](marketData: TreeMap[Long, File], trader: T, mutate: (Solution[T]) => T, populationSize: Int, generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T] = {
 
-    /**Search for best solution by creating a population of traders that are mutated versions of modelTrader and then by competing among them on market simulator.
-     * @param modelTrader Model trader used for breeding population.
-     * @returns The best solution in population.
-     * */
-    def optimise(modelTrader: Solution[T]): Solution[T] = {
-
-      /** Born 10 traders.*/
-      val population = for (i <- 1 to populationSize) yield mutate(modelTrader)
-
-      /**Get best of children.*/
-      CoevolutionFitness(MarketData(marketData), 0.05).fitness(population)
-    }
-
     /**We assume that initial trader is always the worst one and should never be returned itself.*/
     val initialSolution = Solution(trader, Double.MinValue, 0)
     val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => {
-      val child = optimise(best)
-          val bestOfTwo = if (child.expectedProfit > best.expectedProfit) child else best
-          progress(iter, bestOfTwo, child)
-          bestOfTwo
+      val child = CoevolutionBreeding(mutate,populationSize,CoevolutionFitness(MarketData(marketData), 0.05)).breed(best)
+      val bestOfTwo = if (child.expectedProfit > best.expectedProfit) child else best
+      progress(iter, bestOfTwo, child)
+      bestOfTwo
     })
     bestTrader
   }
