@@ -64,7 +64,7 @@ object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
    * @param populationSize Number of individuals in every generation.
    * @param generationNum Maximum number of generations that optimisation is executed for.
    * @param progress The current progress of optimisation, it is called after every generation and returns 
-   *                (current number of generation, the best solution so far, best solution for the current generation)
+   *                (current number of generation, the best solution so far, best solution for the current generation). Default progress is provided.
    *                  
    * @return Best trader found.
    **/
@@ -72,32 +72,25 @@ object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
 
     /**Search for best solution by creating a population of traders that are mutated versions of modelTrader and then by competing among them on market simulator.
      * @param modelTrader Model trader used for breeding population.
-     * @param iter Current number of generation.
-     * @returns The best of two, the best solution in population and modelTrader.
+     * @returns The best solution in population.
      * */
-    def optimise(modelTrader: Solution[T], iter: Int): Solution[T] = {
+    def optimise(modelTrader: Solution[T]): Solution[T] = {
 
       /** Born 10 traders.*/
       val population = for (i <- 1 to populationSize) yield mutate(modelTrader)
 
       /**Get best of children.*/
-      val bestOfPopulation = CoevolutionFitness(MarketData(marketData),0.05).fitness(population)
-
-      /**Get best of children and parent.*/
-      val best: Solution[T] = bestOfPopulation match {
-        case None => modelTrader
-        case Some(solution) => {
-          val bestOfTwo = if (solution.expectedProfit > modelTrader.expectedProfit) solution else modelTrader
-          progress(iter, bestOfTwo, solution)
-          bestOfTwo
-        }
-      }
-      best
+      CoevolutionFitness(MarketData(marketData), 0.05).fitness(population)
     }
 
     /**We assume that initial trader is always the worst one and should never be returned itself.*/
     val initialSolution = Solution(trader, Double.MinValue, 0)
-    val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => optimise(best, iter))
+    val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => {
+      val child = optimise(best)
+          val bestOfTwo = if (child.expectedProfit > best.expectedProfit) child else best
+          progress(iter, bestOfTwo, child)
+          bestOfTwo
+    })
     bestTrader
   }
 

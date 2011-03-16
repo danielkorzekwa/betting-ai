@@ -16,9 +16,10 @@ import ISimulator._
 case class CoevolutionFitness(marketData: MarketData, commission: Double) {
 
   /**@see CoevolutionFitness
-   * @returns Fitness for the best individual or none if no market data to analyse.
+   * @returns Fitness for the best individual or the first individual in the population if no market data to analyse.
    */
-  def fitness[T <: ITrader](population: Seq[T]): Option[Solution[T]] = {
+  def fitness[T <: ITrader](population: Seq[T]): Solution[T] = {
+    require(!population.isEmpty)
     /**Create simulation environment.*/
     val simulator = Simulator(commission)
 
@@ -26,7 +27,7 @@ case class CoevolutionFitness(marketData: MarketData, commission: Double) {
     val simulationReport = simulator.runSimulation(marketData.data, population.toList, p => {})
 
     val bestSolution = simulationReport.marketReports match {
-      case Nil => None
+      case Nil => Solution(population.head, 0d, 0d)
       case x :: xs => {
         val traders = simulationReport.marketReports.head.traderReports.map(_.trader)
         val tradersFitness: List[Tuple2[RegisteredTrader, Double]] = traders.map(t => t -> simulationReport.totalExpectedProfit(t.userId))
@@ -34,7 +35,7 @@ case class CoevolutionFitness(marketData: MarketData, commission: Double) {
         val (bestTrader, expectedProfit) = tradersFitness.reduceLeft((a, b) => if (a._2 > b._2) a else b)
         val matchedBetsNum = simulationReport.totalMatchedBetsNum(bestTrader.userId)
 
-        Option(Solution(bestTrader.trader.asInstanceOf[T], expectedProfit, matchedBetsNum))
+        Solution(bestTrader.trader.asInstanceOf[T], expectedProfit, matchedBetsNum)
       }
     }
 
