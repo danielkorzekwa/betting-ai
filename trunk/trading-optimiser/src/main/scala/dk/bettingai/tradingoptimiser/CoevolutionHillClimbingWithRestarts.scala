@@ -34,33 +34,15 @@ class CoevolutionHillClimbingWithRestarts[T <: ITrader] extends ICoevolutionHill
    **/
   def optimise(marketData: MarketData, trader: T, restart: (Solution[T]) => T, populationSize: Int, generationNum: Int, optimize: (Solution[T]) => Solution[T], progress: Option[(Int, Solution[T], Solution[T]) => Unit] = None): Solution[T] = {
 
-    /**Search for best solution by creating a population of traders that are mutated versions of modelTrader and then by competing among them on market simulator.
-     * @param modelTrader Model trader used for breeding population.
-     * @param iter Current number of generation.
-     * @returns The best of two, the best solution in population and modelTrader.
-     * */
-    def optimise(modelTrader: Solution[T], iter: Int): Solution[T] = {
-
-      /** Born 10 traders.*/
-      val population = for (i <- 1 to populationSize) yield restart(modelTrader)
-
-      /**Get best of children.*/
-      val bestOfPopulation = CoevolutionFitness(marketData, 0.05).fitness(population)
-
-      /**Get best of children and parent.*/
-
-      val optimisedSolution = if (bestOfPopulation.expectedProfit > 0) optimize(bestOfPopulation) else bestOfPopulation
-
-      val bestOfTwo = if (optimisedSolution.expectedProfit > modelTrader.expectedProfit) optimisedSolution else modelTrader
-      progress.getOrElse(defaultProgress _)(iter, bestOfTwo, optimisedSolution)
-      bestOfTwo
-
-    }
-
     /**We assume that initial trader is always the worst one and should never be returned itself.*/
     val initialSolution = Solution(trader, Double.MinValue, 0)
-    val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => optimise(best, iter))
+    val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => {
+      val child = CoevolutionBreeding(restart, populationSize, CoevolutionFitness(marketData, 0.05)).breed(best)
+      val optimisedChild = if (child.expectedProfit > 0) optimize(child) else child
+      val bestOfTwo = if (optimisedChild.expectedProfit > best.expectedProfit) optimisedChild else best
+      progress.getOrElse(defaultProgress _)(iter, bestOfTwo, optimisedChild)
+      bestOfTwo
+    })
     bestTrader
-    Solution(trader, -1d, -1d)
   }
 }
