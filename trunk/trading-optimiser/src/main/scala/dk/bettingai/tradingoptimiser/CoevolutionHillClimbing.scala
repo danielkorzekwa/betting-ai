@@ -1,7 +1,6 @@
 package dk.bettingai.tradingoptimiser
 
 import dk.bettingai.marketsimulator.trader._
-import ICoevolutionHillClimbing._
 import java.io.File
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.marketevent._
