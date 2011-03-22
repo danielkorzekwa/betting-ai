@@ -6,7 +6,8 @@ import org.slf4j.LoggerFactory
 import java.util.Random
 import java.io.File
 import dk.bettingai.tradingoptimiser._
-import dk.bettingai.tradingoptimiser.ICoevolutionHillClimbing._
+import HillClimbing._
+import CoevolutionHillClimbing._
 
 /**Run trader implementation.
  * 
@@ -32,13 +33,13 @@ class PriceSlopeTraderTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
-    val marketDataDir ="./src/test/resources/two_hr_10mins_before_inplay"
+    val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
     val mutate = (solution: Solution[PriceSlopeTrader]) => {
       val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       new PriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal)
     }
-    val bestSolution = CoevolutionHillClimbing.optimise(marketDataDir, trader, mutate, populationSize, generationNum)
+    val bestSolution = CoevolutionHillClimbing(marketData,mutate,populationSize).optimise(trader, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }

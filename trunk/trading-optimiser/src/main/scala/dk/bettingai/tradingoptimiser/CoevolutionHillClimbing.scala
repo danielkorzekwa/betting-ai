@@ -8,77 +8,71 @@ import dk.bettingai.marketsimulator._
 import ISimulator._
 import org.slf4j.LoggerFactory
 import scala.collection.immutable.TreeMap
+import HillClimbing._
 
-/** Search for optimal trader using co-evolution based hill climbing gradient algorithm. Algorithm 6 from Essentials of metaheuristics book 
+/**@see class level comments.
+ * 
+ * @author korzekwad
+ *
+ */
+object CoevolutionHillClimbing {
+
+  /**Represents event driven data for betting exchange markets.*/
+  object MarketData {
+
+    /** @param marketDataDir Directory, which contains market data for simulation.*/
+    def apply(marketDataDir: String): MarketData = {
+      val marketDataSources = TreeMap(new File(marketDataDir).listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
+      new MarketData(marketDataSources)
+    }
+
+    def apply(): MarketData = new MarketData(new TreeMap())
+  }
+
+  /**@param data Market events for betting exchange markets. Key - marketId, value - market events*/
+  case class MarketData(data: TreeMap[Long, File])
+}
+
+/** Search for optimal trader using co-evolution based gradient ascent algorithm. Algorithm 6 from Essentials of metaheuristics book 
  *  (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics) with a one difference that individuals in population compete 
  *  against each other instead of evaluating them in isolation (chapter 6, page 107,...The entire population participated at the same time in the game...)
  *  
  *  Fitness function for individual (trader) is defined by current expected profit. 
  *
  * @author korzekwad
+ * 
+ * @param marketData Contains market events that the market simulation/optimisation is executed for. Key - marketId, value - market events
+ * @param mutate Takes trader as input and creates mutated trader.
+ * @param populationSize Number of individuals in every generation.
  *
  */
-object CoevolutionHillClimbing extends ICoevolutionHillClimbing {
+case class CoevolutionHillClimbing[T <: ITrader](marketData: CoevolutionHillClimbing.MarketData, mutate: (Solution[T]) => T, populationSize: Int) extends HillClimbing[T] {
 
-  /** Search for optimal trader using co-evolution based gradient hill climbing algorithm, @see ICoevolutionHillClimbing.
-   *  It's logging simulation progress using log4j info level.
-   * 
-   * @param marketDataDir Contains market data for simulation. 
-   * @param trader Trader to be optimised.
-   * @param mutate Takes trader as input and creates mutated trader.
-   * @param populationSize Number of individuals in every generation.
-   * @param generationNum Maximum number of generations that optimisation is executed for.
-   *                  
-   * @return Best trader found.
-   **/
-  def optimise[T <: ITrader](marketDataDir: String, trader: T, mutate: (Solution[T]) => T, populationSize: Int, generationNum: Int): Solution[T] = {
-    val logger = LoggerFactory.getLogger(getClass)
+  def breed(trader: Solution[T]): Solution[T] = {
+    /** Born 10 traders.*/
+    val population = for (i <- 1 to populationSize) yield mutate(trader)
 
-    val progress = (iter: Int, best: Solution[T], current: Solution[T]) => logger.info("Iter number=" + iter + ", bestSoFar=" + best + ", currentBest=" + current)
-    optimise(marketDataDir, trader, mutate, populationSize, generationNum, progress)
-  }
+    /**Create simulation environment.*/
+    val simulator = Simulator(0.05)
 
-  /** Search for optimal trader using co-evolution based gradient hill climbing algorithm, @see ICoevolutionHillClimbing	 
-   * 
-   * @param marketDataDir Directory, which contains market data for simulation. 
-   * @param trader Trader to be optimised.
-   * @param mutate Takes trader as input and creates mutated trader.
-   * @param populationSize Number of individuals in every generation.
-   * @param generationNum Maximum number of generations that optimisation is executed for.
-   * @param progress The current progress of optimisation, it is called after every generation and returns 
-   *                (current number of generation, the best solution so far, best solution for the current generation)
-   *                  
-   * @return Best trader found.
-   **/
-  def optimise[T <: ITrader](marketDataDir: String, trader: T, mutate: (Solution[T]) => T, populationSize: Int, generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T] = {
+    /**Run simulation and find the best solution.*/
+    val simulationReport = simulator.runSimulation(marketData.data, population.toList, p => {})
 
-    val marketDataSources = TreeMap(new File(marketDataDir).listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
-    optimise(marketDataSources, trader, mutate, populationSize, generationNum, progress)
-  }
+    val bestSolution = simulationReport.marketReports match {
+      case Nil => Solution(population.head, 0d, 0d)
+      case x :: xs => {
+        val traders = simulationReport.marketReports.head.traderReports.map(_.trader)
+        val tradersFitness: List[Tuple2[RegisteredTrader, Double]] = traders.map(t => t -> simulationReport.totalExpectedProfit(t.userId))
+        /** Find best trader [trader, fitness]*/
+        val (bestTrader, expectedProfit) = tradersFitness.reduceLeft((a, b) => if (a._2 > b._2) a else b)
+        val matchedBetsNum = simulationReport.totalMatchedBetsNum(bestTrader.userId)
 
-  /** Search for optimal trader using co-evolution based gradient hill climbing algorithm, @see ICoevolutionHillClimbing	 
-   * 
-   * @param marketData Contains market events that the market simulation/optimisation is executed for. Key - marketId, value - market events
-   * @param trader Trader to be optimised.
-   * @param mutate Takes trader as input and creates mutated trader.
-   * @param populationSize Number of individuals in every generation.
-   * @param generationNum Maximum number of generations that optimisation is executed for.
-   * @param progress The current progress of optimisation, it is called after every generation and returns 
-   *                (current number of generation, the best solution so far, best solution for the current generation). Default progress is provided.
-   *                  
-   * @return Best trader found.
-   **/
-  def optimise[T <: ITrader](marketData: TreeMap[Long, File], trader: T, mutate: (Solution[T]) => T, populationSize: Int, generationNum: Int, progress: (Int, Solution[T], Solution[T]) => Unit): Solution[T] = {
+        Solution(bestTrader.trader.asInstanceOf[T], expectedProfit, matchedBetsNum)
+      }
+    }
 
-    /**We assume that initial trader is always the worst one and should never be returned itself.*/
-    val initialSolution = Solution(trader, Double.MinValue, 0)
-    val bestTrader = (1 to generationNum).foldLeft(initialSolution)((best, iter) => {
-      val child = CoevolutionBreeding(mutate,populationSize,CoevolutionFitness(MarketData(marketData), 0.05)).breed(best)
-      val bestOfTwo = if (child.expectedProfit > best.expectedProfit) child else best
-      progress(iter, bestOfTwo, child)
-      bestOfTwo
-    })
-    bestTrader
+    /**Return best of children.*/
+    bestSolution
   }
 
 }
