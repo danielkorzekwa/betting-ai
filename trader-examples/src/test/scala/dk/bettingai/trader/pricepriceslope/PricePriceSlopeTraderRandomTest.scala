@@ -6,8 +6,9 @@ import org.slf4j.LoggerFactory
 import java.util.Random
 import java.io.File
 import dk.bettingai.tradingoptimiser._
-import dk.bettingai.tradingoptimiser.ICoevolutionHillClimbing._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
+import HillClimbing._
+import CoevolutionHillClimbing._
 
 /**Run trader implementation, full random mutate only.
  * 
@@ -30,13 +31,16 @@ import dk.bettingai.marketsimulator.betex.PriceUtil._
  *  50 markets  04/03/2011 19:17:06 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=766, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader3772, backSlope=0.0, laySlope=0.03, maxPrice=9.2,mxNumOfRunners=9,minProfitLoss=-1369.0,minTradedVolume=1.0], expectedProfit=96.28912720506212, matchedBetsNum=21993.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader3830, backSlope=-0.05, laySlope=0.02, maxPrice=4.8,mxNumOfRunners=3,minProfitLoss=-2158.0,minTradedVolume=667.0], expectedProfit=0.0, matchedBetsNum=0.0] 
  *  50 markets 05/03/2011 11:47:25 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=993, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader4144, backSlope=-0.04, laySlope=0.0, maxPrice=8.0,mxNumOfRunners=6,minProfitLoss=-1604.0,minTradedVolume=9.0], expectedProfit=119.07696684885481, matchedBetsNum=3069.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader4966, backSlope=0.01, laySlope=0.0, maxPrice=1.04,mxNumOfRunners=7,minProfitLoss=-2653.0,minTradedVolume=488.0], expectedProfit=0.0, matchedBetsNum=0.0] 
  *  275 markets 07/03/2011 22:42:45 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=144, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader353, backSlope=-0.03, laySlope=-0.04, maxPrice=1.81,mxNumOfRunners=17,minProfitLoss=-2232.0,minTradedVolume=22.0], expectedProfit=151.9900618638515, matchedBetsNum=6717.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader717, backSlope=0.05, laySlope=0.0, maxPrice=1.24,mxNumOfRunners=17,minProfitLoss=-798.0,minTradedVolume=795.0], expectedProfit=0.0, matchedBetsNum=0.0] 
+ *  275 markets2 13/03/2011 15:53:46 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=2677, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader8268, backSlope=0.05, laySlope=-0.05, maxPrice=13.0,mxNumOfRunners=19,minProfitLoss=-101.0,minTradedVolume=19.0], expectedProfit=64.31752079068137, matchedBetsNum=221145.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader13385, backSlope=0.04, laySlope=0.03, maxPrice=1.82,mxNumOfRunners=3,minProfitLoss=-377.0,minTradedVolume=970.0], expectedProfit=0.0, matchedBetsNum=0.0] 
+ *  575 markets 15/03/2011 09:03:32 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing$ - Iter number=569, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader338, backSlope=0.03, laySlope=-0.05, maxPrice=1.62,mxNumOfRunners=13,minProfitLoss=-761.0,minTradedVolume=708.0], expectedProfit=2.442444453994086, matchedBetsNum=1607.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader2843, backSlope=0.02, laySlope=0.04, maxPrice=1.26,mxNumOfRunners=7,minProfitLoss=-1773.0,minTradedVolume=353.0], expectedProfit=0.0603605950663688, matchedBetsNum=12.0] 
+ *  575 markets 20/03/2011 18:32:43 INFO  dk.bettingai.tradingoptimiser.CoevolutionHillClimbing - Iter number=1865, bestSoFar=Solution [trader=PricePriceSlopeTrader [id=trader851, backSlope=0.02, laySlope=-0.03, maxPrice=9.6,mxNumOfRunners=16,minProfitLoss=-1.0,minTradedVolume=33.0], expectedProfit=662.8046898651958, matchedBetsNum=178299.0], currentBest=Solution [trader=PricePriceSlopeTrader [id=trader9324, backSlope=-0.02, laySlope=-0.03, maxPrice=1.11,mxNumOfRunners=12,minProfitLoss=-2028.0,minTradedVolume=33.0], expectedProfit=0.0, matchedBetsNum=0.0] 
  *
  */
 class PricePriceSlopeTraderRandomTest {
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  val baseTrader = PricePriceSlopeTrader("baseTrader", -0.21, 0.21, 5,20,-10,10)
+  val baseTrader = PricePriceSlopeTrader("baseTrader", -0.21, 0.21, 5, 20, -10, 10)
 
   private val populationSize = 5
   private val generationNum = 5
@@ -51,8 +55,8 @@ class PricePriceSlopeTraderRandomTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
-   // val marketDataDir = "c:/daniel/marketdatafull2"
-    val marketDataDir = "./src/test/resources/two_hr_10mins_before_inplay"
+    //  val marketData = MarketData("c:/daniel/marketdataall")
+    val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
 
     /**Full random mutate only.*/
     val mutate = (solution: Solution[PricePriceSlopeTrader]) => {
@@ -62,10 +66,10 @@ class PricePriceSlopeTraderRandomTest {
       val maxNumOfRunners = 3 + rand.nextInt(20)
       val minProfitLoss = -rand.nextInt(3000)
       val minTradedVolume = rand.nextInt(1000)
-      val trader = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice,maxNumOfRunners,minProfitLoss,minTradedVolume)
+      val trader = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, maxNumOfRunners, minProfitLoss, minTradedVolume)
       trader
     }
-    val bestSolution = CoevolutionHillClimbing.optimise(marketDataDir, baseTrader, mutate, populationSize, generationNum)
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize).optimise(baseTrader, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }
