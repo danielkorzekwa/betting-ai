@@ -36,11 +36,11 @@ Betting AI version 1.3 (RELEASED on 4 March 2011)
 -----------------------------------------------------------------------------------------
 
 Betting AI version 1.4 (release planned on 30 July 2011)
-    * More metaheuristic optimisation, evolution algorithms, genetic programming, cooperative evolution, graph based trading optimisation.
-    * Improve performance of market simulation.
-    * Refactoring of Betting Exchange - Introduce abstract types, e.g. replace BetTypeEnum (BACK, LAY) with specialised classes BackBet and LayBet
-    * Simplify using of Complex Event Processing inside of Traders, e.g. add some dsl functions for delta or slope.
-    * Standalone application for running trading strategy on a real betting exchange. Input arguments: Trader Implementation, betfair market id, market polling interval in seconds.[http://code.google.com/p/betting-ai/issues/detail?id=100&q=milestone%3DRelease1.4&colspec=ID%20Type%20Status%20Priority%20Complexity%20Milestone%20Owner%20Component%20Summary Issue 100]
+    * More metaheuristic optimisation, evolution algorithms, genetic programming, cooperative evolution, graph based trading optimisation. [http://code.google.com/p/betting-ai/issues/detail?id=99 Issue 99]
+    * Improve performance CPU/mem of market simulation. [http://code.google.com/p/betting-ai/issues/detail?id=98 Issue 98], [http://code.google.com/p/betting-ai/issues/detail?id=97 Issue 97]
+    * Refactoring of Betting Exchange - Introduce abstract types, e.g. replace BetTypeEnum (BACK, LAY) with specialised classes BackBet and LayBet [http://code.google.com/p/betting-ai/issues/detail?id=87 Issue 87]
+    * Simplify using of Complex Event Processing inside of Traders, e.g. add some dsl functions for delta or slope. [http://code.google.com/p/betting-ai/issues/detail?id=83 Issue 83]
+    * Standalone application for running trading strategy on a real betting exchange. Input arguments: Trader Implementation, betfair market id, market polling interval in seconds.[http://code.google.com/p/betting-ai/issues/detail?id=100 Issue 100]
 
 -----------------------------------------------------------------------------------------
 
