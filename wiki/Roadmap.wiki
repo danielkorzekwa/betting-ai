@@ -40,6 +40,7 @@ Betting AI version 1.4 (release planned on 30 July 2011)
     * Improve performance of market simulation.
     * Refactoring of Betting Exchange - Introduce abstract types, e.g. replace BetTypeEnum (BACK, LAY) with specialised classes BackBet and LayBet
     * Simplify using of Complex Event Processing inside of Traders, e.g. add some dsl functions for delta or slope.
+    * Standalone application for running trading strategy on a real betting exchange. Input arguments: Trader Implementation, betfair market id, market polling interval in seconds.
 
 -----------------------------------------------------------------------------------------
 
