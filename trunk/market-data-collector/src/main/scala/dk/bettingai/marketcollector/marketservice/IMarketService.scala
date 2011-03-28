@@ -60,6 +60,14 @@ trait IMarketService {
 	
 	def getUserMatchedBets(marketId:Long,matchedSince:Date): List[IBet]
 	
+	/**Returns matched/unmatched/all user bets for a market id.
+	 * 
+	 * @param marketId
+	 * @param betStatus if None (default) all bets are returned.
+	 * @return
+	 */
+	def getUserBets(marketId: Long, betStatus: Option[BetStatusEnum] = None): List[IBet]
+	
 	/** Places a bet on a betting exchange market.
 	 * 
 	 * @param betSize
