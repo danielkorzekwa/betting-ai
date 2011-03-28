@@ -31,17 +31,17 @@ case class LiveTrader(trader: ITrader, marketId: Long, interval: Long, marketSer
       react {
         case StartTrader => {
           marketDetails = Some(marketService.getMarketDetails(marketId))
-          LiveTraderExecutor.execute(ctx => trader.init(ctx), marketId, marketDetails.get,marketService)
+          trader.init(LiveTraderContext(marketDetails.get,marketService))
           self ! ExecuteTrader
           reply
         }
         case StopTrader => {
-          LiveTraderExecutor.execute(ctx => trader.after(ctx), marketId, marketDetails.get,marketService)
+          trader.after(LiveTraderContext(marketDetails.get,marketService))
           reply
           exit
         }
         case ExecuteTrader => {
-          LiveTraderExecutor.execute(ctx => trader.execute(ctx), marketId, marketDetails.get,marketService)
+          trader.execute(LiveTraderContext(marketDetails.get,marketService))
           Thread.sleep(interval)
           self ! ExecuteTrader
         }
