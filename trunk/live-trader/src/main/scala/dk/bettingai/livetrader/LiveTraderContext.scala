@@ -14,18 +14,10 @@ import dk.bettingai.marketsimulator._
 import scala.collection._
 import com.espertech.esper.client._
 import java.util.Date
-import LiveTraderExecutor._
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
 
-/**This object represents executor, which triggers trader with a data obtained from a betting exchange market.
- * 
- * @author korzekwad
- *
- */
-object LiveTraderExecutor {
-
-  private case class LiveTraderContext(marketDetails:MarketDetails) extends ITraderContext {
+case class LiveTraderContext(marketDetails:MarketDetails, marketService: IMarketService) extends ITraderContext {
 
     lazy val userId: Int = throw new UnsupportedOperationException("Not implemented yet")
     val marketId: Long = marketDetails.marketId
@@ -69,7 +61,7 @@ object LiveTraderExecutor {
      * 
      * @return The bet that was placed.
      */
-    def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = throw new UnsupportedOperationException("Not implemented yet")
+    def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = marketService.placeBet(betSize, betPrice, betType, marketId, runnerId)
 
     /** Places a bet on a betting exchange market.
      * 
@@ -155,15 +147,3 @@ object LiveTraderExecutor {
     def getEPNStatement(eplID: String): EPStatement = throw new UnsupportedOperationException("Not implemented yet")
 
   }
-
-  /** Triggers trader with a data obtained from a betting exchange market.
-   * 
-   * @param call This function is called once with data obtained from a betting exchange market.
-   * @param marketId Unique identifier of a betting exchange market.
-   * @param marketDetails Static market information, e.g. market name, runner names, numOfWinners, etc.
-   * @param marketService Adapter for a betting exchange.
-   * */
-  def execute(call: (ITraderContext) => Unit, marketId: Long, marketDetails:MarketDetails,marketService: IMarketService) {
-    call(LiveTraderContext(marketDetails))
-  }
-}
