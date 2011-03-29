@@ -7,6 +7,7 @@ import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
 import dk.bettingai.marketsimulator.betex.api.IBet._
 import BetTypeEnum._
+import BetStatusEnum._
 import org.junit.runner._
 import org.jmock.integration.junit4._
 import org.jmock._
@@ -52,9 +53,75 @@ class LiveTraderContextTest {
     assertEquals(bet, placedBet)
   }
 
-  @Test def fillBet {
-	//  val firstBet = liveCtx.fillBet(10,2.22, BACK,11)
+  @Test
+  def fillBetFullyPlaced {
+    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(Nil))
+        one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
+      }
+    })
+
+    val placedBet = liveCtx.fillBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
+
+    assertEquals(betToBePlaced, placedBet.get)
   }
+
+  @Test
+  def fillBetFullyPlacedOtherBetsAreAvailable {
+    val existingBets =
+      Bet(100, 1000, 10, 2.2, LAY, 1, 11) ::
+        Bet(100, 1000, 10, 2.2, BACK, 1, 12) ::
+        Bet(100, 1000, 10, 2.21, BACK, 1, 11) :: Nil
+    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(existingBets))
+        one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
+      }
+    })
+
+    val placedBet = liveCtx.fillBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
+
+    assertEquals(betToBePlaced, placedBet.get)
+  }
+
+  @Test
+  def fillBetPartiallyPlaced {
+    val existingBet = Bet(100, 1000, 6, 2.2, BACK, 1, 11)
+    val betToBePlaced = Bet(100, 1000, 4, 2.2, BACK, 1, 11)
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(existingBet :: Nil))
+        one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
+      }
+    })
+
+    val placedBet = liveCtx.fillBet(10, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
+
+    assertEquals(betToBePlaced, placedBet.get)
+  }
+
+  @Test
+  def fillBetNothingPlaced {
+    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(betToBePlaced :: Nil))
+      }
+    })
+
+    val placedBet = liveCtx.fillBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
+
+    assertTrue(placedBet.isEmpty)
+  }
+
+  @Test def getBestPricesForRunnerId {
+	  liveCtx.getBestPrices(11)
+  }
+  
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
