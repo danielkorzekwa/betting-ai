@@ -9,6 +9,7 @@ import IBet._
 import BetTypeEnum._
 import BetStatusEnum._
 import Market._
+import IMarket._
 import dk.bot.betfairservice.model._
 import IMarketService._
 import MarketService._
@@ -80,6 +81,25 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     } else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
   }
 
+  /**Returns runner prices (best to back and best to lay) for all market runners.
+	 * 
+	 * @param marketId
+	 * 
+	 * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
+	 * */
+	def getMarketPrices(marketId:Long):Map[Long,List[IRunnerPrice]] = {
+   
+    val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
+    if (bfMarketRunners != null) {
+      def toRunnerPrices(bfPrices: java.util.List[BFRunnerPrice]): List[IRunnerPrice] = bfPrices.map(p => new RunnerPrice(p.getPrice, p.getTotalToBack, p.getTotalToLay)).toList
+
+      /**Tuple2[runnerId, list of runner prices]*/
+      val marketRunners: List[Tuple2[Long, List[IRunnerPrice]]] = bfMarketRunners.getMarketRunners.map(r => r.getSelectionId.toLong -> toRunnerPrices(r.getPrices)).toList
+      Map(marketRunners: _*)
+
+    } else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
+  }
+
   def getMarketDetails(marketId: Long): IMarketService.MarketDetails = {
     val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
 
@@ -91,7 +111,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
   def getUserMatchedBets(marketId: Long, matchedSince: Date): List[IBet] = {
     val muBets = betfairService.getMUBets(BFBetStatus.MU, marketId.toInt, matchedSince)
 
-    val bets = muBets.map(b => new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(),  b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId)).toList
+    val bets = muBets.map(b => new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(), b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId)).toList
     bets
   }
 

@@ -6,6 +6,7 @@ import dk.bettingai.marketsimulator.betex.api._
 import IBet._
 import BetTypeEnum._
 import BetStatusEnum._
+import IMarket._
 import Market._
 import IMarketService._
 import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
@@ -55,6 +56,14 @@ trait IMarketService {
 	 * @return marketRunners
 	 */
 	def getMarketRunners(marketId:Long):MarketRunners
+	
+	/**Returns runner prices (best to back and best to lay) for all market runners.
+	 * 
+	 * @param marketId
+	 * 
+	 * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
+	 * */
+	def getMarketPrices(marketId:Long):Map[Long,List[IRunnerPrice]]
 	
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails
 	

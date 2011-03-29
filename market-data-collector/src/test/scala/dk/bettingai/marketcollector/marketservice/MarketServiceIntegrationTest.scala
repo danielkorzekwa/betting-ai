@@ -49,4 +49,14 @@ class MarketServiceIntegrationTest {
       val unmatchedBets = marketService.getUserBets(markets.head)
     }
   }
+
+  @Test
+  def getMarketPrices {
+    val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
+    if (!markets.isEmpty) {
+      val marketPrices = marketService.getMarketPrices(markets.head)
+      assertTrue(marketPrices.size > 2)
+      marketPrices.values.foreach(runnerPrices => assertTrue(runnerPrices.size > 0))
+    }
+  }
 }
