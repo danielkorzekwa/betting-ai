@@ -16,11 +16,11 @@ import scala.collection._
  *
  */
 object Market {
-  class Runner(val runnerId: Long, val runnerName: String) extends IMarket.IRunner {
+	case  class Runner(val runnerId: Long, val runnerName: String) extends IMarket.IRunner {
     override def toString = "Runner [runnerId=%s, runnerName=%s]".format(runnerId, runnerName)
   }
 
-  class RunnerPrice(val price: Double, val totalToBack: Double, val totalToLay: Double) extends IMarket.IRunnerPrice {
+  case class RunnerPrice(val price: Double, val totalToBack: Double, val totalToLay: Double) extends IMarket.IRunnerPrice {
     override def toString = "RunnerPrice [price=%s, totalToBack=%s, totalToLay=%s]".format(price, totalToBack, totalToLay)
   }
 

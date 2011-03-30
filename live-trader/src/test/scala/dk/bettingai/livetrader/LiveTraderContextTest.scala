@@ -1,10 +1,13 @@
 package dk.bettingai.livetrader
 
-import org.junit._
-import Assert._
+import org.junit.Test
+import org.junit.Assert._
 import java.util.Date
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
+import dk.bettingai.marketsimulator.betex._
+import dk.bettingai.marketsimulator.betex.api._
+import Market._
 import dk.bettingai.marketsimulator.betex.api.IBet._
 import BetTypeEnum._
 import BetStatusEnum._
@@ -12,7 +15,6 @@ import org.junit.runner._
 import org.jmock.integration.junit4._
 import org.jmock._
 import org.hamcrest._
-import org.hamcrest.Matchers._
 import org.jmock.Expectations._
 import dk.bettingai.marketsimulator.betex._
 
@@ -23,13 +25,15 @@ class LiveTraderContextTest {
   private val numOfWinners = 3
   private val interval = 10
   private val marketTime = new Date(2000)
-  private val marketRunners: List[RunnerDetails] = Nil
+  private val marketRunners: List[RunnerDetails] = new RunnerDetails(11,"Max") :: new RunnerDetails(12,"Jordan") ::Nil
   private val marketDetails = new MarketDetails(marketId, "Soccer Jacpot", "Plump 28th Mar - 14:10 2m Mdn Hrd", numOfWinners, marketTime, marketRunners)
+
+  private val commission = 0.05
 
   private val mockery = new Mockery()
   private val marketService = mockery.mock(classOf[IMarketService])
 
-  private val liveCtx = LiveTraderContext(marketDetails, marketService)
+  private val liveCtx = LiveTraderContext(marketDetails, marketService, commission)
 
   @Test
   def marketDetailsAreCorrect {
@@ -38,6 +42,13 @@ class LiveTraderContextTest {
     assertEquals("Plump 28th Mar - 14:10 2m Mdn Hrd", liveCtx.eventName)
     assertEquals(3, liveCtx.numOfWinners)
     assertEquals(new Date(2000), liveCtx.marketTime)
+  }
+  
+  @Test def runners {
+	  val runners = liveCtx.runners;
+	   assertEquals(2, runners.size)
+	   assertEquals(Market.Runner(11,"Max"),runners(0))
+	   assertEquals(Market.Runner(12,"Jordan"),runners(1))
   }
 
   @Test
@@ -118,10 +129,61 @@ class LiveTraderContextTest {
     assertTrue(placedBet.isEmpty)
   }
 
-  @Test def getBestPricesForRunnerId {
-	  liveCtx.getBestPrices(11)
+  @Test
+  def getBestPrices {
+    val marketPrices = Map(
+      11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
+      12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+      }
+    })
+
+    val bestPrices = liveCtx.getBestPrices()
+    assertEquals(2, bestPrices.size)
+    assertEquals(Tuple2(RunnerPrice(2.3, 200, 0), RunnerPrice(2.4, 0, 300)), bestPrices(11))
+    assertEquals(Tuple2(RunnerPrice(1.3, 20, 0), RunnerPrice(1.4, 0, 30)), bestPrices(12))
   }
-  
+
+  @Test
+  def getBestPricesForRunner {
+    val marketPrices = Map(
+      11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
+      12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
+
+    mockery.checking(new SExpectations() {
+      {
+        exactly(2).of(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+      }
+    })
+
+    val bestPrices11 = liveCtx.getBestPrices(11)
+    val bestPrices12 = liveCtx.getBestPrices(12)
+    assertEquals(Tuple2(RunnerPrice(2.3, 200, 0), RunnerPrice(2.4, 0, 300)), bestPrices11)
+    assertEquals(Tuple2(RunnerPrice(1.3, 20, 0), RunnerPrice(1.4, 0, 30)), bestPrices12)
+  }
+
+  @Test
+  def risk {
+    val marketPrices = Map(
+      11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
+      12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
+
+    val bets = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11) :: new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11) :: Nil
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserBets(marketId, Option(M)); will(returnValue(bets))
+        one(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+      }
+    })
+
+    val risk = liveCtx.risk
+    assertEquals(-0.768, risk.marketExpectedProfit, 0.001)
+  }
+
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
@@ -130,4 +192,5 @@ class LiveTraderContextTest {
     def withArg(value: Int): Int = super.`with`(value)
     def withArg[Any](matcher: Any): Any = super.`with`(matcher)
   }
+
 }
