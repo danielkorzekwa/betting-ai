@@ -7,6 +7,7 @@ import dk.bettingai.marketsimulator.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import IMarket._
+import Market._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.betex.BetUtil._
@@ -16,8 +17,9 @@ import com.espertech.esper.client._
 import java.util.Date
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
+import dk.bettingai.marketsimulator.risk._
 
-case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarketService) extends ITraderContext {
+case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarketService, commission:Double) extends ITraderContext {
 
   lazy val userId: Int = throw new UnsupportedOperationException("Not implemented yet")
   val marketId: Long = marketDetails.marketId
@@ -25,9 +27,7 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   val eventName: String = marketDetails.menuPath
   val numOfWinners: Int = marketDetails.numOfWinners
   val marketTime: Date = marketDetails.marketTime
-  lazy val runners: List[IRunner] = throw new UnsupportedOperationException("Not implemented yet")
-
-  lazy val commission: Double = throw new UnsupportedOperationException("Not implemented yet")
+  lazy val runners: List[IRunner] = marketDetails.runners.map(r => new Runner(r.runnerId,r.runnerName))
 
   /**Time stamp of market event */
   def getEventTimestamp: Long = throw new UnsupportedOperationException("Not implemented yet")
@@ -44,13 +44,25 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    * Double.NaN is returned if price is not available.
    * @return 
    * */
-  def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice, IRunnerPrice] = throw new UnsupportedOperationException("Not implemented yet")
-
+  def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice, IRunnerPrice] = getBestPrices()(runnerId)
+  
   /**Returns best toBack/toLay prices for market.
    * 
    * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
    */
-  def getBestPrices(): Map[Long, Tuple2[IRunnerPrice, IRunnerPrice]] = throw new UnsupportedOperationException("Not implemented yet")
+  def getBestPrices(): Map[Long, Tuple2[IRunnerPrice, IRunnerPrice]] = {
+    val marketPrices = marketService.getMarketPrices(marketId)
+
+    def toBestPrices(runnerPrices: List[IRunnerPrice]): Tuple2[IRunnerPrice, IRunnerPrice] = {
+      val bestToBack = runnerPrices.filter(p => p.totalToBack>0).reduceLeft((a,b) => if(a.price>b.price) a else b)
+      val bestToLay = runnerPrices.filter(p => p.totalToLay>0).reduceLeft((a,b) => if(a.price<b.price) a else b)
+
+      Tuple2(bestToBack, bestToLay)
+    }
+
+    val bestPrices = marketPrices.mapValues(prices => toBestPrices(prices))
+    bestPrices
+  }
 
   /** Places a bet on a betting exchange market.
    * 
@@ -119,7 +131,12 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   /**Returns total traded volume for a given runner.*/
   def getTotalTradedVolume(runnerId: Long): Double = throw new UnsupportedOperationException("Not implemented yet")
 
-  def risk(): MarketExpectedProfit = throw new UnsupportedOperationException("Not implemented yet")
+  def risk(): MarketExpectedProfit = {
+	    val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
+	    val matchedUserBets = marketService.getUserBets(marketId, Option(M))
+	    val risk = ExpectedProfitCalculator.calculate(matchedUserBets,probs,commission)
+	    risk
+  }
 
   /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
   def wealth(bank: Double): MarketExpectedProfit = throw new UnsupportedOperationException("Not implemented yet")

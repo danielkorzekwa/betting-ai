@@ -10,15 +10,14 @@ import BetTypeEnum._
 import BetStatusEnum._
 
 class MarketServiceIntegrationTest {
-  require(System.getProperty("bfUser") != null, "The bfUser property is not defined")
-  require(System.getProperty("bfPassword") != null, "The bfPassword property is not defined")
-  require(System.getProperty("bfProductId") != null, "The bfProductId property is not defined")
+  require(System.getenv("bfUser") != null, "The bfUser property is not defined")
+  require(System.getenv("bfPassword") != null, "The bfPassword property is not defined")
 
   /**Create betfair service and login to betfair account.*/
   val betfairServiceFactoryBean = new dk.bot.betfairservice.DefaultBetFairServiceFactoryBean();
   betfairServiceFactoryBean.setUser(System.getProperty("bfUser"))
   betfairServiceFactoryBean.setPassword(System.getProperty("bfPassword"))
-  betfairServiceFactoryBean.setProductId(System.getProperty("bfProductId").toInt)
+  betfairServiceFactoryBean.setProductId(82)
   val loginResponse = betfairServiceFactoryBean.login
   val betfairService: BetFairService = (betfairServiceFactoryBean.getObject.asInstanceOf[BetFairService])
 
