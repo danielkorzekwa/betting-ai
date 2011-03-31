@@ -10,13 +10,14 @@ import BetTypeEnum._
 import BetStatusEnum._
 
 class MarketServiceIntegrationTest {
+
   require(System.getenv("bfUser") != null, "The bfUser property is not defined")
   require(System.getenv("bfPassword") != null, "The bfPassword property is not defined")
 
   /**Create betfair service and login to betfair account.*/
   val betfairServiceFactoryBean = new dk.bot.betfairservice.DefaultBetFairServiceFactoryBean();
-  betfairServiceFactoryBean.setUser(System.getProperty("bfUser"))
-  betfairServiceFactoryBean.setPassword(System.getProperty("bfPassword"))
+  betfairServiceFactoryBean.setUser(System.getenv("bfUser"))
+  betfairServiceFactoryBean.setPassword(System.getenv("bfPassword"))
   betfairServiceFactoryBean.setProductId(82)
   val loginResponse = betfairServiceFactoryBean.login
   val betfairService: BetFairService = (betfairServiceFactoryBean.getObject.asInstanceOf[BetFairService])
@@ -56,6 +57,16 @@ class MarketServiceIntegrationTest {
       val marketPrices = marketService.getMarketPrices(markets.head)
       assertTrue(marketPrices.size > 2)
       marketPrices.values.foreach(runnerPrices => assertTrue(runnerPrices.size > 0))
+    }
+  }
+
+  @Test
+  def getRunnerTradedVolume {
+    val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
+    if (!markets.isEmpty) {
+      val tradedVolume = marketService.getMarketTradedVolume(markets.head)
+      assertTrue(tradedVolume.size > 2)
+      tradedVolume.values.foreach(tv => assertTrue("No traded volume for runner",tv.pricesTradedVolume.size > 0))
     }
   }
 }

@@ -13,6 +13,7 @@ import IMarket._
 import dk.bot.betfairservice.model._
 import IMarketService._
 import MarketService._
+import IRunnerTradedVolume._
 import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 /**Betfair service adapter.
@@ -100,6 +101,25 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     } else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
   }
 
+	/**Returns traded volume for all market runners.
+	 * 
+	 * @param marketId
+	 * 
+	 * @return Traded volume for all market runners, key - runnerId, ,value - runner traded volume for all prices.
+	 * */
+	def getMarketTradedVolume(marketId:Long):Map[Long,IRunnerTradedVolume] = {
+		val bfTradedVolume =  betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
+		
+		def toPriceTradedVolume(bfPriceTradedVolume: java.util.List[BFPriceTradedVolume]): IRunnerTradedVolume = {
+			val priceTradedVolume:List[IPriceTradedVolume] = bfPriceTradedVolume.map(tv => new PriceTradedVolume(tv.getPrice, tv.getTradedVolume)).toList
+			new RunnerTradedVolume(priceTradedVolume)
+		}
+		
+		/**Tuple2[runnerId, tradedVolume]*/
+		val tradedVolume:List[Tuple2[Long,IRunnerTradedVolume]]  = bfTradedVolume.getRunnerTradedVolume.map(tv => (tv.getSelectionId.toLong -> toPriceTradedVolume(tv.getPriceTradedVolume))).toList
+		Map(tradedVolume: _*)
+	}
+	
   def getMarketDetails(marketId: Long): IMarketService.MarketDetails = {
     val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
 

@@ -61,9 +61,17 @@ trait IMarketService {
 	 * 
 	 * @param marketId
 	 * 
-	 * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
+	 * @return market prices, key - runnerId, ,value - list of runner prices (toBack and toLay)
 	 * */
 	def getMarketPrices(marketId:Long):Map[Long,List[IRunnerPrice]]
+	
+	/**Returns traded volume for all market runners.
+	 * 
+	 * @param marketId
+	 * 
+	 * @return Traded volume for all market runners, key - runnerId, ,value - runner traded volume for all prices.
+	 * */
+	def getMarketTradedVolume(marketId:Long):Map[Long,IRunnerTradedVolume]
 	
 	def getMarketDetails(marketId:Long):IMarketService.MarketDetails
 	
