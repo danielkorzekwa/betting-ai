@@ -17,6 +17,7 @@ import org.jmock._
 import org.hamcrest._
 import org.jmock.Expectations._
 import dk.bettingai.marketsimulator.betex._
+import RunnerTradedVolume._
 
 @RunWith(value = classOf[JMock])
 class LiveTraderContextTest {
@@ -25,7 +26,7 @@ class LiveTraderContextTest {
   private val numOfWinners = 3
   private val interval = 10
   private val marketTime = new Date(2000)
-  private val marketRunners: List[RunnerDetails] = new RunnerDetails(11,"Max") :: new RunnerDetails(12,"Jordan") ::Nil
+  private val marketRunners: List[RunnerDetails] = new RunnerDetails(11, "Max") :: new RunnerDetails(12, "Jordan") :: Nil
   private val marketDetails = new MarketDetails(marketId, "Soccer Jacpot", "Plump 28th Mar - 14:10 2m Mdn Hrd", numOfWinners, marketTime, marketRunners)
 
   private val commission = 0.05
@@ -33,7 +34,7 @@ class LiveTraderContextTest {
   private val mockery = new Mockery()
   private val marketService = mockery.mock(classOf[IMarketService])
 
-  private val liveCtx = LiveTraderContext(marketDetails, marketService, commission)
+  private val liveCtx = LiveTraderContext(marketDetails, marketService, commission, null)
 
   @Test
   def marketDetailsAreCorrect {
@@ -43,12 +44,13 @@ class LiveTraderContextTest {
     assertEquals(3, liveCtx.numOfWinners)
     assertEquals(new Date(2000), liveCtx.marketTime)
   }
-  
-  @Test def runners {
-	  val runners = liveCtx.runners;
-	   assertEquals(2, runners.size)
-	   assertEquals(Market.Runner(11,"Max"),runners(0))
-	   assertEquals(Market.Runner(12,"Jordan"),runners(1))
+
+  @Test
+  def runners {
+    val runners = liveCtx.runners;
+    assertEquals(2, runners.size)
+    assertEquals(Market.Runner(11, "Max"), runners(0))
+    assertEquals(Market.Runner(12, "Jordan"), runners(1))
   }
 
   @Test
@@ -184,6 +186,25 @@ class LiveTraderContextTest {
     assertEquals(-0.768, risk.marketExpectedProfit, 0.001)
   }
 
+  @Test
+  def getTotalTraderVolumeForRunner {
+    val marketTradedVolume = Map(11 -> new RunnerTradedVolume(new PriceTradedVolume(2.2, 50) :: new PriceTradedVolume(3.45, 25) :: Nil), 12 -> new RunnerTradedVolume(Nil))
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketTradedVolume(1); will(returnValue(marketTradedVolume))
+      }
+    })
+
+    val totalTradedVolume = liveCtx.getTotalTradedVolume(11)
+    assertEquals(75, totalTradedVolume, 0)
+  }
+
+  @Test
+  def getSetEventTimestamp {
+    liveCtx.setEventTimestamp(1000)
+    assertEquals(1000, liveCtx.getEventTimestamp)
+  }
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
