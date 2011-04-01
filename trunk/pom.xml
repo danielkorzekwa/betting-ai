@@ -45,6 +45,7 @@
 		<module>market-data-collector</module>
 		<module>betting-ai-launcher</module>
 		<module>trading-optimiser</module>
+		<module>live-trader</module>
 	</modules>
 
 	<!-- Properties -->
@@ -209,6 +210,18 @@
 			<dependency>
 				<groupId>dk.bettingai</groupId>
 				<artifactId>trading-optimiser</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>trader-examples</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>live-trader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
