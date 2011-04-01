@@ -139,7 +139,7 @@ class LiveTraderContextTest {
 
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+        one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0, marketPrices)))
       }
     })
 
@@ -147,6 +147,21 @@ class LiveTraderContextTest {
     assertEquals(2, bestPrices.size)
     assertEquals(Tuple2(RunnerPrice(2.3, 200, 0), RunnerPrice(2.4, 0, 300)), bestPrices(11))
     assertEquals(Tuple2(RunnerPrice(1.3, 20, 0), RunnerPrice(1.4, 0, 30)), bestPrices(12))
+  }
+
+  @Test(expected = classOf[IllegalStateException])
+  def getBestPricesMarketIsInplay {
+    val marketPrices = Map(
+      11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
+      12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(1, marketPrices)))
+      }
+    })
+
+    val bestPrices = liveCtx.getBestPrices()
   }
 
   @Test
@@ -157,7 +172,8 @@ class LiveTraderContextTest {
 
     mockery.checking(new SExpectations() {
       {
-        exactly(2).of(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+        /**Only one call to this method is expected because market prices are cached.*/
+        exactly(1).of(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0, marketPrices)))
       }
     })
 
@@ -178,7 +194,7 @@ class LiveTraderContextTest {
     mockery.checking(new SExpectations() {
       {
         one(marketService).getUserBets(marketId, Option(M)); will(returnValue(bets))
-        one(marketService).getMarketPrices(1); will(returnValue(marketPrices))
+        one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0,marketPrices)))
       }
     })
 

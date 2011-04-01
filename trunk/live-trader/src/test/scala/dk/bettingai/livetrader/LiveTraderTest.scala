@@ -29,28 +29,79 @@ class LiveTraderTest {
 
   private val mockery = new Mockery()
   private val marketService = mockery.mock(classOf[IMarketService])
-  mockery.checking(new SExpectations() {
-    {
-      one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-    }
-  })
 
-  private val liveTrader = LiveTrader(trader, marketId, interval, marketService, commission)
+  private val menuPathFilter = "Strat 1st Apr"
+  
+  private val liveTrader = LiveTrader(trader, interval, marketService, commission, -60, 12, 60,menuPathFilter)
 
   @Test
   def liveTraderStart {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
+    })
+
     assertEquals(0, trader.executed)
     assertEquals(0, trader.initialised)
     assertEquals(0, trader.finalised)
 
     liveTrader.start
-    Thread.sleep(50)
+    Thread.sleep(200)
     assertTrue("Trader was called %s times only.".format(trader.executed), trader.executed > 3)
     liveTrader.stop
   }
 
   @Test
+  def liveTraderStartMoreThanOneMarketAreDiscovered {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l, 2l)))
+      }
+    })
+
+    assertEquals(0, trader.executed)
+    assertEquals(0, trader.initialised)
+    assertEquals(0, trader.finalised)
+
+    liveTrader.start
+    Thread.sleep(200)
+    assertTrue("Trader was called %s times.".format(trader.executed), trader.executed == 0)
+    
+    liveTrader.stop
+    
+  }
+  
+   @Test
+  def liveTraderStartZeroMarketAreDiscovered {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List()))
+      }
+    })
+
+    assertEquals(0, trader.executed)
+    assertEquals(0, trader.initialised)
+    assertEquals(0, trader.finalised)
+
+    liveTrader.start
+    Thread.sleep(200)
+    assertTrue("Trader was called %s times.".format(trader.executed), trader.executed == 0)
+    
+    liveTrader.stop
+    
+  }
+
+  @Test
   def liveTraderStop {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
+    })
+
     liveTrader.start
     liveTrader.stop
     val numOfCalls = trader.executed
@@ -60,6 +111,13 @@ class LiveTraderTest {
 
   @Test
   def traderInit {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
+    })
+
     liveTrader.start
     Thread.sleep(50)
     assertEquals(1, trader.initialised)
@@ -70,6 +128,13 @@ class LiveTraderTest {
 
   @Test
   def traderAfter {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
+    })
+
     liveTrader.start
     liveTrader.stop
     assertEquals(1, trader.initialised)
@@ -81,11 +146,15 @@ class LiveTraderTest {
     var initialised = 0
     var finalised = 0
 
-    override def init(ctx: ITraderContext) = initialised += 1
+    override def init(ctx: ITraderContext) = {
+    	require(ctx.getEventTimestamp>0,"Event time stamp is wrong:" + ctx.getEventTimestamp)
+    	initialised += 1
+    }
     override def after(ctx: ITraderContext) = finalised += 1
 
     def execute(ctx: ITraderContext) = {
       require(ctx != null, "Trader Context is null")
+      require(ctx.getEventTimestamp>0,"Event time stamp is wrong:" + ctx.getEventTimestamp)
       executed += 1
     }
   }

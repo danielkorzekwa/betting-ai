@@ -9,22 +9,29 @@ import BetStatusEnum._
 import IMarket._
 import Market._
 import IMarketService._
-import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
 object IMarketService {
+	
+	/**
+	 * @param inPlayDelay if bigger than 0 then market is in play.
+	 * @param runnerPrices Key - runnerId, Value - List[IRunnerPrice]
+	 */
+	case class MarketPrices(val inPlayDelay:Int, val runnerPrices:Map[Long,List[IRunnerPrice]]) {
+		override def toString = "MarketPrices [inPlayDelay=%s, runnerPrices=%s]".format(inPlayDelay,runnerPrices)
+	}
 	
 		/**
 	 * @param inPlayDelay if bigger than 0 then market is in play.
 	 * @param runnerPrices Key - runnerId, Value - Tuple[runner prices, price traded volume]
 	 */
-	class MarketRunners(val inPlayDelay:Int, val runnerPrices:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]]) {
+	case class MarketRunners(val inPlayDelay:Int, val runnerPrices:Map[Long,Tuple2[List[RunnerPrice],RunnerTradedVolume]]) {
 		override def toString = "MarketRunners [inPlayDelay=%s, runnerPrices=%s]".format(inPlayDelay,runnerPrices)
 	}
 	
-	class MarketDetails(val marketId:Long,val marketName:String, val menuPath:String,val numOfWinners:Int, val marketTime:java.util.Date, val runners:List[RunnerDetails]) {
+	case class MarketDetails(val marketId:Long,val marketName:String, val menuPath:String,val numOfWinners:Int, val marketTime:java.util.Date, val runners:List[RunnerDetails]) {
 		override def toString = "MarketDetails [marketId=%s, marketName=%s, menuPath=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId,marketName,menuPath,numOfWinners,marketTime,runners)
 	}
-	class RunnerDetails(val runnerId:Long, val runnerName:String) {
+	case class RunnerDetails(val runnerId:Long, val runnerName:String) {
 		override def toString = "RunnerDetails [runnerId=%s, runnerName=%s]".format(runnerId,runnerName)
 	}
 }
@@ -50,6 +57,20 @@ trait IMarketService {
 	 */
 	def getMarkets(marketTimeFrom:Date, marketTimeTo:Date):List[Long]
 	
+	/**Returns markets from betfair betting exchange that fulfil the following criteria:
+	 * - UK Horse Racing
+	 * - Win only markets
+	 * - Active markets
+	 * - isInPlay
+	 * - isBsbMarket.
+	 * 
+	 * @param marketTimeFrom Filter markets by market time.
+	 * @param marketTimeTo Filter markets by market time.
+	 * @param menuPathFilter Returns those markets only for which market.menuPath.contains(menuPathFilter)
+	 * @return List of market ids.
+	 */
+	def getMarkets(marketTimeFrom:Date, marketTimeTo:Date, menuPathFilter:String):List[Long]
+	
 	/** Returns runner prices and price traded volumes for market runner.
 	 * 
 	 * @param marketId
@@ -61,9 +82,9 @@ trait IMarketService {
 	 * 
 	 * @param marketId
 	 * 
-	 * @return market prices, key - runnerId, ,value - list of runner prices (toBack and toLay)
+	 * @return market prices
 	 * */
-	def getMarketPrices(marketId:Long):Map[Long,List[IRunnerPrice]]
+	def getMarketPrices(marketId:Long):MarketPrices
 	
 	/**Returns traded volume for all market runners.
 	 * 
