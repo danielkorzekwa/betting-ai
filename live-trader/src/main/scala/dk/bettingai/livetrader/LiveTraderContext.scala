@@ -64,8 +64,9 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    */
   def getBestPrices(): Map[Long, Tuple2[IRunnerPrice, IRunnerPrice]] = {
     if (cachedBestPrices.isEmpty) {
-      println("get best prices")
-      cachedBestPrices = Option(marketService.getMarketPrices(marketId))
+    	val marketPrices = marketService.getMarketPrices(marketId)
+    	if(marketPrices.inPlayDelay>0) throw new IllegalStateException("Market is in play.")
+    	else cachedBestPrices = Option(marketPrices.runnerPrices)
     }
 
     def toBestPrices(runnerPrices: List[IRunnerPrice]): Tuple2[IRunnerPrice, IRunnerPrice] = {

@@ -9,6 +9,8 @@ import com.espertech.esper.client._
 import com.espertech.esper.client.time._
 import scala.collection._
 import scala.collection.JavaConversions._
+import org.joda.time._
+import org.slf4j.LoggerFactory
 
 /**
  * This class allows for running trader on a betting exchange market. Trader observes a market and places some bets.
@@ -26,7 +28,8 @@ case object StartTrader
 case object StopTrader
 case object ExecuteTrader
 
-case class LiveTrader(trader: ITrader, marketId: Long, interval: Long, marketService: IMarketService, commission: Double) {
+case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketService, commission: Double, startInMinutesFrom: Int, startInMinutesTo: Int, marketDiscoveryIntervalSec: Long, menuPathFilter: String) {
+  private val log = LoggerFactory.getLogger(getClass)
 
   /**key - epnID.*/
   private var epnNetwork: Option[EPServiceProvider] = None
@@ -36,34 +39,84 @@ case class LiveTrader(trader: ITrader, marketId: Long, interval: Long, marketSer
 
   private var traderContext: Option[ITraderContext] = None
 
-  private val liveTraderActor = actor {
+  /**How often new markets are discovered, e.g. if it's set to 60, then new markets will be discovered every 60 seconds, even though this task is executed every 1 second.*/
+  private var discoveryTime: Long = 0
+  /**List of discovered markets that market data is collected for.*/
+  private var marketIds: List[Long] = Nil
 
-    var marketDetails: Option[MarketDetails] = None
+  private val liveTraderActor = actor {
 
     loop {
       react {
         case StartTrader => {
-          marketDetails = Some(marketService.getMarketDetails(marketId))
-          traderContext = Option(LiveTraderContext(marketDetails.get, marketService, commission, this))
-          traderContext.get.setEventTimestamp(System.currentTimeMillis)
-          trader.init(traderContext.get)
           self ! ExecuteTrader
           reply
         }
         case StopTrader => {
-          traderContext.get.setEventTimestamp(System.currentTimeMillis)
-          trader.after(traderContext.get)
+          if (traderContext.isDefined) {
+            traderContext.get.setEventTimestamp(System.currentTimeMillis)
+            trader.after(traderContext.get)
+          }
           epnNetwork.foreach(epn => epn.destroy())
           reply
           exit
         }
         case ExecuteTrader => {
-          /**Send new time event to esper.*/
-          val eventTimestamp = System.currentTimeMillis
-          traderContext.get.setEventTimestamp(eventTimestamp)
-          epnNetwork.foreach(epn => epn.getEPRuntime().sendEvent(new CurrentTimeEvent(eventTimestamp)))
-          epnPublisher.foreach { publish => publish(epnNetwork.get) }
-          trader.execute(traderContext.get)
+          try {
+
+            /**Discover markets that the market events should be collected for.*/
+            val now = new DateTime()
+            if ((now.getMillis - discoveryTime) / 1000 > marketDiscoveryIntervalSec) {
+              marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate, menuPathFilter)
+              discoveryTime = now.getMillis
+              if (marketIds.size > 1) {
+                log.error("Only a single market can be analysing at one time. Num of markets found: " + marketIds.size)
+                traderContext = None
+              } else if (marketIds.isEmpty) {
+                if (traderContext.isDefined) {
+                  traderContext.get.setEventTimestamp(System.currentTimeMillis)
+                  trader.after(traderContext.get)
+                }
+                epnNetwork.foreach(epn => epn.destroy())
+                epnNetwork = None
+                eplStatements.clear
+                epnPublisher = None
+              } else if (traderContext.isEmpty || marketIds.head != traderContext.get.marketId) {
+
+                log.info("New market found: " + marketIds)
+
+                /**destroy old context and epn*/
+                if (traderContext.isDefined) {
+                  traderContext.get.setEventTimestamp(System.currentTimeMillis)
+                  trader.after(traderContext.get)
+                }
+                epnNetwork.foreach(epn => epn.destroy())
+                epnNetwork = None
+                eplStatements.clear
+                epnPublisher = None
+
+                /**Create new context and initialise it.*/
+                val marketDetails = marketService.getMarketDetails(marketIds.head)
+                traderContext = Option(LiveTraderContext(marketDetails, marketService, commission, this))
+                traderContext.get.setEventTimestamp(System.currentTimeMillis)
+                trader.init(traderContext.get)
+              }
+
+              log.info("Market discovery: " + marketIds)
+            }
+
+            /**Send new time event to esper.*/
+            if (traderContext.isDefined) {
+              val eventTimestamp = System.currentTimeMillis
+              traderContext.get.setEventTimestamp(eventTimestamp)
+              epnNetwork.foreach(epn => epn.getEPRuntime().sendEvent(new CurrentTimeEvent(eventTimestamp)))
+              epnPublisher.foreach { publish => publish(epnNetwork.get) }
+              trader.execute(traderContext.get)
+            }
+
+          } catch {
+            case e: Exception => log.error("Execute trader error", e)
+          }
 
           Thread.sleep(interval)
           self ! ExecuteTrader
@@ -98,7 +151,7 @@ case class LiveTrader(trader: ITrader, marketId: Long, interval: Long, marketSer
       config.getEngineDefaults().getThreading().setInternalTimerEnabled(false)
       getEventTypes.foreach { case (eventTypeName, eventMap) => config.addEventType(eventTypeName, eventMap) }
 
-      val epServiceProvider = EPServiceProviderManager.getProvider("" + marketId, config)
+      val epServiceProvider = EPServiceProviderManager.getProvider("" + marketIds.head, config)
       epServiceProvider.initialize()
 
       getEPLStatements.foreach { case (eplID, eplStatement) => eplStatements(eplID) = epServiceProvider.getEPAdministrator().createEPL(eplStatement) }

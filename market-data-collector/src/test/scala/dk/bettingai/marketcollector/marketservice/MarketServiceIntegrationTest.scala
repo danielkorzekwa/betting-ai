@@ -34,6 +34,23 @@ class MarketServiceIntegrationTest {
   }
 
   @Test
+  def getMarketsForMenuPathFilter {
+    val dateFrom = new Date(System.currentTimeMillis)
+    val dateTo = new Date(System.currentTimeMillis + (1000 * 3600 * 48))
+    val allMarkets = marketService.getMarkets(dateFrom, dateTo)
+    if (!allMarkets.isEmpty) {
+      val menuPathFilter = marketService.getMarketDetails(allMarkets.head).menuPath
+      val filteredMarkets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)), menuPathFilter)
+
+      /**Check if all filtered markets have the same menuPath.*/
+      for (marketId <- filteredMarkets) {
+        val menuPath = marketService.getMarketDetails(marketId).menuPath
+        assertEquals(menuPathFilter, menuPath)
+      }
+    }
+  }
+
+  @Test
   def getMatchedBets {
     val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
     if (!markets.isEmpty) {
@@ -55,8 +72,8 @@ class MarketServiceIntegrationTest {
     val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
     if (!markets.isEmpty) {
       val marketPrices = marketService.getMarketPrices(markets.head)
-      assertTrue(marketPrices.size > 2)
-      marketPrices.values.foreach(runnerPrices => assertTrue(runnerPrices.size > 0))
+      assertTrue(marketPrices.runnerPrices.size > 2)
+      marketPrices.runnerPrices.values.foreach(runnerPrices => assertTrue(runnerPrices.size > 0))
     }
   }
 
@@ -66,7 +83,7 @@ class MarketServiceIntegrationTest {
     if (!markets.isEmpty) {
       val tradedVolume = marketService.getMarketTradedVolume(markets.head)
       assertTrue(tradedVolume.size > 2)
-      tradedVolume.values.foreach(tv => assertTrue("No traded volume for runner",tv.pricesTradedVolume.size > 0))
+      tradedVolume.values.foreach(tv => assertTrue("No traded volume for runner", tv.pricesTradedVolume.size > 0))
     }
   }
 }

@@ -16,8 +16,9 @@ import MarketService._
 import IRunnerTradedVolume._
 import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
 
-/**Betfair service adapter.
- * 
+/**
+ * Betfair service adapter.
+ *
  * @author KorzekwaD
  *
  */
@@ -27,16 +28,17 @@ object MarketService {
 
 class MarketService(betfairService: BetFairService) extends IMarketService {
 
-  /**Returns markets from betfair betting exchange that fulfil the following criteria:
+  /**
+   * Returns markets from betfair betting exchange that fulfil the following criteria:
    * - UK Horse Racing
    * - Win only markets
    * - Active markets
    * - isInPlay
    * - isBsbMarket.
-   * 
+   *
    * @param marketTimeFrom Filter markets by market time.
    * @param marketTimeTo Filter markets by market time.
-   * 
+   *
    * @return List of market ids.
    */
   def getMarkets(marketTimeFrom: Date, marketTimeTo: Date): List[Long] = {
@@ -48,11 +50,40 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     filteredMarkets.map(_.getMarketId.asInstanceOf[Long]).toList
   }
 
-  /** Returns runner prices and price traded volumes for market runner.
-   * 
+  /**
+   * Returns markets from betfair betting exchange that fulfil the following criteria:
+   * - UK Horse Racing
+   * - Win only markets
+   * - Active markets
+   * - isInPlay
+   * - isBsbMarket.
+   *
+   * @param marketTimeFrom Filter markets by market time.
+   * @param marketTimeTo Filter markets by market time.
+   *
+   * @return List of market ids.
+   */
+  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: String): List[Long] = {
+    /**7 - HorceRacing markets*/
+    val eventTypeIds: java.util.Set[Integer] = Set(new Integer(7))
+    val markets = betfairService.getMarkets(marketTimeFrom, marketTimeTo, eventTypeIds)
+
+    val filteredMarkets = markets.filter(m => m.getMarketStatus == "ACTIVE" && 
+    		m.getEventHierarchy.startsWith("/7/298251/") && 
+    		m.isTurningInPlay && 
+    		m.isBsbMarket && m.getNumberOfWinners == 1 
+    		&& m.getMenuPath.contains(menuPathFilter))
+    		
+    filteredMarkets.map(_.getMarketId.asInstanceOf[Long]).toList
+
+  }
+
+  /**
+   * Returns runner prices and price traded volumes for market runner.
+   *
    * @param marketId
    * @return market runners
-   * @throw 
+   * @throw
    */
   def getMarketRunners(marketId: Long): MarketRunners = {
     /**Get runner prices and runner traded volume*/
@@ -82,44 +113,47 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     } else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
   }
 
-  /**Returns runner prices (best to back and best to lay) for all market runners.
-	 * 
-	 * @param marketId
-	 * 
-	 * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
-	 * */
-	def getMarketPrices(marketId:Long):Map[Long,List[IRunnerPrice]] = {
-   
+  /**
+   * Returns runner prices (best to back and best to lay) for all market runners.
+   *
+   * @param marketId
+   *
+   * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
+   */
+  def getMarketPrices(marketId: Long): MarketPrices = {
+
     val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
     if (bfMarketRunners != null) {
       def toRunnerPrices(bfPrices: java.util.List[BFRunnerPrice]): List[IRunnerPrice] = bfPrices.map(p => new RunnerPrice(p.getPrice, p.getTotalToBack, p.getTotalToLay)).toList
 
       /**Tuple2[runnerId, list of runner prices]*/
       val marketRunners: List[Tuple2[Long, List[IRunnerPrice]]] = bfMarketRunners.getMarketRunners.map(r => r.getSelectionId.toLong -> toRunnerPrices(r.getPrices)).toList
-      Map(marketRunners: _*)
+      val marketRunnersMap = Map(marketRunners: _*)
+      MarketPrices(bfMarketRunners.getInPlayDelay, marketRunnersMap)
 
     } else throw new MarketClosedOrSuspendedException("Market is closed/suspended. MarketId=" + marketId)
   }
 
-	/**Returns traded volume for all market runners.
-	 * 
-	 * @param marketId
-	 * 
-	 * @return Traded volume for all market runners, key - runnerId, ,value - runner traded volume for all prices.
-	 * */
-	def getMarketTradedVolume(marketId:Long):Map[Long,IRunnerTradedVolume] = {
-		val bfTradedVolume =  betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
-		
-		def toPriceTradedVolume(bfPriceTradedVolume: java.util.List[BFPriceTradedVolume]): IRunnerTradedVolume = {
-			val priceTradedVolume:List[IPriceTradedVolume] = bfPriceTradedVolume.map(tv => new PriceTradedVolume(tv.getPrice, tv.getTradedVolume)).toList
-			new RunnerTradedVolume(priceTradedVolume)
-		}
-		
-		/**Tuple2[runnerId, tradedVolume]*/
-		val tradedVolume:List[Tuple2[Long,IRunnerTradedVolume]]  = bfTradedVolume.getRunnerTradedVolume.map(tv => (tv.getSelectionId.toLong -> toPriceTradedVolume(tv.getPriceTradedVolume))).toList
-		Map(tradedVolume: _*)
-	}
-	
+  /**
+   * Returns traded volume for all market runners.
+   *
+   * @param marketId
+   *
+   * @return Traded volume for all market runners, key - runnerId, ,value - runner traded volume for all prices.
+   */
+  def getMarketTradedVolume(marketId: Long): Map[Long, IRunnerTradedVolume] = {
+    val bfTradedVolume = betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
+
+    def toPriceTradedVolume(bfPriceTradedVolume: java.util.List[BFPriceTradedVolume]): IRunnerTradedVolume = {
+      val priceTradedVolume: List[IPriceTradedVolume] = bfPriceTradedVolume.map(tv => new PriceTradedVolume(tv.getPrice, tv.getTradedVolume)).toList
+      new RunnerTradedVolume(priceTradedVolume)
+    }
+
+    /**Tuple2[runnerId, tradedVolume]*/
+    val tradedVolume: List[Tuple2[Long, IRunnerTradedVolume]] = bfTradedVolume.getRunnerTradedVolume.map(tv => (tv.getSelectionId.toLong -> toPriceTradedVolume(tv.getPriceTradedVolume))).toList
+    Map(tradedVolume: _*)
+  }
+
   def getMarketDetails(marketId: Long): IMarketService.MarketDetails = {
     val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
 
@@ -135,8 +169,9 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     bets
   }
 
-  /**Returns matched/unmatched/all user bets for a market id.
-   * 
+  /**
+   * Returns matched/unmatched/all user bets for a market id.
+   *
    * @param marketId
    * @param betStatus if None (default) all bets are returned.
    * @return
@@ -161,14 +196,15 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     case BFBetStatus.U => U
     case _ => throw new IllegalArgumentException("Not supported bet status")
   }
-  /** Places a bet on a betting exchange market.
-   * 
+  /**
+   * Places a bet on a betting exchange market.
+   *
    * @param betSize
    * @param betPrice
    * @param betType
    * @param runnerId
    * @param marketId
-   * 
+   *
    * @return The bet that was placed.
    */
   def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, marketId: Long, runnerId: Long): IBet = {
