@@ -31,11 +31,18 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
 
   private var _eventTimestamp = -1l
 
+  /**Cache.*/
+  var cachedBestPrices: Option[Map[Long, List[IRunnerPrice]]] = None
+  var marketTradedVolume: Option[Map[Long, IRunnerTradedVolume]] = None
+  var marketExpectedProfit: Option[MarketExpectedProfit] = None
+
   /**Time stamp of market event */
   def getEventTimestamp: Long = _eventTimestamp
   def setEventTimestamp(eventTimestamp: Long) = {
     /**clear cache.*/
     cachedBestPrices = None
+    marketTradedVolume = None
+    marketExpectedProfit = None
 
     _eventTimestamp = eventTimestamp
   }
@@ -55,8 +62,6 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    */
   def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice, IRunnerPrice] = getBestPrices()(runnerId)
 
-  var cachedBestPrices: Option[Map[Long, List[IRunnerPrice]]] = None
-
   /**
    * Returns best toBack/toLay prices for market.
    *
@@ -64,9 +69,9 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    */
   def getBestPrices(): Map[Long, Tuple2[IRunnerPrice, IRunnerPrice]] = {
     if (cachedBestPrices.isEmpty) {
-    	val marketPrices = marketService.getMarketPrices(marketId)
-    	if(marketPrices.inPlayDelay>0) throw new IllegalStateException("Market is in play.")
-    	else cachedBestPrices = Option(marketPrices.runnerPrices)
+      val marketPrices = marketService.getMarketPrices(marketId)
+      if (marketPrices.inPlayDelay > 0) throw new IllegalStateException("Market is in play.")
+      else cachedBestPrices = Option(marketPrices.runnerPrices)
     }
 
     def toBestPrices(runnerPrices: List[IRunnerPrice]): Tuple2[IRunnerPrice, IRunnerPrice] = {
@@ -152,15 +157,20 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
 
   /**Returns total traded volume for a given runner.*/
   def getTotalTradedVolume(runnerId: Long): Double = {
-    val marketTradedVolume = marketService.getMarketTradedVolume(marketId)
-    marketTradedVolume(runnerId).totalTradedVolume
+    if (marketTradedVolume.isEmpty) {
+      marketTradedVolume = Option(marketService.getMarketTradedVolume(marketId))
+    }
+    marketTradedVolume.get(runnerId).totalTradedVolume
   }
 
   def risk(): MarketExpectedProfit = {
-    val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-    val matchedUserBets = marketService.getUserBets(marketId, Option(M))
-    val risk = ExpectedProfitCalculator.calculate(matchedUserBets, probs, commission)
-    risk
+    if (marketExpectedProfit.isEmpty) {
+      val matchedUserBets = marketService.getUserBets(marketId, Option(M))
+      val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
+      marketExpectedProfit = Option(ExpectedProfitCalculator.calculate(matchedUserBets, probs, commission))
+    }
+
+    marketExpectedProfit.get
   }
 
   /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/

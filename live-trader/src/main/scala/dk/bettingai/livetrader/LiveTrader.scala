@@ -109,6 +109,12 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
             if (traderContext.isDefined) {
               val eventTimestamp = System.currentTimeMillis
               traderContext.get.setEventTimestamp(eventTimestamp)
+
+              /**Fill the cache with responses from those operations.*/
+              traderContext.get.risk()
+              traderContext.get.getBestPrices()
+              traderContext.get.getTotalTradedVolume(traderContext.get.runners.head.runnerId)
+
               epnNetwork.foreach(epn => epn.getEPRuntime().sendEvent(new CurrentTimeEvent(eventTimestamp)))
               epnPublisher.foreach { publish => publish(epnNetwork.get) }
               trader.execute(traderContext.get)
