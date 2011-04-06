@@ -214,6 +214,9 @@ class LiveTraderContextTest {
 
     val totalTradedVolume = liveCtx.getTotalTradedVolume(11)
     assertEquals(75, totalTradedVolume, 0)
+    
+    /**Call again (should be already cached, so no extra call to market service should be required.*/
+   liveCtx.getTotalTradedVolume(11)
   }
 
   @Test
