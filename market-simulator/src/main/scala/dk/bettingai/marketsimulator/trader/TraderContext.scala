@@ -64,6 +64,9 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
     timestampChartValues += label -> value
   }
 
+   /**Saves html chart to file.*/
+   def saveChart(chartFilePath:String) {throw new UnsupportedOperationException("Not implemented yet")}
+  
   /** Places a bet on a betting exchange market.
    * 
    * @param betSize

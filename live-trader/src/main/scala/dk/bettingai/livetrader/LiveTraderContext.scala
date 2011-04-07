@@ -18,6 +18,9 @@ import java.util.Date
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
 import dk.bettingai.marketsimulator.risk._
+import org.apache.commons.io.FileUtils
+import java.io.File
+import dk.bettingai.marketsimulator.reporting._
 
 case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarketService, commission: Double, liveTrader: LiveTrader) extends ITraderContext {
 
@@ -36,6 +39,10 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   var marketTradedVolume: Option[Map[Long, IRunnerTradedVolume]] = None
   var marketExpectedProfit: Option[MarketExpectedProfit] = None
 
+  /** key - timestamp, value Map[chartLabel,value]*/
+  val chartData = collection.mutable.LinkedHashMap[Long, collection.mutable.Map[String, Double]]()
+  val chartLabels = collection.mutable.LinkedHashSet[String]()
+
   /**Time stamp of market event */
   def getEventTimestamp: Long = _eventTimestamp
   def setEventTimestamp(eventTimestamp: Long) = {
@@ -52,7 +59,26 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    * @param label Label of chart series
    * @param value Value to be added to chart series
    */
-  def addChartValue(label: String, value: Double) = throw new UnsupportedOperationException("Not implemented yet")
+  def addChartValue(label: String, value: Double) = {
+    chartLabels += label
+    val timestampChartValues = chartData.getOrElseUpdate(getEventTimestamp, collection.mutable.Map[String, Double]())
+    timestampChartValues += label -> value
+  }
+
+  /**Saves html chart to file.*/
+  def saveChart(chartFilePath: String) {
+
+    val chartValues = for {
+      (timestamp, values) <- chartData
+      val timestampValues = chartLabels.toList.map(l => values.getOrElse(l, Double.NaN))
+
+    } yield Tuple2(timestamp, timestampValues)
+    val marketReport = MarketReport(marketId, marketName, eventName, marketTime, TraderReport(null, null, -1, -1, chartLabels.toList, chartValues.toList) :: Nil)
+
+    val formmatedReport = ReportGenerator.generateReport(marketReport :: Nil)
+    val reportFile = new File(chartFilePath)
+    FileUtils.writeStringToFile(reportFile, formmatedReport.toString)
+  }
 
   /**
    * Returns best toBack/toLay prices for market runner.

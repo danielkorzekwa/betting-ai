@@ -2,38 +2,15 @@
 package dk.bettingai.marketsimulator
 
 import java.io._
-import scala.io._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader._
 import org.apache.commons.math.util.MathUtils._
-import ISimulator._
 import org.apache.commons.io.FileUtils
-import scala.collection.JavaConversions._
 import scala.collection._
 import immutable.TreeMap
 import scala.annotation._
+import dk.bettingai.marketsimulator.reporting._
 
-/**Google visualization imports*/
-import com.google.visualization.datasource._
-import DataSourceHelper._
-import com.google.visualization.datasource.DataSourceRequest
-import com.google.visualization.datasource.base.DataSourceException
-import com.google.visualization.datasource.base.DataSourceParameters
-import com.google.visualization.datasource.base.TypeMismatchException
-import com.google.visualization.datasource.datatable.ColumnDescription
-import com.google.visualization.datasource.datatable.DataTable
-import com.google.visualization.datasource.datatable.TableCell
-import com.google.visualization.datasource.datatable.TableRow
-import com.google.visualization.datasource.datatable.value.DateTimeValue
-import com.google.visualization.datasource.datatable.value.Value
-import com.google.visualization.datasource.datatable.value.ValueType
-import com.google.visualization.datasource.query.Query
 import com.ibm.icu.text.SimpleDateFormat
-import com.ibm.icu.util.GregorianCalendar
-import com.ibm.icu.util.TimeZone
-import com.ibm.icu.util.ULocale
 
 /** Main class for the market simulator.
  * 
@@ -83,65 +60,9 @@ object SimulatorApp {
   }
 
   private def generateHtmlReport(marketReports: List[MarketReport], htmlReportDir: String) {
-    val in = this.getClass.getResourceAsStream("/sim_report_template.html")
-    val simReportTemplate = Source.fromInputStream(in).mkString
-
-    val reportHead = new StringBuilder()
-    val reportBody = new StringBuilder()
-
-    for (marketReport <- marketReports) {
-      val traderReport = marketReport.traderReports.head
-      val rawData = generateDataTableJson(traderReport.chartLabels, traderReport.chartValues)
-      reportHead.append("\n var rawdata%s =%s".format(marketReport.marketId, rawData))
-      reportHead.append("\n var data%s = new google.visualization.DataTable(rawdata%s.table);".format(marketReport.marketId, marketReport.marketId))
-      reportHead.append("\n var chart%s = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div%s'));".format(marketReport.marketId, marketReport.marketId))
-      reportHead.append("\n chart%s.draw(data%s, {'dateFormat' : 'HH:mm:ss MMMM dd, yyyy', 'legendPosition': 'newRow',displayAnnotations: true,'scaleType': 'maximized'});".format(marketReport.marketId, marketReport.marketId))
-
-      reportBody.append("<br/>%s/%s<br/>".format(marketReport.marketName, marketReport.eventName))
-      reportBody.append("<br/><div id='chart_div%s' style='width: 800px; height: 480px;'></div>".format(marketReport.marketId))
-
-    }
-    val formmatedReport = simReportTemplate.format(reportHead, reportBody)
-
+    val formmatedReport = ReportGenerator.generateReport(marketReports)
     val reportFile = new File(htmlReportDir + "/market_sim_report.html")
     FileUtils.writeStringToFile(reportFile, formmatedReport.toString)
-
-  }
-
-  /**Generate json data string for time series chart.
-   * 
-   * @param chartLabels Labels for all chart series.
-   * @param chartValues Key - time stamp, value - list of values for all series in the same order as labels
-   *  
-   */
-  private def generateDataTableJson(chartLabels: List[String], chartValues: List[Tuple2[Long, List[Double]]]): String = {
-    val data = new DataTable()
-    val timeSeriesColumns = chartLabels.map(label => new ColumnDescription(label, ValueType.NUMBER, label)).toList
-    val cd = new ColumnDescription("date", ValueType.DATETIME, "Date") :: timeSeriesColumns
-    data.addColumns(cd)
-
-    /**Add rows for all series.*/
-    for ((timestamp, values) <- chartValues) {
-      val row = new TableRow();
-      val calendar = com.ibm.icu.util.Calendar.getInstance().asInstanceOf[GregorianCalendar]
-      calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-      calendar.setTimeInMillis(TimeZone.getDefault().getOffset(timestamp) + timestamp);
-      row.addCell(new TableCell(new DateTimeValue(calendar)));
-      for (value <- values) {
-        if (!value.isNaN) {
-          row.addCell(value);
-        } else {
-          row.addCell(Value.getNullValueFromValueType(ValueType.NUMBER));
-        }
-      }
-      data.addRow(row);
-    }
-
-    val query = new Query()
-    val parameters = new DataSourceParameters("")
-    val request = new DataSourceRequest(query, parameters, ULocale.UK)
-    val response = DataSourceHelper.generateResponse(data, request)
-    response
   }
 
   private def printMarketReport(marketReports: List[MarketReport], console: PrintStream) {
