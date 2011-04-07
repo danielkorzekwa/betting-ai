@@ -18,6 +18,7 @@ import org.hamcrest._
 import org.jmock.Expectations._
 import dk.bettingai.marketsimulator.betex._
 import RunnerTradedVolume._
+import java.io.File
 
 @RunWith(value = classOf[JMock])
 class LiveTraderContextTest {
@@ -194,7 +195,7 @@ class LiveTraderContextTest {
     mockery.checking(new SExpectations() {
       {
         one(marketService).getUserBets(marketId, Option(M)); will(returnValue(bets))
-        one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0,marketPrices)))
+        one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0, marketPrices)))
       }
     })
 
@@ -214,15 +215,37 @@ class LiveTraderContextTest {
 
     val totalTradedVolume = liveCtx.getTotalTradedVolume(11)
     assertEquals(75, totalTradedVolume, 0)
-    
+
     /**Call again (should be already cached, so no extra call to market service should be required.*/
-   liveCtx.getTotalTradedVolume(11)
+    liveCtx.getTotalTradedVolume(11)
   }
 
   @Test
   def getSetEventTimestamp {
     liveCtx.setEventTimestamp(1000)
     assertEquals(1000, liveCtx.getEventTimestamp)
+  }
+
+  @Test
+  def saveChart {
+    liveCtx.setEventTimestamp(1000)
+    liveCtx.addChartValue("a", 1)
+    liveCtx.addChartValue("b", 1)
+
+    liveCtx.setEventTimestamp(2000)
+    liveCtx.addChartValue("a", 2)
+    liveCtx.addChartValue("b", 3)
+
+    liveCtx.setEventTimestamp(5000)
+    liveCtx.addChartValue("a", 3)
+    liveCtx.addChartValue("b", 5)
+    
+    val chartFileName = "./target/" + getClass.getSimpleName + ".html"
+    liveCtx.saveChart(chartFileName)
+    val chartFile = new File(chartFileName)
+    assertTrue("Chart file doesn't exist",chartFile.exists)
+    assertTrue("Chart file is empty",chartFile.length>0)
+    
   }
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {

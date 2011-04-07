@@ -38,6 +38,9 @@ import com.espertech.esper.client._
      */
     def addChartValue(label: String, value: Double)
 
+    /**Saves html chart to file.*/
+    def saveChart(chartFilePath:String)
+    
     /**Returns best toBack/toLay prices for market runner.
      * Element 1 - best price to back, element 2 - best price to lay
      * Double.NaN is returned if price is not available.

@@ -113,6 +113,7 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
               /**Fill the cache with responses from those operations.*/
               traderContext.get.risk()
               traderContext.get.getBestPrices()
+              if(!traderContext.get.runners.isEmpty)
               traderContext.get.getTotalTradedVolume(traderContext.get.runners.head.runnerId)
 
               epnNetwork.foreach(epn => epn.getEPRuntime().sendEvent(new CurrentTimeEvent(eventTimestamp)))

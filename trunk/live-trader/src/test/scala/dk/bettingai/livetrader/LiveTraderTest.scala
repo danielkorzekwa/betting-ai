@@ -12,6 +12,8 @@ import org.hamcrest._
 import org.hamcrest.Matchers._
 import org.jmock.Expectations._
 import java.util.Date
+import dk.bettingai.marketsimulator.betex.api._
+import IBet.BetStatusEnum._
 
 @RunWith(value = classOf[JMock])
 class LiveTraderTest {
@@ -36,9 +38,12 @@ class LiveTraderTest {
 
   @Test
   def liveTraderStart {
-    mockery.checking(new SExpectations() {
+    val marketPrices = MarketPrices(0,Map())
+	  mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
+    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
         one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
       }
     })
@@ -95,11 +100,14 @@ class LiveTraderTest {
 
   @Test
   def liveTraderStop {
-    mockery.checking(new SExpectations() {
+     val marketPrices = MarketPrices(0,Map())
+	  mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
+    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
         one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
-      }
+       }
     })
 
     liveTrader.start
@@ -111,9 +119,12 @@ class LiveTraderTest {
 
   @Test
   def traderInit {
+	val marketPrices = MarketPrices(0,Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
+    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
         one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
       }
     })
@@ -128,11 +139,14 @@ class LiveTraderTest {
 
   @Test
   def traderAfter {
+	val marketPrices = MarketPrices(0,Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
+    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
         one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
-      }
+     }
     })
 
     liveTrader.start
