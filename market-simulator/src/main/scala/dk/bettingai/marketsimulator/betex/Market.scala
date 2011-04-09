@@ -70,7 +70,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
     betsIds += betId
 
-    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId)
+    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId,None)
 
     /**Match bet.*/
     val matchedBets = betType match {
