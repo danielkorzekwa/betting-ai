@@ -32,7 +32,7 @@ class MarketMatchedBetsListenerTest {
     market.placeBet(101, 124, 7, 3, LAY, 11)
 
     assertEquals(1, matchedBets.size)
-    assertEquals(Bet(101, 124, 7, 3, LAY, M, 1, 11), matchedBets(0))
+    assertEquals(Bet(101, 124, 7, 3, LAY, M, 1, 11,None), matchedBets(0))
   }
 
   @Test
@@ -44,8 +44,8 @@ class MarketMatchedBetsListenerTest {
     market.placeBet(101, 124, 7, 3, LAY, 11)
 
     assertEquals(2, matchedBets.size)
-    assertEquals(Bet(101, 124, 7, 3, LAY, M, 1, 11), matchedBets(0))
-    assertEquals(Bet(100, 123, 7, 3, BACK, M, 1, 11), matchedBets(1))
+    assertEquals(Bet(101, 124, 7, 3, LAY, M, 1, 11,None), matchedBets(0))
+    assertEquals(Bet(100, 123, 7, 3, BACK, M, 1, 11,None), matchedBets(1))
   }
 
 }
