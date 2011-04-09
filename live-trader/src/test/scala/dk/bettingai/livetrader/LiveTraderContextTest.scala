@@ -35,10 +35,16 @@ class LiveTraderContextTest {
   private val mockery = new Mockery()
   private val marketService = mockery.mock(classOf[IMarketService])
 
+  mockery.checking(new SExpectations() {
+    {
+      one(marketService).getUserBets(marketId, None); will(returnValue(Nil))
+    }
+  })
   private val liveCtx = LiveTraderContext(marketDetails, marketService, commission, null)
 
   @Test
   def marketDetailsAreCorrect {
+
     assertEquals(1, liveCtx.marketId)
     assertEquals("Soccer Jacpot", liveCtx.marketName)
     assertEquals("Plump 28th Mar - 14:10 2m Mdn Hrd", liveCtx.eventName)
@@ -72,7 +78,6 @@ class LiveTraderContextTest {
     val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(Nil))
         one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
       }
     })
@@ -92,7 +97,6 @@ class LiveTraderContextTest {
 
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(existingBets))
         one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
       }
     })
@@ -108,11 +112,12 @@ class LiveTraderContextTest {
     val betToBePlaced = Bet(100, 1000, 4, 2.2, BACK, 1, 11)
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(existingBet :: Nil))
+        one(marketService).placeBet(existingBet.betSize, existingBet.betPrice, existingBet.betType, existingBet.marketId, existingBet.runnerId); will(returnValue(existingBet))
         one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
       }
     })
 
+    liveCtx.fillBet(existingBet.betSize, existingBet.betPrice, existingBet.betType, existingBet.runnerId)
     val placedBet = liveCtx.fillBet(10, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
 
     assertEquals(betToBePlaced, placedBet.get)
@@ -121,12 +126,14 @@ class LiveTraderContextTest {
   @Test
   def fillBetNothingPlaced {
     val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, Option(U)); will(returnValue(betToBePlaced :: Nil))
+        one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
       }
     })
 
+    liveCtx.fillBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
     val placedBet = liveCtx.fillBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.runnerId)
 
     assertTrue(placedBet.isEmpty)
@@ -190,11 +197,21 @@ class LiveTraderContextTest {
       11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
       12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
 
-    val bets = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11) :: new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11) :: Nil
+    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11)
+    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11)
 
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, Option(M)); will(returnValue(bets))
+        one(marketService).placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.marketId, bet1.runnerId); will(returnValue(bet1))
+        one(marketService).placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.marketId, bet2.runnerId); will(returnValue(bet2))
+      }
+    })
+
+    liveCtx.placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.runnerId)
+    liveCtx.placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.runnerId)
+
+    mockery.checking(new SExpectations() {
+      {
         one(marketService).getMarketPrices(1); will(returnValue(MarketPrices(0, marketPrices)))
       }
     })
@@ -239,13 +256,13 @@ class LiveTraderContextTest {
     liveCtx.setEventTimestamp(5000)
     liveCtx.addChartValue("a", 3)
     liveCtx.addChartValue("b", 5)
-    
+
     val chartFileName = "./target/" + getClass.getSimpleName + ".html"
     liveCtx.saveChart(chartFileName)
     val chartFile = new File(chartFileName)
-    assertTrue("Chart file doesn't exist",chartFile.exists)
-    assertTrue("Chart file is empty",chartFile.length>0)
-    
+    assertTrue("Chart file doesn't exist", chartFile.exists)
+    assertTrue("Chart file is empty", chartFile.length > 0)
+
   }
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {

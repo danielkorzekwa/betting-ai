@@ -30,19 +30,21 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   val eventName: String = marketDetails.menuPath
   val numOfWinners: Int = marketDetails.numOfWinners
   val marketTime: Date = marketDetails.marketTime
-  lazy val runners: List[IRunner] = marketDetails.runners.map(r => new Runner(r.runnerId, r.runnerName))
+  val runners: List[IRunner] = marketDetails.runners.map(r => new Runner(r.runnerId, r.runnerName))
 
   private var _eventTimestamp = -1l
 
   /**Cache.*/
-  var cachedBestPrices: Option[Map[Long, List[IRunnerPrice]]] = None
-  var marketTradedVolume: Option[Map[Long, IRunnerTradedVolume]] = None
-  var marketExpectedProfit: Option[MarketExpectedProfit] = None
+  private var cachedBestPrices: Option[Map[Long, List[IRunnerPrice]]] = None
+  private var marketTradedVolume: Option[Map[Long, IRunnerTradedVolume]] = None
+ private  var marketExpectedProfit: Option[MarketExpectedProfit] = None
 
   /** key - timestamp, value Map[chartLabel,value]*/
-  val chartData = collection.mutable.LinkedHashMap[Long, collection.mutable.Map[String, Double]]()
-  val chartLabels = collection.mutable.LinkedHashSet[String]()
+  private val chartData = collection.mutable.LinkedHashMap[Long, collection.mutable.Map[String, Double]]()
+  private val chartLabels = collection.mutable.LinkedHashSet[String]()
 
+  private val userBetsState = UserBets(marketService.getUserBets(marketId,None))
+  
   /**Time stamp of market event */
   def getEventTimestamp: Long = _eventTimestamp
   def setEventTimestamp(eventTimestamp: Long) = {
@@ -121,7 +123,11 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    *
    * @return The bet that was placed.
    */
-  def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = marketService.placeBet(betSize, betPrice, betType, marketId, runnerId)
+  def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = {
+	  val bet = marketService.placeBet(betSize, betPrice, betType, marketId, runnerId)
+	  userBetsState.betPlaced(bet)
+	  bet
+  }
 
   /**
    * Places a bet on a betting exchange market.
@@ -136,7 +142,7 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    */
   def fillBet(betSizeLimit: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): Option[IBet] = {
 
-    val userBets = marketService.getUserBets(marketId, Option(U))
+    val userBets = userBetsState.getUserBets(marketId, Option(U))
     val filteredBets = userBets.filter(b => b.betType == betType && b.betPrice == betPrice && b.runnerId == runnerId)
 
     val fillBetSize = betSizeLimit - totalStake(filteredBets)
@@ -191,7 +197,7 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
 
   def risk(): MarketExpectedProfit = {
     if (marketExpectedProfit.isEmpty) {
-      val matchedUserBets = marketService.getUserBets(marketId, Option(M))
+      val matchedUserBets = userBetsState.getUserBets(marketId, Option(M))
       val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
       marketExpectedProfit = Option(ExpectedProfitCalculator.calculate(matchedUserBets, probs, commission))
     }

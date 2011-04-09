@@ -33,18 +33,18 @@ class LiveTraderTest {
   private val marketService = mockery.mock(classOf[IMarketService])
 
   private val menuPathFilter = "Strat 1st Apr"
-  
-  private val liveTrader = LiveTrader(trader, interval, marketService, commission, -60, 12, 60,menuPathFilter)
+
+  private val liveTrader = LiveTrader(trader, interval, marketService, commission, -60, 12, 60, menuPathFilter)
 
   @Test
   def liveTraderStart {
-    val marketPrices = MarketPrices(0,Map())
-	  mockery.checking(new SExpectations() {
+    val marketPrices = MarketPrices(0, Map())
+    mockery.checking(new SExpectations() {
       {
-        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
-        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
-    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getUserBets(marketId, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
       }
     })
 
@@ -62,7 +62,7 @@ class LiveTraderTest {
   def liveTraderStartMoreThanOneMarketAreDiscovered {
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l, 2l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l, 2l)))
       }
     })
 
@@ -73,16 +73,16 @@ class LiveTraderTest {
     liveTrader.start
     Thread.sleep(200)
     assertTrue("Trader was called %s times.".format(trader.executed), trader.executed == 0)
-    
+
     liveTrader.stop
-    
+
   }
-  
-   @Test
+
+  @Test
   def liveTraderStartZeroMarketAreDiscovered {
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List()))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List()))
       }
     })
 
@@ -93,21 +93,21 @@ class LiveTraderTest {
     liveTrader.start
     Thread.sleep(200)
     assertTrue("Trader was called %s times.".format(trader.executed), trader.executed == 0)
-    
+
     liveTrader.stop
-    
+
   }
 
   @Test
   def liveTraderStop {
-     val marketPrices = MarketPrices(0,Map())
-	  mockery.checking(new SExpectations() {
+    val marketPrices = MarketPrices(0, Map())
+    mockery.checking(new SExpectations() {
       {
-        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
-        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
-    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
-       }
+        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
     })
 
     liveTrader.start
@@ -119,13 +119,13 @@ class LiveTraderTest {
 
   @Test
   def traderInit {
-	val marketPrices = MarketPrices(0,Map())
+    val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
-        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
-    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
       }
     })
 
@@ -139,14 +139,14 @@ class LiveTraderTest {
 
   @Test
   def traderAfter {
-	val marketPrices = MarketPrices(0,Map())
+    val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        atLeast(1).of(marketService).getUserBets(1l,Option(M));will(returnValue(Nil))
-        atLeast(1).of(marketService).getMarketPrices(1l);will(returnValue(marketPrices))
-    	one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(menuPathFilter)); will(returnValue(List(1l)))
-     }
+        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
+        one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+      }
     })
 
     liveTrader.start
@@ -161,14 +161,14 @@ class LiveTraderTest {
     var finalised = 0
 
     override def init(ctx: ITraderContext) = {
-    	require(ctx.getEventTimestamp>0,"Event time stamp is wrong:" + ctx.getEventTimestamp)
-    	initialised += 1
+      require(ctx.getEventTimestamp > 0, "Event time stamp is wrong:" + ctx.getEventTimestamp)
+      initialised += 1
     }
     override def after(ctx: ITraderContext) = finalised += 1
 
     def execute(ctx: ITraderContext) = {
       require(ctx != null, "Trader Context is null")
-      require(ctx.getEventTimestamp>0,"Event time stamp is wrong:" + ctx.getEventTimestamp)
+      require(ctx.getEventTimestamp > 0, "Event time stamp is wrong:" + ctx.getEventTimestamp)
       executed += 1
     }
   }
