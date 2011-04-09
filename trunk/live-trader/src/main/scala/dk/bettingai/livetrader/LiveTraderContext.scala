@@ -37,14 +37,14 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   /**Cache.*/
   private var cachedBestPrices: Option[Map[Long, List[IRunnerPrice]]] = None
   private var marketTradedVolume: Option[Map[Long, IRunnerTradedVolume]] = None
- private  var marketExpectedProfit: Option[MarketExpectedProfit] = None
+  private var marketExpectedProfit: Option[MarketExpectedProfit] = None
 
   /** key - timestamp, value Map[chartLabel,value]*/
   private val chartData = collection.mutable.LinkedHashMap[Long, collection.mutable.Map[String, Double]]()
   private val chartLabels = collection.mutable.LinkedHashSet[String]()
 
-  private val userBetsState = UserBets(marketService.getUserBets(marketId,None))
-  
+  private val userBetsState = UserBets(marketService.getUserBets(marketId, None))
+
   /**Time stamp of market event */
   def getEventTimestamp: Long = _eventTimestamp
   def setEventTimestamp(eventTimestamp: Long) = {
@@ -52,6 +52,11 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
     cachedBestPrices = None
     marketTradedVolume = None
     marketExpectedProfit = None
+
+    /**update UserBets with matched bets.*/
+    val matchedSince = new Date(userBetsState.getLatestMatchedDate + 1)
+    val recentlyMatchedBets = marketService.getUserMatchedBets(marketId, matchedSince)
+    recentlyMatchedBets.foreach(b => userBetsState.betMatched(b))
 
     _eventTimestamp = eventTimestamp
   }
@@ -124,9 +129,9 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    * @return The bet that was placed.
    */
   def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = {
-	  val bet = marketService.placeBet(betSize, betPrice, betType, marketId, runnerId)
-	  userBetsState.betPlaced(bet)
-	  bet
+    val bet = marketService.placeBet(betSize, betPrice, betType, marketId, runnerId)
+    userBetsState.betPlaced(bet)
+    bet
   }
 
   /**
