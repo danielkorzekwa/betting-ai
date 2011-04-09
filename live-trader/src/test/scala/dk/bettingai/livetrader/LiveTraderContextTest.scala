@@ -23,7 +23,7 @@ import java.io.File
 @RunWith(value = classOf[JMock])
 class LiveTraderContextTest {
 
-  private val marketId = 1
+  private val marketId = 1l
   private val numOfWinners = 3
   private val interval = 10
   private val marketTime = new Date(2000)
@@ -197,8 +197,8 @@ class LiveTraderContextTest {
       11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
       12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
 
-    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11)
-    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11)
+    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11, None)
+    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11, None)
 
     mockery.checking(new SExpectations() {
       {
@@ -239,12 +239,24 @@ class LiveTraderContextTest {
 
   @Test
   def getSetEventTimestamp {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
+      }
+    })
+
     liveCtx.setEventTimestamp(1000)
     assertEquals(1000, liveCtx.getEventTimestamp)
   }
 
   @Test
   def saveChart {
+    mockery.checking(new SExpectations() {
+      {
+        exactly(3).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
+      }
+    })
+
     liveCtx.setEventTimestamp(1000)
     liveCtx.addChartValue("a", 1)
     liveCtx.addChartValue("b", 1)

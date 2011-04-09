@@ -23,10 +23,13 @@ trait IUserBets {
 
   /**Place unmatched bet.*/
   def betPlaced(bet: IBet)
-  
+
   /**Match bet portion.*/
-  def betMatched(betId:Long,matchedSize: Double)
+  def betMatched(bet: IBet)
 
   /**Cancel a bet.*/
-  def betCancelled(betId:Long)
+  def betCancelled(betId: Long)
+
+  /**Date of recently matched bet.*/
+  def getLatestMatchedDate: Long
 }
