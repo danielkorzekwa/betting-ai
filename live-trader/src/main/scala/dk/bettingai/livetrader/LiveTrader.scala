@@ -11,6 +11,11 @@ import scala.collection._
 import scala.collection.JavaConversions._
 import org.joda.time._
 import org.slf4j.LoggerFactory
+import dk.bettingai.marketsimulator.betex.api._
+import dk.bettingai.marketsimulator.betex._
+import IBet.BetTypeEnum._
+import IBet.BetStatusEnum._
+import dk.bettingai.marketsimulator.betex.BetUtil._
 
 /**
  * This class allows for running trader on a betting exchange market. Trader observes a market and places some bets.
@@ -103,6 +108,20 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
               }
 
               log.info("Market discovery: " + marketIds)
+
+              /**Verify UserBetsState.*/
+              if (traderContext.isDefined) {
+                val userBets = marketService.getUserBets(traderContext.get.marketId,None)
+                val userBetsFromState = traderContext.get.getBets(false)
+                log.info("VERIFY ubets=%s/%s, mBets=%s/%s, uBetsSize=%s/%s, mBetsSize=%s/%s".format(
+                  userBets.filter(_.betStatus == U).size,
+                  userBetsFromState.filter(_.betStatus == U).size,
+                  userBets.filter(_.betStatus == M).size,
+                  userBetsFromState.filter(_.betStatus == M).size,
+                  totalStake(userBets.filter(_.betStatus == U)), totalStake(userBetsFromState.filter(_.betStatus == U)),
+                  totalStake(userBets.filter(_.betStatus == M)), totalStake(userBetsFromState.filter(_.betStatus == M))))
+
+              }
             }
 
             /**Send new time event to esper.*/
@@ -113,8 +132,8 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
               /**Fill the cache with responses from those operations.*/
               traderContext.get.risk()
               traderContext.get.getBestPrices()
-              if(!traderContext.get.runners.isEmpty)
-              traderContext.get.getTotalTradedVolume(traderContext.get.runners.head.runnerId)
+              if (!traderContext.get.runners.isEmpty)
+                traderContext.get.getTotalTradedVolume(traderContext.get.runners.head.runnerId)
 
               epnNetwork.foreach(epn => epn.getEPRuntime().sendEvent(new CurrentTimeEvent(eventTimestamp)))
               epnPublisher.foreach { publish => publish(epnNetwork.get) }

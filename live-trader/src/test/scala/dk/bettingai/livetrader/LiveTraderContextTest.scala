@@ -276,6 +276,62 @@ class LiveTraderContextTest {
     assertTrue("Chart file is empty", chartFile.length > 0)
 
   }
+
+  @Test
+  def getBets {
+    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None)
+    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, U, 1, 11, None)
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.marketId, bet1.runnerId); will(returnValue(bet1))
+        one(marketService).placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.marketId, bet2.runnerId); will(returnValue(bet2))
+      }
+    })
+
+    liveCtx.placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.runnerId)
+    liveCtx.placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.runnerId)
+
+    val bets = liveCtx.getBets(false)
+
+    assertEquals(bet1 :: bet2 :: Nil, bets)
+  }
+
+  @Test
+  def getBetsMatchedOnly {
+    /**Place bets.*/
+    val bet1 = Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None)
+    val bet2 = Bet(101, 1000, 10, 2.4, LAY, U, 1, 11, None)
+
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.marketId, bet1.runnerId); will(returnValue(bet1))
+        one(marketService).placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.marketId, bet2.runnerId); will(returnValue(bet2))
+      }
+    })
+
+    liveCtx.placeBet(bet1.betSize, bet1.betPrice, bet1.betType, bet1.runnerId)
+    liveCtx.placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.runnerId)
+
+    /**Bet is matched.*/
+    val matchedBet = new Bet(101, 1000, 4, 2.4, LAY, M, 1, 11, None)
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(matchedBet :: Nil))
+      }
+    })
+
+    liveCtx.setEventTimestamp(1000)
+
+    /**Check matched bets.*/
+    val matchedBets = liveCtx.getBets(true)
+    assertEquals(matchedBet :: Nil, matchedBets)
+
+    /**Check all bets.*/
+    val allBets = liveCtx.getBets(false)
+    assertEquals(Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None) :: Bet(101, 1000, 6, 2.4, LAY, U, 1, 11, None) :: matchedBet :: Nil, allBets)
+  }
+
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
