@@ -178,7 +178,12 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    * @param matchedBetsOnly If true then matched bets are returned only,
    * otherwise all unmatched and matched bets for user are returned.
    */
-  def getBets(matchedBetsOnly: Boolean): List[IBet] = throw new UnsupportedOperationException("Not implemented yet")
+  def getBets(matchedBetsOnly: Boolean): List[IBet] = {
+	  matchedBetsOnly match {
+	 	  case true => userBetsState.getUserBets(marketId,Option(M))
+	 	  case false => userBetsState.getUserBets(marketId)
+	  }
+  }
 
   /**
    * Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange.

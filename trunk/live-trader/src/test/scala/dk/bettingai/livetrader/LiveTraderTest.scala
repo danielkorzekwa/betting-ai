@@ -39,7 +39,7 @@ class LiveTraderTest {
     val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(marketId, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getUserBets(marketId, None); will(returnValue(Nil))
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
@@ -102,7 +102,7 @@ class LiveTraderTest {
     val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getUserBets(1l, None); will(returnValue(Nil))
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
@@ -122,7 +122,7 @@ class LiveTraderTest {
     val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getUserBets(1l, None); will(returnValue(Nil))
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
@@ -143,7 +143,7 @@ class LiveTraderTest {
     val marketPrices = MarketPrices(0, Map())
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getUserBets(1l, None); will(returnValue(Nil))
+        atLeast(1).of(marketService).getUserBets(1l, None); will(returnValue(Nil))
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
