@@ -66,13 +66,13 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
       val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
       if (!bestPrices._1.price.isNaN) {
-        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId))
+        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId,None))
         val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
         if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
 
       if (!bestPrices._2.price.isNaN) {
-        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId))
+        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId,None))
         val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
         if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
