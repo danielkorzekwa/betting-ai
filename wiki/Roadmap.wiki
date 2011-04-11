@@ -41,14 +41,13 @@ Betting AI version 1.4 (release planned on 30 July 2011)
     * Refactoring of Betting Exchange - Introduce abstract types, e.g. replace BetTypeEnum (BACK, LAY) with specialised classes BackBet and LayBet [http://code.google.com/p/betting-ai/issues/detail?id=87 Issue 87]
     * Simplify using of Complex Event Processing inside of Traders, e.g. add some dsl functions for delta or slope. [http://code.google.com/p/betting-ai/issues/detail?id=83 Issue 83]
     * Standalone application for running trading strategy on a real betting exchange. Input arguments: Trader Implementation, betfair market id, market polling interval in seconds.[http://code.google.com/p/betting-ai/issues/detail?id=100 Issue 100]
-
+    * Proof of concept. Create and test trading strategies adopting neural networks. [http://code.google.com/p/betting-ai/issues/detail?id=64 Issue 64](http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
+    * Compare efficiency of trading strategies between meta-heuristics and simple neural network (back propagation)
 -----------------------------------------------------------------------------------------
 
 Future
    
     * Visualisation of trader optimisation.
-    * Proof of concept. Create and test trading strategies adopting neural networks. (http://www.goodreads.com/book/show/391010.Introduction_to_Neural_Networks_with_Java)
-    * Compare efficiency of trading strategies between meta-heuristics and simple neural network (back propagation)
     * Web interface to Market Simulator.
     * Collaborative trading in a cloud, many traders can collaboratively   trade.
      
