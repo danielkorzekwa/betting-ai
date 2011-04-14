@@ -32,8 +32,8 @@ class CoevolutionHillClimbingWithLocalOptimisationTest {
     }
 
     val bestSolution = optimiser.optimise(trader, generarationSize)
-    assertTrue(bestSolution.expectedProfit > 0)
-    assertTrue(bestSolution.matchedBetsNum > 0)
+    assertTrue("Expected profit is zero",bestSolution.expectedProfit > 0)
+    assertTrue("Number of matched bets is zero",bestSolution.matchedBetsNum > 0)
 
   }
 

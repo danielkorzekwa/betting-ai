@@ -1,37 +1,9 @@
 package dk.bettingai.tradingoptimiser
 
 import dk.bettingai.marketsimulator.trader._
-import java.io.File
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator._
 import ISimulator._
-import org.slf4j.LoggerFactory
-import scala.collection.immutable.TreeMap
 import HillClimbing._
-
-/**@see class level comments.
- * 
- * @author korzekwad
- *
- */
-object CoevolutionHillClimbing {
-
-  /**Represents event driven data for betting exchange markets.*/
-  object MarketData {
-
-    /** @param marketDataDir Directory, which contains market data for simulation.*/
-    def apply(marketDataDir: String): MarketData = {
-      val marketDataSources = TreeMap(new File(marketDataDir).listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f): _*)
-      new MarketData(marketDataSources)
-    }
-
-    def apply(): MarketData = new MarketData(new TreeMap())
-  }
-
-  /**@param data Market events for betting exchange markets. Key - marketId, value - market events*/
-  case class MarketData(data: TreeMap[Long, File])
-}
 
 /** Search for optimal trader using co-evolution based gradient ascent algorithm. Algorithm 6 from Essentials of metaheuristics book 
  *  (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics) with a one difference that individuals in population compete 
@@ -46,7 +18,7 @@ object CoevolutionHillClimbing {
  * @param populationSize Number of individuals in every generation.
  *
  */
-case class CoevolutionHillClimbing[T <: ITrader](marketData: CoevolutionHillClimbing.MarketData, mutate: (Solution[T]) => T, populationSize: Int) extends HillClimbing[T] {
+case class CoevolutionHillClimbing[T <: ITrader](marketData: MarketData, mutate: (Solution[T]) => T, populationSize: Int) extends HillClimbing[T] {
 
   def breed(trader: Solution[T]): Solution[T] = {
     /** Born 10 traders.*/
