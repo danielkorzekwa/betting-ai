@@ -12,8 +12,9 @@ import dk.bettingai.marketsimulator.reporting._
 
 import com.ibm.icu.text.SimpleDateFormat
 
-/** Main class for the market simulator.
- * 
+/**
+ * Main class for the market simulator.
+ *
  * @author korzekwad
  *
  */
@@ -30,6 +31,11 @@ object SimulatorApp {
       case e: Exception => printHelpMessage(console); console.println("\n" + e); return
     }
 
+    run(inputData._1, inputData._2, console, inputData._3 )
+  }
+
+  def run(marketData: TreeMap[Long, File], trader: ITrader, console: PrintStream,reportDir: String = "./") {
+
     console.print("Simulation is started.")
 
     /**Create market simulator.*/
@@ -41,16 +47,16 @@ object SimulatorApp {
     console.print(" Simulation progress:")
     val time = System.currentTimeMillis
 
-    val marketRiskReports = simulator.runSimulation(inputData._1, inputData._2.asInstanceOf[ITrader] :: Nil, (progress: Int) => console.print(" " + progress + "%"))
+    val marketRiskReports = simulator.runSimulation(marketData, trader :: Nil, (progress: Int) => console.print(" " + progress + "%"))
 
     /**Print market simulation report.*/
     console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis - time)))
 
     console.print("\nSaving simulation html report...")
-    generateHtmlReport(marketRiskReports.marketReports, inputData._3)
+    generateHtmlReport(marketRiskReports.marketReports, reportDir)
     console.print("DONE")
 
-    console.print("\n\nExpected profit report for trader " + inputData._2.getClass.getName + ":")
+    console.print("\n\nExpected profit report for trader " + trader.getClass.getName + ":")
     console.print("\nCommission on winnings=" + round(commission * 100, 2) + "%")
     printMarketReport(marketRiskReports.marketReports, console)
     console.print("\n------------------------------------------------------------------------------------")
@@ -67,13 +73,13 @@ object SimulatorApp {
 
   private def printMarketReport(marketReports: List[MarketReport], console: PrintStream) {
     val marketReportsSize = marketReports.size
-	printMarketRiskReport(0, 0)
-    
+    printMarketRiskReport(0, 0)
+
     @tailrec
     def printMarketRiskReport(marketReportIndex: Int, expAggrProfit: Double): Unit = {
-    val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    	
-    	if (marketReportIndex < marketReportsSize) {
+      val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+      if (marketReportIndex < marketReportsSize) {
         val marketRiskReport = marketReports(marketReportIndex)
         val traderReport = marketRiskReport.traderReports.head
         val newExpAggrProfit = expAggrProfit + traderReport.marketExpectedProfit.marketExpectedProfit
@@ -96,7 +102,7 @@ object SimulatorApp {
     simulationReport.marketReports match {
       case Nil => console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(0, 0, 0))
       case x :: xs => {
-    	  /**SimulatorApp run simulation for one trader only.*/
+        /**SimulatorApp run simulation for one trader only.*/
         val userId = x.traderReports.head.trader.userId
         def totalExpectedProfit = simulationReport.totalExpectedProfit(userId)
         def aggrMatchedBets = simulationReport.totalMatchedBetsNum(userId)

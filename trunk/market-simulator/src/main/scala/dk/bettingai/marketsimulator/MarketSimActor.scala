@@ -158,7 +158,7 @@ class MarketSimActor(marketId: Long, betex: IBetex, nextBetId: () => Long, histo
       config.getEngineDefaults().getThreading().setInternalTimerEnabled(false)
       getEventTypes.foreach { case (eventTypeName, eventMap) => config.addEventType(eventTypeName, eventMap) }
 
-      val epServiceProvider = EPServiceProviderManager.getProvider("" + marketId, config)
+      val epServiceProvider = EPServiceProviderManager.getProvider("" + this.hashCode + marketId, config)
       epServiceProvider.initialize()
 
       getEPLStatements.foreach { case (eplID, eplStatement) => eplStatements(eplID) = epServiceProvider.getEPAdministrator().createEPL(eplStatement) }

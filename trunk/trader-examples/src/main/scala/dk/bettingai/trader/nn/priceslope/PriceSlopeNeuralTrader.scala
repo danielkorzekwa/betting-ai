@@ -1,7 +1,11 @@
-package dk.bettingai.trader.priceslope
+package dk.bettingai.trader.nn.priceslope
 
+import dk.bettingai.marketsimulator.trader._
+import org.encog.neural.data.basic._
+import org.encog.neural.networks.BasicNetwork
+import dk.bettingai.marketsimulator.betex.api._
+import IBet.BetTypeEnum._
 import com.espertech.esper.client._
-import com.espertech.esper.client.time._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.betex._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
@@ -11,17 +15,34 @@ import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import scala.collection._
+import org.encog.neural.pattern.FeedForwardPattern
+import org.encog.engine.network.activation.ActivationTANH
+import org.encog.neural.data._
+
+/**@see class level comments.*/
+object PriceSlopeNeuralNetwork {
+
+  /**Creates neural network that is used by this trader.*/
+  def createNetwork(): BasicNetwork = {
+    val pattern = new FeedForwardPattern();
+    pattern.setInputNeurons(1);
+    pattern.addHiddenLayer(5);
+    pattern.setOutputNeurons(2);
+    pattern.setActivationFunction(new ActivationTANH());
+    val network = pattern.generate();
+    network.reset();
+    network
+  }
+
+}
 
 /**
- * Places back and lay bets based on price slope (linear regression)
+ * This trader uses neural network for taking bet placement decisions, which is seeded with a single price slope variable.
  *
  * @author korzekwad
  *
- * @param traderId Must be unique for all traders.
- * @param backPriceSlopeSignal Back bet is placed when priceSlope < backPriceSlopeSignal.
- * @param layPriceSlopeSignal Lay bet is placed when priceSlope > layPriceSlopeSignal.
  */
-class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, val layPriceSlopeSignal: Double) extends ITrader {
+case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
 
   override def init(ctx: ITraderContext) {
 
@@ -46,7 +67,7 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
       }
     }
 
-    ctx.registerEPN(getEventTypes, getEPLStatements, publish) 
+    ctx.registerEPN(getEventTypes, getEPLStatements, publish)
   }
 
   def execute(ctx: ITraderContext) = {
@@ -59,20 +80,28 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
 
       val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
+      val neuralData = new BasicNeuralData(Array(priceSlope))
+
+      /**Neural Network is not thread safe.*/
+      var decision: NeuralData = null
+      this.synchronized {
+        decision = network.compute(neuralData)
+      }
+
       if (!bestPrices._1.price.isNaN) {
         val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
         val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
-        if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
+        if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
 
       if (!bestPrices._2.price.isNaN) {
         val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
         val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
-        if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
+        if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
     }
 
   }
-  
-  override def toString = "PriceSlopeTrader [id=%s, backSlope=%s, laySlope=%s]".format(traderId, backPriceSlopeSignal, layPriceSlopeSignal)
+
+  override def toString = "PriceSlopeNeuralTrader [nn=%s]".format(network)
 }
