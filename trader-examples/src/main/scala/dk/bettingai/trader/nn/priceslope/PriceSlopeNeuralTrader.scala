@@ -44,6 +44,8 @@ object PriceSlopeNeuralTrader {
  */
 case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
 
+  val bank=1000d
+	
   override def init(ctx: ITraderContext) {
 
     def getEventTypes(): Map[String, Map[String, Object]] = {
@@ -90,13 +92,13 @@ case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
 
       if (!bestPrices._1.price.isNaN) {
         val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
-        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
         if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
 
       if (!bestPrices._2.price.isNaN) {
         val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
-        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
+        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
         if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
     }

@@ -20,14 +20,13 @@ class SimpleRiskTrader extends ITrader{
 	def execute(ctx: ITraderContext) = {
 
 		
-		val expectedProfit = ctx.risk
-		val wealth = ctx.wealth(1000)
+		val expectedProfit = ctx.risk(1000)
 		
 		for(runner <- ctx.runners) {
 
 			val bestPrices = ctx.getBestPrices(runner.runnerId)
 
-			if(!bestPrices._2.price.isNaN && bestPrices._2.price < 50 && expectedProfit.marketExpectedProfit > -40 && wealth.marketExpectedProfit  > -30) {
+			if(!bestPrices._2.price.isNaN && bestPrices._2.price < 50 && expectedProfit.marketExpectedProfit > -40 && expectedProfit.wealth  > -30) {
 				ctx.placeBet(2,1/((1/bestPrices._2.price)-0.01),BACK,runner.runnerId)
 			}
 

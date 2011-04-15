@@ -33,14 +33,19 @@ import dk.bettingai.marketsimulator.betex._
  */
 object Simulator {
 	
-	def apply(commission:Double):Simulator = {
+	/**
+	 * @param commission Betting Exchanger commission
+	 * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
+	 * @return
+	 */
+	def apply(commission:Double, bank:Double):Simulator = {
 		val betex = new Betex()
-		val simulator = new Simulator(betex,commission)
+		val simulator = new Simulator(betex,commission,bank)
 		simulator
 	}
 }
 
-class Simulator(betex: IBetex, commission: Double) extends ISimulator {
+class Simulator(betex: IBetex, commission: Double, bank:Double) extends ISimulator {
 
   var nextBetIdValue = new AtomicLong(1)
   def nextBetId() = nextBetIdValue.addAndGet(1)
@@ -64,12 +69,12 @@ class Simulator(betex: IBetex, commission: Double) extends ISimulator {
 
     p(0)
 
-    def createTraderContext(userId:Int, market:IMarket, marketSimActor:MarketSimActor):TraderContext = new TraderContext(nextBetId(), userId, market, commission, this,marketSimActor)
+    def createTraderContext(userId:Int, market:IMarket, marketSimActor:MarketSimActor):TraderContext = new TraderContext(nextBetId(), userId, market, commission, bank,this,marketSimActor)
     
     /**Process all markets in parallel and send back market reports.*/
     for ((marketId, marketFile) <- marketData) {
 
-      val slave = new MarketSimActor(marketId,betex, nextBetId, historicalDataUserId, commission, createTraderContext).start
+      val slave = new MarketSimActor(marketId,betex, nextBetId, historicalDataUserId, commission, createTraderContext,bank).start
       slave ! MarketSimRequest(marketId, marketFile, registeredTraders)
     }
 
@@ -99,5 +104,5 @@ class Simulator(betex: IBetex, commission: Double) extends ISimulator {
    * e.g. when testing some evolution algorithms for which more than one trader is required.
    * @return trader context
    */
-  def registerTrader(market: IMarket, marketSimActor:MarketSimActor): ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission, this,marketSimActor)
+  def registerTrader(market: IMarket, marketSimActor:MarketSimActor): ITraderContext = new TraderContext(nextBetId(), nextTraderUserId(), market, commission,bank, this,marketSimActor)
 }

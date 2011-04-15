@@ -4,50 +4,26 @@ import dk.bettingai.marketsimulator.betex.api._
 import IBet.BetTypeEnum._
 import scala.collection._
 
-/**This trait represents a function that calculates market expected profit and wealth from bets and probabilities.
- * 
+/**
+ * This trait represents a function that calculates market expected profit and wealth from bets and probabilities.
+ *
  * More on expected value: http://en.wikipedia.org/wiki/Expected_value
  * More on wealth: http://en.wikipedia.org/wiki/Kelly_criterion
- * 
+ *
  * @author korzekwad
  *
  */
 object ExpectedProfitCalculator extends IExpectedProfitCalculator {
 
-  /** Calculates market expected profit from bets and probabilities
-   * @param bets
-   * @param probabilities Key - runnerId, value - runner probability.
-   * @param commision Commission on winnings in percentage.
-   * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
-   */
-  def calculate(bets: List[IBet], probabilities: Map[Long, Double], commission: Double): MarketExpectedProfit = {
-    calculate(bets, probabilities, commission, u => u, r => r)
-  }
-
-   /** Calculates wealth from bets and probabilities based on the following utility and reverse functions:
-   * def u(ifWin: Double) = log(bank - ifWin)
-   * def r(currentExp: Double) = bank - exp(currentExp) 
+  /**
+   * Calculates market expected profit from bets and probabilities
    * @param bets
    * @param probabilities Key - runnerId, value - runner probability.
    * @param commision Commission on winnings in percentage.
    * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
    * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
    */
-  def wealth(bets: List[IBet], probabilities: Map[Long, Double], commission: Double, bank: Double): MarketExpectedProfit = {
-    def u(ifWin: Double) = Math.log(bank + ifWin)
-    def r(currentExp: Double) = -(bank - Math.exp(currentExp))
-    calculate(bets, probabilities, commission, u, r)
-  }
-
-  /** Calculates market expected profit from bets and probabilities
-   * @param bets
-   * @param probabilities Key - runnerId, value - runner probability.
-   * @param commision Commission on winnings in percentage.
-   * @param u - Utility function that transforms ifWins before calculating expected liability.
-   * @param r - Utility function that reverses expected liability based on utility function.
-   * @return Market expected profit and ifWin for all market runners @see MarketExpectedProfit
-   */
-  def calculate(bets: List[IBet], probabilities: Map[Long, Double], commission: Double, u: (Double) => Double, r: (Double) => Double): MarketExpectedProfit = {
+   def calculate(bets: List[IBet], probabilities: Map[Long, Double], commission: Double, bank: Double): MarketExpectedProfit = {
     if (bets.isEmpty) 0
 
     /**Check input parameters.*/
@@ -64,11 +40,16 @@ object ExpectedProfitCalculator extends IExpectedProfitCalculator {
 
     def ifWinCommission(ifWin: Double): Double = if (ifWin > 0) ifWin * (1 - commission) else ifWin
     /**[runnerId, ifWin]*/
-    val runnersIfwin:Map[Long,Double] = probabilities.map(entry => entry._1 -> ifWinCommission(runnerPayoutMap.getOrElse(entry._1, 0d) - totalStake))
+    val runnersIfwin: Map[Long, Double] = probabilities.map(entry => entry._1 -> ifWinCommission(runnerPayoutMap.getOrElse(entry._1, 0d) - totalStake))
 
-    val expectedProfitValue = r(runnersIfwin.map(entry => u(entry._2) * probabilities(entry._1)).sum)
+    val expectedProfitValue = runnersIfwin.map(entry => entry._2 * probabilities(entry._1)).sum
+
+    def u(ifWin: Double) = Math.log(bank + ifWin)
+    def r(currentExp: Double) = -(bank - Math.exp(currentExp))
+    val wealth = r(runnersIfwin.map(entry => u(entry._2) * probabilities(entry._1)).sum)
+
     /**Calculate market expected profit.*/
-    new MarketExpectedProfit(expectedProfitValue, runnersIfwin, probabilities)
+    new MarketExpectedProfit(expectedProfitValue, wealth, runnersIfwin, probabilities)
   }
 
   /**Lay bet is a back bet with a negative stake.*/

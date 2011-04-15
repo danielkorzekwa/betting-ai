@@ -22,6 +22,8 @@ object IfwinlosedeltaTrader {
 }
 class IfwinlosedeltaTrader extends ITrader {
 
+  val bank=1000d
+	
   var backSignal = 0d
   var laySignal = 0d
   /**It is called once for every analysed market.
@@ -39,7 +41,7 @@ class IfwinlosedeltaTrader extends ITrader {
 
   def execute(ctx: ITraderContext) = {
 
-    val risk = ctx.risk
+    val risk = ctx.risk(bank)
     for (runnerId <- ctx.runners.map(_.runnerId)) {
       val bestPrices = ctx.getBestPrices(runnerId)
 

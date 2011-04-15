@@ -36,6 +36,7 @@ object PricePriceSlopeTrader {
 }
 class PricePriceSlopeTrader extends ITrader {
 
+  val bank=1000d
   var traderId = "pricePriceTrader1"
   var backPriceSlopeSignal = 0.02
   var layPriceSlopeSignal = -0.03
@@ -86,7 +87,7 @@ class PricePriceSlopeTrader extends ITrader {
 
     if (numOfRunners(ctx.marketId) < maxNumOfRunners) {
 
-      val risk = ctx.risk
+      val risk = ctx.risk(bank)
       ctx.addChartValue("expected", risk.marketExpectedProfit)
       val deltaMap = Map(ctx.getEPNStatement("tradedVolumeDelta").iterator.map(event => (event.get("runnerId").asInstanceOf[Long], event.get("delta").asInstanceOf[Double])).toList: _*)
 
@@ -102,13 +103,13 @@ class PricePriceSlopeTrader extends ITrader {
 
           if (!bestPrices._2.price.isNaN && bestPrices._2.price < maxPrice && risk.ifLose(runnerId) > minProfitLoss) {
             val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._2.price, BACK, M, ctx.marketId, runnerId,None))
-            val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+            val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
             if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, BACK, runnerId)
           }
 
           if (!bestPrices._1.price.isNaN && bestPrices._1.price < maxPrice && risk.ifWin(runnerId) > minProfitLoss) {
             val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._1.price, LAY, M, ctx.marketId, runnerId,None))
-            val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
+            val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
             if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, LAY, runnerId)
           }
 

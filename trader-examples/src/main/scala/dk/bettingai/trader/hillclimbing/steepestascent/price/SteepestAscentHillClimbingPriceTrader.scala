@@ -39,6 +39,7 @@ class SteepestAscentHillClimbingPriceTrader extends ITrader {
 
   private val log = LoggerFactory.getLogger(getClass)
 
+  val bank=1000d
   val rand = new Random(System.currentTimeMillis)
   var bestPrice = 2.22
   var bestExpectedProfit = Double.MinValue
@@ -68,13 +69,13 @@ class SteepestAscentHillClimbingPriceTrader extends ITrader {
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def after(ctx: ITraderContext) {
-    val bestChild = children.reduceLeft((c1, c2) => if (c1._2.risk.marketExpectedProfit > c2._2.risk.marketExpectedProfit) c1 else c2)
+    val bestChild = children.reduceLeft((c1, c2) => if (c1._2.risk(bank).marketExpectedProfit > c2._2.risk(bank).marketExpectedProfit) c1 else c2)
 
-    if (bestChild._2.risk.marketExpectedProfit > bestExpectedProfit) {
+    if (bestChild._2.risk(bank).marketExpectedProfit > bestExpectedProfit) {
       bestPrice = bestChild._1.price
-      bestExpectedProfit = bestChild._2.risk.marketExpectedProfit
+      bestExpectedProfit = bestChild._2.risk(bank).marketExpectedProfit
 
       log.info("Best price found = " + bestPrice + ", profit=" + bestExpectedProfit)
-    } else log.info("Best price not found = " + bestChild._1.price + ", profit=" + bestChild._2.risk.marketExpectedProfit + ", current best [price/profit]=" + bestPrice + "/" + bestExpectedProfit)
+    } else log.info("Best price not found = " + bestChild._1.price + ", profit=" + bestChild._2.risk(bank).marketExpectedProfit + ", current best [price/profit]=" + bestPrice + "/" + bestExpectedProfit)
   }
 }
