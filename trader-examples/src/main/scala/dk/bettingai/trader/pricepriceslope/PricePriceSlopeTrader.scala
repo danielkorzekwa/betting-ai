@@ -106,7 +106,7 @@ class PricePriceSlopeTrader extends ITrader {
             if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, BACK, runnerId)
           }
 
-          if (!bestPrices._1.price.isNaN && bestPrices._2.price < maxPrice && risk.ifWin(runnerId) > minProfitLoss) {
+          if (!bestPrices._1.price.isNaN && bestPrices._1.price < maxPrice && risk.ifWin(runnerId) > minProfitLoss) {
             val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._1.price, LAY, M, ctx.marketId, runnerId,None))
             val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
             if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, LAY, runnerId)

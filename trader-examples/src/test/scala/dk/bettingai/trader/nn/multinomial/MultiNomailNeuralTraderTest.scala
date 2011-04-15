@@ -1,4 +1,4 @@
-package dk.bettingai.trader.nn.priceslope
+package dk.bettingai.trader.nn.multinomial
 
 import org.junit._
 import Assert._
@@ -12,15 +12,15 @@ import ISimulator._
 import dk.bettingai.tradingoptimiser._
 import dk.bettingai.tradingoptimiser.nn._
 
-class PriceSlopeNeuralTraderTrainingTest {
+class MultiNomailNeuralTraderTest {
 
   @Test
   def test {
 
-    //val marketData = MarketData("c:/daniel/marketdata10")
+   // val marketData = MarketData("c:/daniel/marketdata50")
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
-    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => PriceSlopeNeuralTrader(network))
-    val network = PriceSlopeNeuralTrader.createNetwork()
+    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => MultiNomialNeuralTrader(network))
+    val network = MultiNomialNeuralTrader.createNetwork()
 
     /**Min population size should be 50.*/
     val train = new NeuralGeneticAlgorithm(network, new FanInRandomizer(), neuralTraderScore, 10, 0.1d, 0.25d)
@@ -31,8 +31,9 @@ class PriceSlopeNeuralTraderTrainingTest {
       println("Epoch #" + i + " Score:" + train.getError());
       if (train.getError > bestScore) {
         bestScore = train.getError
-        dk.bettingai.marketsimulator.SimulatorApp.run(marketData.data, new PriceSlopeNeuralTrader(train.getNetwork), System.out, "./target")
+        dk.bettingai.marketsimulator.SimulatorApp.run(marketData.data, MultiNomialNeuralTrader(train.getNetwork), System.out, "./target")
       }
     }
   }
+
 }
