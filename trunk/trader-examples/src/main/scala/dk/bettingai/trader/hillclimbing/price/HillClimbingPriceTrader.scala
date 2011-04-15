@@ -20,6 +20,8 @@ class HillClimbingPriceTrader extends ITrader {
 
   private val log = LoggerFactory.getLogger(getClass)
 
+  val bank=1000d
+  
   val marketId = 101655622
   val runnerId = 4207432
 
@@ -52,11 +54,11 @@ class HillClimbingPriceTrader extends ITrader {
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market
    * */
   override def after(ctx: ITraderContext) {
-    if (ctx.risk.marketExpectedProfit > bestExpectedProfit) {
+    if (ctx.risk(bank).marketExpectedProfit > bestExpectedProfit) {
       bestPrice = candidate
-      bestExpectedProfit = ctx.risk.marketExpectedProfit
+      bestExpectedProfit = ctx.risk(bank).marketExpectedProfit
 
       log.info("Best price found = " + candidate + ", profit=" + bestExpectedProfit)
-    } else log.info("Best price not found = " + candidate + ", profit=" + ctx.risk.marketExpectedProfit + ", current best [price/profit]=" + bestPrice + "/" + bestExpectedProfit)
+    } else log.info("Best price not found = " + candidate + ", profit=" + ctx.risk(bank).marketExpectedProfit + ", current best [price/profit]=" + bestPrice + "/" + bestExpectedProfit)
   }
 }

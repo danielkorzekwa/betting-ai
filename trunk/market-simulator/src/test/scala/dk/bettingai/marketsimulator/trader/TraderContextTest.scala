@@ -16,7 +16,7 @@ class TraderContextTest {
 
 	private var lastBetId=0l
 	private val nextBetId = () => {lastBetId+=1;lastBetId}
-	val ctx = new TraderContext(nextBetId(),200,market,0,Simulator(0.05),null)
+	val ctx = new TraderContext(nextBetId(),200,market,0,1000,Simulator(0.05,1000),null)
 	ctx.setEventTimestamp(1234)
 
 	/**
@@ -93,8 +93,8 @@ class TraderContextTest {
 		/**No hedge bet is placed this time.*/
 		val nextHedgeBet:Option[IBet] = ctx.placeHedgeBet(11l)
 		assertEquals(None,nextHedgeBet)
-		assertEquals(-0.5,ctx.risk.ifWin(11),0)
-		assertEquals(-0.5,ctx.risk.ifLose(11),0)
+		assertEquals(-0.5,ctx.risk(1000).ifWin(11),0)
+		assertEquals(-0.5,ctx.risk(1000).ifLose(11),0)
 	}
 
 	@Test def testPlaceHedgeBetBackHedgeBetIsPlaced {
@@ -111,8 +111,8 @@ class TraderContextTest {
 		/**No hedge bet is placed this time.*/
 		val nextHedgeBet:Option[IBet] = ctx.placeHedgeBet(11l)
 		assertEquals(None,nextHedgeBet)
-		assertEquals(-0.5,ctx.risk.ifWin(11),0)
-		assertEquals(-0.5,ctx.risk.ifLose(11),0)
+		assertEquals(-0.5,ctx.risk(1000).ifWin(11),0)
+		assertEquals(-0.5,ctx.risk(1000).ifLose(11),0)
 	}
 	
 	/**Tests scenarios for registerTrader*/

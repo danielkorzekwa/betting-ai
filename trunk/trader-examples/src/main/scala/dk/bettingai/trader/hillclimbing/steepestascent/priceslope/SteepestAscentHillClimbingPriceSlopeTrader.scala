@@ -28,6 +28,8 @@ object SteepestAscentHillClimbingPriceSlopeTrader {
 
   class ChildTrader(val childId: String, val backPriceSlopeSignal: Double, val layPriceSlopeSignal: Double) extends ITrader {
 
+	val bank=1000d
+	  
     val config = new Configuration()
     config.getEngineDefaults().getThreading().setInternalTimerEnabled(false)
 
@@ -72,13 +74,13 @@ object SteepestAscentHillClimbingPriceSlopeTrader {
 
         if (!bestPrices._1.price.isNaN) {
           val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId,None))
-          val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+          val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
           if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
         }
 
         if (!bestPrices._2.price.isNaN) {
           val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId,None))
-          val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
+          val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
           if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
         }
       }
@@ -96,6 +98,7 @@ class SteepestAscentHillClimbingPriceSlopeTrader extends ITrader {
 
   private val log = LoggerFactory.getLogger(getClass)
 
+  val bank=1000d
   val rand = new Random(System.currentTimeMillis)
   var bestBackPriceSlopeSignal = -0.01
   var bestLayPriceSlopeSignal = 0.01
@@ -138,14 +141,14 @@ class SteepestAscentHillClimbingPriceSlopeTrader extends ITrader {
    * */
   override def after(ctx: ITraderContext) {
 
-    val bestChild = children.reduceLeft((c1, c2) => if (c1._2.risk.marketExpectedProfit > c2._2.risk.marketExpectedProfit) c1 else c2)
+    val bestChild = children.reduceLeft((c1, c2) => if (c1._2.risk(bank).marketExpectedProfit > c2._2.risk(bank).marketExpectedProfit) c1 else c2)
 
-    if (bestChild._2.risk.marketExpectedProfit > bestExpectedProfit) {
+    if (bestChild._2.risk(bank).marketExpectedProfit > bestExpectedProfit) {
       bestBackPriceSlopeSignal = bestChild._1.backPriceSlopeSignal
       bestLayPriceSlopeSignal = bestChild._1.layPriceSlopeSignal
-      bestExpectedProfit = bestChild._2.risk.marketExpectedProfit
+      bestExpectedProfit = bestChild._2.risk(bank).marketExpectedProfit
 
       log.info("Best found [backPriceSlopeSignal/layPriceSlopeSignal] = " + bestBackPriceSlopeSignal + "/" + bestLayPriceSlopeSignal + ", profit=" + bestExpectedProfit)
-    } else log.info("Best price not found [backPriceSlopeSignal/layPriceSlopeSignal] = " + bestChild._1.backPriceSlopeSignal + "/" + bestChild._1.layPriceSlopeSignal + ", profit=" + bestChild._2.risk.marketExpectedProfit + ", current best [backPriceSlopeSignal/layPriceSlopeSignal/profit]=" + bestBackPriceSlopeSignal + "/" + bestLayPriceSlopeSignal + "/" + bestExpectedProfit)
+    } else log.info("Best price not found [backPriceSlopeSignal/layPriceSlopeSignal] = " + bestChild._1.backPriceSlopeSignal + "/" + bestChild._1.layPriceSlopeSignal + ", profit=" + bestChild._2.risk(bank).marketExpectedProfit + ", current best [backPriceSlopeSignal/layPriceSlopeSignal/profit]=" + bestBackPriceSlopeSignal + "/" + bestLayPriceSlopeSignal + "/" + bestExpectedProfit)
   }
 }

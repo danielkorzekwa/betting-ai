@@ -37,11 +37,13 @@ object SimulatorApp {
   def run(marketData: TreeMap[Long, File], trader: ITrader, console: PrintStream,reportDir: String = "./") {
 
     console.print("Simulation is started.")
-
+   
     /**Create market simulator.*/
     /**Commission on winnings that is used when generating expected profit report.*/
     val commission = 0.05;
-    val simulator = Simulator(commission)
+    /**Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)*/
+    val bank = 2500
+    val simulator = Simulator(commission,bank)
 
     /**Run market simulator.*/
     console.print(" Simulation progress:")
@@ -58,6 +60,7 @@ object SimulatorApp {
 
     console.print("\n\nExpected profit report for trader " + trader.getClass.getName + ":")
     console.print("\nCommission on winnings=" + round(commission * 100, 2) + "%")
+    console.print("\nAmount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)=" + bank)
     printMarketReport(marketRiskReports.marketReports, console)
     console.print("\n------------------------------------------------------------------------------------")
 
@@ -105,10 +108,11 @@ object SimulatorApp {
         /**SimulatorApp run simulation for one trader only.*/
         val userId = x.traderReports.head.trader.userId
         def totalExpectedProfit = simulationReport.totalExpectedProfit(userId)
+         def totalWealth = simulationReport.totalWealth(userId)
         def aggrMatchedBets = simulationReport.totalMatchedBetsNum(userId)
         def aggrUnmatchedBets = simulationReport.totalUnmatchedBetsNum(userId)
 
-        console.print("\nTotalExpectedProfit=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit, 2), aggrMatchedBets, aggrUnmatchedBets))
+        console.print("\nTotalExpectedProfit=%s Wealth=%s TotalMatchedBets=%s TotalUnmachedBets=%s".format(round(totalExpectedProfit, 2),round(totalWealth, 2), aggrMatchedBets, aggrUnmatchedBets))
       }
     }
   }

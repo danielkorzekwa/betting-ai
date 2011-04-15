@@ -22,18 +22,11 @@ trait IExpectedProfitEngine {
   /**Calculates market expected profit based on all bets in a model, given market probabilities and commission.
    * @param probabilities Key - runnerId, value - runner probability.
    * @param commision Commission on winnings in percentage.
+   * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
    * 
    * @return market expected profit
    * */
-  def calculateExpectedProfit(probabilities: Map[Long, Double], commission: Double): MarketExpectedProfit
+  def calculateExpectedProfit(probabilities: Map[Long, Double], commission: Double,bank:Double): MarketExpectedProfit
   
-   /**Calculates wealth based on all bets in a model, given market probabilities, commission and bank.
-   * @param probabilities Key - runnerId, value - runner probability.
-   * @param commision Commission on winnings in percentage.
-   * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
-   * 
-   * @return wealth
-   * */
-  def calculateWealth(probabilities: Map[Long, Double], commission: Double, bank:Double): MarketExpectedProfit
 
 }

@@ -16,8 +16,9 @@ import com.espertech.esper.client._
  * @author korzekwad
  *
  * @param commision Commission on winnings in percentage.
+ * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
  */
-class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val commission: Double, simulator: Simulator, marketSimActor:MarketSimActor) extends ITraderContext {
+class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val commission: Double, val bank: Double,simulator: Simulator, marketSimActor:MarketSimActor) extends ITraderContext {
   val marketId = market.marketId
   val marketName = market.marketName
   val eventName = market.eventName
@@ -116,7 +117,7 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
    * @return Hedge bet that was placed or none if no hedge bet was placed.
    */
   def placeHedgeBet(runnerId: Long): Option[IBet] = {
-    val riskReport = risk()
+    val riskReport = risk(bank)
     val ifWin = riskReport.ifWin(runnerId)
     val ifLose = riskReport.ifLose(runnerId)
     val bestPrices = getBestPrices(runnerId)
@@ -168,15 +169,10 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
   /**Returns total traded volume for a given runner.*/
   def getTotalTradedVolume(runnerId: Long): Double = market.getTotalTradedVolume(runnerId)
 
-  def risk(): MarketExpectedProfit = {
+  /** @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)*/
+  def risk(bank: Double): MarketExpectedProfit = {
     val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-    expectedProfitEngine.calculateExpectedProfit(probs, commission)
-  }
-
-  /**see Kelly Criterion - http://en.wikipedia.org/wiki/Kelly_criterion.*/
-  def wealth(bank: Double): MarketExpectedProfit = {
-    val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-    expectedProfitEngine.calculateWealth(probs, commission, bank)
+    expectedProfitEngine.calculateExpectedProfit(probs, commission,bank)
   }
 
   /**Registers new trader and return trader context. 

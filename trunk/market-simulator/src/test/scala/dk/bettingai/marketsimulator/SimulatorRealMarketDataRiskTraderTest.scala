@@ -18,7 +18,7 @@ import SimulatorTest._
 class SimulatorRealMarketDataRiskTraderTest {
 
   private val traders = new SimpleRiskTrader() :: Nil
-  private val simulator = Simulator(0)
+  private val simulator = Simulator(0,1000)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.

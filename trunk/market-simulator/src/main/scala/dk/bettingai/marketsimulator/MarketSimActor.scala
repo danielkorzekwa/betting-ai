@@ -31,10 +31,10 @@ object MarketSimActor {
 
 /**
  * @param newTraderContext (traderUserId,market) => trader context
- *
+ * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
  */
 class MarketSimActor(marketId: Long, betex: IBetex, nextBetId: () => Long, historicalDataUserId: Int, commission: Double,
-  newTraderContext: (Int, IMarket, MarketSimActor) => TraderContext) extends Actor {
+  newTraderContext: (Int, IMarket, MarketSimActor) => TraderContext, bank: Double) extends Actor {
 
   /**key - epnID.*/
   private var epnNetwork:Option[EPServiceProvider] = None
@@ -131,7 +131,7 @@ class MarketSimActor(marketId: Long, betex: IBetex, nextBetId: () => Long, histo
       val marketProbs = ProbabilityCalculator.calculate(marketPrices, market.numOfWinners)
       val matchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == M)
       val unmatchedBets = market.getBets(traderCtx.userId).filter(_.betStatus == U)
-      val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission)
+      val marketExpectedProfit = ExpectedProfitCalculator.calculate(matchedBets, marketProbs, commission,bank)
 
     } yield TraderReport(trader, marketExpectedProfit, matchedBets.size, unmatchedBets.size, traderCtx.getChartLabels, traderCtx.getChartValues)
 

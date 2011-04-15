@@ -33,7 +33,7 @@ class SimulatorTest {
 
   private val betex = new Betex()
   private val traders = new SimpleTrader() :: Nil
-  private val simulator = new Simulator(betex, 0)
+  private val simulator = new Simulator(betex, 0,1000)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.

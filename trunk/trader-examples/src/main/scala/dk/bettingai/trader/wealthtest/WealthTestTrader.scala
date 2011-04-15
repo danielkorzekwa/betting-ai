@@ -13,6 +13,8 @@ import dk.bettingai.marketsimulator.betex._
  */
 class WealthTestTrader extends ITrader {
 
+  val bank=1000d
+	
   /**Executes trader implementation so it can analyse market on a betting exchange and take appropriate bet placement decisions.
    * 
    * @param ctx Provides market data and market operations that can be used by trader to place bets on a betting exchange market.
@@ -25,8 +27,8 @@ class WealthTestTrader extends ITrader {
       if (bestPrices._1.price < 4) ctx.placeBet(2, bestPrices._1.price, LAY, runnerId)
     }
    
-    ctx.addChartValue("expectedProfit", ctx.risk.marketExpectedProfit)
-    ctx.addChartValue("wealth", ctx.wealth(1000).marketExpectedProfit)
+    ctx.addChartValue("expectedProfit", ctx.risk(bank).marketExpectedProfit)
+    ctx.addChartValue("wealth", ctx.risk(bank).wealth)
 
   }
 }

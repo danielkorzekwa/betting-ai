@@ -48,6 +48,8 @@ object MultiNomialNeuralTrader {
 }
 case class MultiNomialNeuralTrader(network: BasicNetwork) extends ITrader {
 
+  val bank=1000d
+	
   /**key - marketId.*/
   var numOfRunners: mutable.Map[Long, Int] = new mutable.HashMap[Long, Int] with mutable.SynchronizedMap[Long, Int]
 
@@ -88,7 +90,7 @@ case class MultiNomialNeuralTrader(network: BasicNetwork) extends ITrader {
 
   def execute(ctx: ITraderContext) = {
 
-    val risk = ctx.risk
+    val risk = ctx.risk(bank)
     ctx.addChartValue("expected", risk.marketExpectedProfit)
     val deltaMap = Map(ctx.getEPNStatement("tradedVolumeDelta").iterator.map(event => (event.get("runnerId").asInstanceOf[Long], event.get("delta").asInstanceOf[Double])).toList: _*)
 
@@ -117,13 +119,13 @@ case class MultiNomialNeuralTrader(network: BasicNetwork) extends ITrader {
 
       if (!bestPrices._1.price.isNaN) {
         val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
-        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission)
+        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
         if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
 
       if (!bestPrices._2.price.isNaN) {
         val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
-        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission)
+        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
         if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
     }

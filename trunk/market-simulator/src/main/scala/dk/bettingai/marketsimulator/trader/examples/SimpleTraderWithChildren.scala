@@ -50,6 +50,6 @@ class SimpleTraderWithChildren extends ITrader {
     children.foreach { case (trader, context) => trader.execute(context) }
   }
 
-  def getTotalMarketExpectedProfit(): Double = children.map(c => c._2.risk.marketExpectedProfit).sum
+  def getTotalMarketExpectedProfit(): Double = children.map(c => c._2.risk(1000).marketExpectedProfit).sum
 
 }
