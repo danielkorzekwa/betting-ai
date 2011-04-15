@@ -1,10 +1,5 @@
-package dk.bettingai.trader.nn.priceslope
+package dk.bettingai.trader.nn.multinomial
 
-import dk.bettingai.marketsimulator.trader._
-import org.encog.neural.data.basic._
-import org.encog.neural.networks.BasicNetwork
-import dk.bettingai.marketsimulator.betex.api._
-import IBet.BetTypeEnum._
 import com.espertech.esper.client._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.betex._
@@ -18,15 +13,31 @@ import scala.collection._
 import org.encog.neural.pattern.FeedForwardPattern
 import org.encog.engine.network.activation.ActivationTANH
 import org.encog.neural.data._
+import org.encog.neural.data.basic._
+import org.encog.neural.networks.BasicNetwork
 
-/**@see class level comments.*/
-object PriceSlopeNeuralTrader {
+/**This trader uses multiple variables and neural network to take trading decisions.*/
+object MultiNomialNeuralTrader {
 
   /**Creates neural network that is used by this trader.*/
   def createNetwork(): BasicNetwork = {
     val pattern = new FeedForwardPattern();
-    pattern.setInputNeurons(1);
+
+    /**
+     * 1 - numOfRunners
+     * 2 - priceSlope
+     * 3 - traded volume delta
+     * 4 - priceToBack
+     * 5 - priceToLay
+     * 6 - ifWin
+     * 7 - ifLose
+     */
+    pattern.setInputNeurons(7);
     pattern.addHiddenLayer(5);
+    /**
+     * 1 - place back bet
+     * 2 - place lay bet
+     */
     pattern.setOutputNeurons(2);
     pattern.setActivationFunction(new ActivationTANH());
     val network = pattern.generate();
@@ -35,14 +46,10 @@ object PriceSlopeNeuralTrader {
   }
 
 }
+case class MultiNomialNeuralTrader(network: BasicNetwork) extends ITrader {
 
-/**
- * This trader uses neural network for taking bet placement decisions, which is seeded with a single price slope variable.
- *
- * @author korzekwad
- *
- */
-case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
+  /**key - marketId.*/
+  var numOfRunners: mutable.Map[Long, Int] = new mutable.HashMap[Long, Int] with mutable.SynchronizedMap[Long, Int]
 
   override def init(ctx: ITraderContext) {
 
@@ -51,12 +58,18 @@ case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
       probEventProps.put("runnerId", "long")
       probEventProps.put("prob", "double")
       probEventProps.put("timestamp", "long")
-      Map("ProbEvent" -> probEventProps)
+
+      val tradedVolumeEventProps = new java.util.HashMap[String, Object]
+      tradedVolumeEventProps.put("runnerId", "long")
+      tradedVolumeEventProps.put("tradedVolume", "double")
+      tradedVolumeEventProps.put("timestamp", "long")
+      Map("ProbEvent" -> probEventProps, "TradedVolumeEvent" -> tradedVolumeEventProps)
     }
 
     def getEPLStatements(): Map[String, String] = {
       val priceSlopeEPL = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
-      Map("priceSlope" -> priceSlopeEPL)
+      val tradedVolumeDeltaEPL = "select runnerId,(last(tradedVolume)-first(tradedVolume))/(last(timestamp)-first(timestamp)) as delta from TradedVolumeEvent.win:time(120 sec) group by runnerId"
+      Map("priceSlope" -> priceSlopeEPL, "tradedVolumeDelta" -> tradedVolumeDeltaEPL)
     }
 
     def publish(epServiceProvider: EPServiceProvider) {
@@ -64,23 +77,37 @@ case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
         val bestPrices = ctx.getBestPrices(runnerId)
         val avgPrice = PriceUtil.avgPrice(bestPrices._1.price -> bestPrices._2.price)
         epServiceProvider.getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "prob" -> 100 / avgPrice, "timestamp" -> ctx.getEventTimestamp / 1000), "ProbEvent")
+        epServiceProvider.getEPRuntime().sendEvent(Map("runnerId" -> runnerId, "tradedVolume" -> ctx.getTotalTradedVolume(runnerId), "timestamp" -> ctx.getEventTimestamp / 1000), "TradedVolumeEvent")
       }
+
     }
 
     ctx.registerEPN(getEventTypes, getEPLStatements, publish)
+    numOfRunners(ctx.marketId) = ctx.runners.size
   }
 
   def execute(ctx: ITraderContext) = {
+
+    val risk = ctx.risk
+    ctx.addChartValue("expected", risk.marketExpectedProfit)
+    val deltaMap = Map(ctx.getEPNStatement("tradedVolumeDelta").iterator.map(event => (event.get("runnerId").asInstanceOf[Long], event.get("delta").asInstanceOf[Double])).toList: _*)
 
     /**Pull epl statement and execute trading strategy.*/
     for (event <- ctx.getEPNStatement("priceSlope").iterator) {
       val runnerId = event.get("runnerId").asInstanceOf[Long]
       val priceSlope = -1 * event.get("slope").asInstanceOf[Double] //convert prob slope to price slope
       val bestPrices = ctx.getBestPrices(runnerId)
-
       val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
-      val neuralData = new BasicNeuralData(Array(priceSlope))
+      val numOfRunnersValue = numOfRunners(ctx.marketId).toDouble
+      val neuralData = new BasicNeuralData(Array(
+        numOfRunnersValue,
+        priceSlope,
+        deltaMap(runnerId),
+        bestPrices._1.price,
+        bestPrices._2.price,
+        risk.ifWin(runnerId),
+        risk.ifLose(runnerId)))
 
       /**Neural Network is not thread safe.*/
       var decision: NeuralData = null
@@ -100,8 +127,6 @@ case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
         if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
     }
-
   }
 
-  override def toString = "PriceSlopeNeuralTrader [nn=%s]".format(network)
 }
