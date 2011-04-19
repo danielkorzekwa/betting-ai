@@ -24,17 +24,17 @@ object SimulatorApp {
 
     printHeader(console)
 
-    /**Parse input data. Element 1 - marketDataFile, element 2 - traderImplClass, 3 - htmlReportDir*/
-    val inputData: Tuple3[TreeMap[Long, File], ITrader, String] = try {
+    /**Parse input data.*/
+    val inputData: UserInputData = try {
       UserInputParser.parse(args)
     } catch {
       case e: Exception => printHelpMessage(console); console.println("\n" + e); return
     }
 
-    run(inputData._1, inputData._2, console, inputData._3 )
+    run(inputData,console)
   }
 
-  def run(marketData: TreeMap[Long, File], trader: ITrader, console: PrintStream,reportDir: String = "./") {
+  def run(inputData: UserInputData, console: PrintStream) {
 
     console.print("Simulation is started.")
    
@@ -42,25 +42,24 @@ object SimulatorApp {
     /**Commission on winnings that is used when generating expected profit report.*/
     val commission = 0.05;
     /**Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)*/
-    val bank = 2500
-    val simulator = Simulator(commission,bank)
+    val simulator = Simulator(commission,inputData.bank)
 
     /**Run market simulator.*/
     console.print(" Simulation progress:")
     val time = System.currentTimeMillis
 
-    val marketRiskReports = simulator.runSimulation(marketData, trader :: Nil, (progress: Int) => console.print(" " + progress + "%"))
+    val marketRiskReports = simulator.runSimulation(inputData.marketData, inputData.trader :: Nil, (progress: Int) => console.print(" " + progress + "%"))
 
     /**Print market simulation report.*/
     console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis - time)))
 
     console.print("\nSaving simulation html report...")
-    generateHtmlReport(marketRiskReports.marketReports, reportDir)
+    generateHtmlReport(marketRiskReports.marketReports, inputData.reportDir)
     console.print("DONE")
 
-    console.print("\n\nExpected profit report for trader " + trader.getClass.getName + ":")
+    console.print("\n\nExpected profit report for trader " + inputData.trader.getClass.getName + ":")
     console.print("\nCommission on winnings=" + round(commission * 100, 2) + "%")
-    console.print("\nAmount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)=" + bank)
+    console.print("\nAmount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)=" + inputData.bank)
     printMarketReport(marketRiskReports.marketReports, console)
     console.print("\n------------------------------------------------------------------------------------")
 
@@ -130,9 +129,10 @@ object SimulatorApp {
   private def printHelpMessage(console: PrintStream) {
     console.println("Usage:")
     console.println("market_simulator marketData=[market_data_file] traderImpl=[trader_impl_class]\n")
-    console.println("marketDataDir - Text file with market data that will be used for the simulation.")
-    console.println("traderImpl - Fully classified name of the trader implementation class that the simulation will be executed for.")
+    console.println("marketDataDir - Text files with market data that will be used for the simulation.")
+    console.println("traderImpl - Fully classified name of the trader implementation class that the simulation is executed for.")
     console.println("htmlReportDir - Directory the html report is written to. (default = ./)")
+    console.println("bank - Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion). (default = 2500)")
 
   }
   def main(args: Array[String]) {
