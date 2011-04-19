@@ -28,7 +28,7 @@ trait LocalOptimisation[T <: ITrader] extends HillClimbing[T] {
    */
   abstract override def breed(trader: Solution[T]): Solution[T] = {
     val child = super.breed(trader)
-    val optimisedChild = if (child.expectedProfit > 0) optimise(child) else child
+    val optimisedChild = if (child.quality > 0) optimise(child) else child
     optimisedChild
   }
 }

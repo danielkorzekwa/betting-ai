@@ -30,14 +30,19 @@ class PriceNeuralTraderTrainingTest {
   def test {
 
     val marketData = MarketData("./src/test/resources/one_hr_10mins_before_inplay")
-    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => new NeuralTrader(network))
+    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => new NeuralTrader(network),1000)
     val network = NeuralTrader.createNetwork()
 
     val train = new NeuralGeneticAlgorithm(network, new FanInRandomizer(), neuralTraderScore, 10, 0.1d, 0.25d)
 
-    for (i <- 1 to 50) {
+    var bestScore = Double.MinValue
+    for (i <- 1 to 5) {
       train.iteration();
       println("Epoch #" + i + " Score:" + train.getError());
+      if (train.getError > bestScore) {
+        bestScore = train.getError
+        dk.bettingai.marketsimulator.SimulatorApp.run(marketData.data, NeuralTrader(train.getNetwork), System.out, "./target")
+      }
     }
   }
 
@@ -46,7 +51,7 @@ class PriceNeuralTraderTrainingTest {
     def createNetwork(): BasicNetwork = {
       val pattern = new FeedForwardPattern();
       pattern.setInputNeurons(1);
-      // pattern.addHiddenLayer(5);
+      pattern.addHiddenLayer(5);
       pattern.setOutputNeurons(1);
       pattern.setActivationFunction(new ActivationTANH());
       val network = pattern.generate();
@@ -55,7 +60,7 @@ class PriceNeuralTraderTrainingTest {
     }
   }
 
-  private class NeuralTrader(network: BasicNetwork) extends ITrader {
+  private case class NeuralTrader(network: BasicNetwork) extends ITrader {
 
     val market1Id = 101655622
     val market1RunnerId = 4207432
