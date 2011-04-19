@@ -38,6 +38,7 @@ class PricePriceSlopeTraderRandomWithOptimisationTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
+    val bank = 1000
    // val marketData = MarketData("c:/daniel/marketdataall")
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
 
@@ -53,7 +54,7 @@ class PricePriceSlopeTraderRandomWithOptimisationTest {
       trader
     }
 
-    val optimiser = new CoevolutionHillClimbing(marketData, restart, populationSize) with LocalOptimisation[PricePriceSlopeTrader] {
+    val optimiser = new CoevolutionHillClimbing(marketData, restart, populationSize,bank) with LocalOptimisation[PricePriceSlopeTrader] {
       def optimise(solution: Solution[PricePriceSlopeTrader]): Solution[PricePriceSlopeTrader] = {
         val logger = LoggerFactory.getLogger(getClass)
         val generationSize = 2
@@ -66,7 +67,7 @@ class PricePriceSlopeTraderRandomWithOptimisationTest {
             PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, solution.trader.maxNumOfRunners , solution.trader.minProfitLoss, solution.trader.minTradedVolume)
         }
 
-        CoevolutionHillClimbing(marketData, mutate, populationSize).optimise(solution.trader, generationSize, Option(progress))
+        CoevolutionHillClimbing(marketData, mutate, populationSize,bank).optimise(solution.trader, generationSize, Option(progress))
       }
     }
     val bestSolution = optimiser.optimise(baseTrader, generationNum)

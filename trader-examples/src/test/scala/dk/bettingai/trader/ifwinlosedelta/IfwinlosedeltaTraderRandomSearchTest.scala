@@ -22,8 +22,9 @@ class IfwinlosedeltaTraderRandomSearchTest {
 
     log.info("Initial trader=" + baseTrader)
 
+    val bank = 1000
     //val marketDataDir = "c:/daniel/marketdata"
-     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
+    val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
 
     /**Full random mutate only.*/
     val mutate = (solution: Solution[IfwinlosedeltaTrader]) => {
@@ -32,7 +33,7 @@ class IfwinlosedeltaTraderRandomSearchTest {
       val trader = IfwinlosedeltaTrader(backSignal, laySignal)
       trader
     }
-    val bestSolution = CoevolutionHillClimbing(marketData,mutate,populationSize).optimise(baseTrader, generationNum)
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, bank).optimise(baseTrader, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }

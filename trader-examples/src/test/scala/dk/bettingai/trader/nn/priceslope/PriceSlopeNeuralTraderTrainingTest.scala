@@ -16,10 +16,10 @@ class PriceSlopeNeuralTraderTrainingTest {
 
   @Test
   def test {
-
+    val bank = 1000
     //val marketData = MarketData("c:/daniel/marketdata10")
-    val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
-    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => PriceSlopeNeuralTrader(network))
+    val marketData = MarketData("./src/test/resources/one_hr_10mins_before_inplay")
+    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => PriceSlopeNeuralTrader(network), bank)
     val network = PriceSlopeNeuralTrader.createNetwork()
 
     /**Min population size should be 50.*/

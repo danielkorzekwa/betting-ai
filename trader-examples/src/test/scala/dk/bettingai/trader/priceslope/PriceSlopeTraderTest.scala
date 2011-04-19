@@ -33,13 +33,14 @@ class PriceSlopeTraderTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
+    val bank = 1000
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
     val mutate = (solution: Solution[PriceSlopeTrader]) => {
       val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
       new PriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal)
     }
-    val bestSolution = CoevolutionHillClimbing(marketData,mutate,populationSize).optimise(trader, generationNum)
+    val bestSolution = CoevolutionHillClimbing(marketData,mutate,populationSize,bank).optimise(trader, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }
