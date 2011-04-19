@@ -57,6 +57,7 @@ class PricePriceSlopeTraderRandomTest {
     var lastTraderId = 1
     def nextTraderId = { lastTraderId += 1; lastTraderId }
 
+    val bank = 1000
     // val marketData = MarketData("c:/daniel/marketdataall")
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
 
@@ -71,7 +72,7 @@ class PricePriceSlopeTraderRandomTest {
       val trader = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, maxNumOfRunners, minProfitLoss, minTradedVolume)
       trader
     }
-    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize).optimise(baseTrader, generationNum)
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, bank).optimise(baseTrader, generationNum)
 
     log.info("Best solution=" + bestSolution)
   }
