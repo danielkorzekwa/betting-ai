@@ -31,7 +31,7 @@ class MultiNomailNeuralTraderTest {
       println("Epoch #" + i + " Score:" + train.getError());
       if (train.getError > bestScore) {
         bestScore = train.getError
-        dk.bettingai.marketsimulator.SimulatorApp.run(marketData.data, MultiNomialNeuralTrader(train.getNetwork), System.out, "./target")
+        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, MultiNomialNeuralTrader(train.getNetwork),"./target",bank), System.out)
       }
     }
   }

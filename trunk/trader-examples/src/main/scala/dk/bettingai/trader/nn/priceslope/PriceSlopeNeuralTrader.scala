@@ -18,6 +18,7 @@ import scala.collection._
 import org.encog.neural.pattern.FeedForwardPattern
 import org.encog.engine.network.activation.ActivationTANH
 import org.encog.neural.data._
+import org.encog.persist.EncogPersistedCollection
 
 /**@see class level comments.*/
 object PriceSlopeNeuralTrader {
@@ -25,13 +26,21 @@ object PriceSlopeNeuralTrader {
   /**Creates neural network that is used by this trader.*/
   def createNetwork(): BasicNetwork = {
     val pattern = new FeedForwardPattern();
-    pattern.setInputNeurons(1);
+    /**1 - priceToBack, 2 - priceToLay, 3 - priceSlope, 4 - marketExpectedProfit*/
+    pattern.setInputNeurons(4);
     pattern.addHiddenLayer(5);
-    pattern.setOutputNeurons(2);
+    /**1 - back bet, 2 - lay bet, 3 - hedge bet*/
+    pattern.setOutputNeurons(3);
     pattern.setActivationFunction(new ActivationTANH());
     val network = pattern.generate();
     network.reset();
     network
+  }
+  
+  def apply(network:BasicNetwork):PriceSlopeNeuralTrader = {
+	  val trader = new PriceSlopeNeuralTrader()
+	   trader.network = network
+	   trader
   }
 
 }
@@ -42,10 +51,11 @@ object PriceSlopeNeuralTrader {
  * @author korzekwad
  *
  */
-case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
+case class PriceSlopeNeuralTrader extends ITrader {
+  val nnResource = new EncogPersistedCollection("./src/main/resources/nn/" + classOf[PriceSlopeNeuralTrader].getSimpleName + ".eg")
+  var network: BasicNetwork = nnResource.find("nn").asInstanceOf[BasicNetwork]
+  val bank = 100d
 
-  val bank=1000d
-	
   override def init(ctx: ITraderContext) {
 
     def getEventTypes(): Map[String, Map[String, Object]] = {
@@ -76,30 +86,49 @@ case class PriceSlopeNeuralTrader(network: BasicNetwork) extends ITrader {
 
     /**Pull epl statement and execute trading strategy.*/
     for (event <- ctx.getEPNStatement("priceSlope").iterator) {
+
       val runnerId = event.get("runnerId").asInstanceOf[Long]
-      val priceSlope = -1 * event.get("slope").asInstanceOf[Double] //convert prob slope to price slope
-      val bestPrices = ctx.getBestPrices(runnerId)
 
-      val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
+      val risk = ctx.risk(bank)
+      ctx.addChartValue("risk",risk.marketExpectedProfit)
+      ctx.addChartValue("wealth",risk.wealth)
+      
+        if (runnerId == 4207432 || runnerId == 3954418 || runnerId == 3826850 || runnerId == 4806390) {
+     // if (runnerId == 3954418) {
+        val priceSlope = -1 * event.get("slope").asInstanceOf[Double] //convert prob slope to price slope
+        val bestPrices = ctx.getBestPrices(runnerId)
 
-      val neuralData = new BasicNeuralData(Array(priceSlope))
+        val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
-      /**Neural Network is not thread safe.*/
-      var decision: NeuralData = null
-      this.synchronized {
-        decision = network.compute(neuralData)
-      }
+        val neuralData = new BasicNeuralData(Array(
+        		bestPrices._1.price,
+        		bestPrices._2.price,
+        		priceSlope,
+        		risk.marketExpectedProfit)
+        		)
 
-      if (!bestPrices._1.price.isNaN) {
-        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
-        val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
-        if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
-      }
+        /**Neural Network is not thread safe.*/
+        var decision: NeuralData = null
+        this.synchronized {
+          decision = network.compute(neuralData)
+        }
 
-      if (!bestPrices._2.price.isNaN) {
-        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
-        val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
-        if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
+        if (!bestPrices._1.price.isNaN) {
+          val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
+          val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission, bank)
+          if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
+        }
+
+        if (!bestPrices._2.price.isNaN) {
+          val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
+          val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission, bank)
+          if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
+        }
+        
+        /**hedge.*/
+        if(decision.getData(2) > 0) ctx.placeHedgeBet(runnerId)
+
+        ctx.addChartValue("" + runnerId, 1/bestPrices._1.price)
       }
     }
 
