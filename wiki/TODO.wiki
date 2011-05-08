@@ -8,6 +8,8 @@ It's a temporary place for some ideas, they are moved then to [http://code.googl
   # Review of MarketService
   # Data collection - system clock is delayed
   # MarketDataCollector crashed, analyse log.txt.backup file
+  # http://en.wikipedia.org/wiki/Automated_planning,
+  # http://en.wikipedia.org/wiki/STRIPS
 
 
 
