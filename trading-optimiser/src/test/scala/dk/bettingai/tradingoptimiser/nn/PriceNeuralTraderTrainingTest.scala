@@ -18,6 +18,7 @@ import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator._
 import ISimulator._
 import dk.bettingai.tradingoptimiser._
+import dk.bettingai.marketsimulator.ISimulator._
 
 /**
  * Train neural network to trade on a market using a single price variable only.
@@ -29,8 +30,13 @@ class PriceNeuralTraderTrainingTest {
   @Test
   def test {
 
+	val bank = 50
+	  
     val marketData = MarketData("./src/test/resources/one_hr_10mins_before_inplay")
-    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => new NeuralTrader(network),1000)
+    def getFactory(network:BasicNetwork) =  new TraderFactory[NeuralTrader] {
+          def create() = new NeuralTrader(network)
+        }
+    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => getFactory(network),1000)
     val network = NeuralTrader.createNetwork()
 
     val train = new NeuralGeneticAlgorithm(network, new FanInRandomizer(), neuralTraderScore, 10, 0.1d, 0.25d)
@@ -41,7 +47,10 @@ class PriceNeuralTraderTrainingTest {
       println("Epoch #" + i + " Score:" + train.getError());
       if (train.getError > bestScore) {
         bestScore = train.getError
-        dk.bettingai.marketsimulator.SimulatorApp.run(marketData.data, NeuralTrader(train.getNetwork), System.out, "./target")
+         val traderFactory = new TraderFactory[NeuralTrader] {
+          def create() = NeuralTrader(train.getNetwork)
+        }
+        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, traderFactory, "./target", bank), System.out)
       }
     }
   }

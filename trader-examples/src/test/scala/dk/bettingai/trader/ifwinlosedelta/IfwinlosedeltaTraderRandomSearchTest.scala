@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import dk.bettingai.tradingoptimiser._
 import HillClimbing._
 import CoevolutionHillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
 
 class IfwinlosedeltaTraderRandomSearchTest {
 
@@ -30,8 +31,9 @@ class IfwinlosedeltaTraderRandomSearchTest {
     val mutate = (solution: Solution[IfwinlosedeltaTrader]) => {
       val backSignal = (rand.nextInt(600) - 300)
       val laySignal = (rand.nextInt(600) - 300)
-      val trader = IfwinlosedeltaTrader(backSignal, laySignal)
-      trader
+      new TraderFactory[IfwinlosedeltaTrader]() {
+        def create() = IfwinlosedeltaTrader(backSignal, laySignal)
+      }
     }
     val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, bank).optimise(baseTrader, generationNum)
 

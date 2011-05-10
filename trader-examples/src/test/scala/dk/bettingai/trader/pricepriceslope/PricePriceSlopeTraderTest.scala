@@ -9,6 +9,7 @@ import dk.bettingai.tradingoptimiser._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import HillClimbing._
 import CoevolutionHillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
 
 /**
  * Run trader implementation.
@@ -57,7 +58,10 @@ class PricePriceSlopeTraderTest {
       val maxNumOfWinners = solution.trader.maxNumOfRunners + rand.nextInt(3) - 1
       val minProfitLoss = solution.trader.minProfitLoss + rand.nextInt(10) - 5
       val minTradedVolume = solution.trader.minTradedVolume + rand.nextInt(20) - 10
-      PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, maxNumOfWinners, minProfitLoss, minTradedVolume)
+    
+       new TraderFactory[PricePriceSlopeTrader]() {
+    	  def create() =    PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, maxNumOfWinners, minProfitLoss, minTradedVolume)
+      } 
       //solution.trader
     }
     val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, bank).optimise(trader, generationNum)

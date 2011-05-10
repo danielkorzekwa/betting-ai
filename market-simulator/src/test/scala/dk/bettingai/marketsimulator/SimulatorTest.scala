@@ -32,12 +32,15 @@ object SimulatorTest {
 class SimulatorTest {
 
   private val betex = new Betex()
-  private val traders = new SimpleTrader() :: Nil
-  private val simulator = new Simulator(betex, 0,1000)
+  private val traderFactory = new ISimulator.TraderFactory[ITrader] {
+    def create() = new SimpleTrader()
+  }
+  private val traders = traderFactory :: Nil
+  private val simulator = new Simulator(betex, 0, 1000)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.
-   * */
+   */
 
   @Test
   def testNoMarketEvents {
@@ -63,7 +66,7 @@ class SimulatorTest {
     assertEquals(0, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(11), 0)
     assertEquals(0, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(12), 0)
 
-    assertEquals(12345, traders.head.initTimestamp)
+    assertEquals(12345, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initTimestamp)
   }
 
   @Test
@@ -81,7 +84,7 @@ class SimulatorTest {
     assertEquals(2.4, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(11), 0.001)
     assertEquals(-2, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(12), 0)
 
-    assertEquals(RegisteredTrader(3, traders(0)), marketReports(0).traderReports(0).trader)
+    assertEquals(RegisteredTrader(3, marketReports(0).traderReports(0).trader.trader), marketReports(0).traderReports(0).trader)
   }
 
   @Test
@@ -132,8 +135,8 @@ class SimulatorTest {
     assertEquals(15.6, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(11), 0.001)
     assertEquals(-14.6, marketReports(0).traderReports(0).marketExpectedProfit.runnersIfWin(12), 0.001)
 
-    assertEquals(1, traders.head.initCalledTimes.get)
-    assertEquals(1, traders.head.afterCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
   }
 
   @Test
@@ -156,19 +159,24 @@ class SimulatorTest {
     assertEquals(1, marketReports(1).traderReports.size)
     assertTraderReport(0.6, 1, 1, marketReports(1).traderReports(0))
 
-    assertEquals(2, traders.head.initCalledTimes.get)
-    assertEquals(2, traders.head.afterCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
 
   }
 
   @Test
   def testTraderWithTradingChildren {
     val marketEventsFile = new File("src/test/resources/marketDataPlaceLayBet/10.csv")
-    val traderUnderTest = new SimpleTraderWithChildren() :: Nil
+    val traderFactory = new ISimulator.TraderFactory[ITrader] {
+      def create() = new SimpleTraderWithChildren()
+    }
+    val traderUnderTest = traderFactory :: Nil
     /**Run market simulation.*/
     val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile), traderUnderTest, (progress: Int) => {}).marketReports
 
-    assertEquals(-0.625, traderUnderTest.head.getTotalMarketExpectedProfit, 0.001)
+    assertEquals(-0.625, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTraderWithChildren].getTotalMarketExpectedProfit, 0.001)
 
     /**All the risk numbers below are equal to zero because master trader is not placing any bets, it's just creating child traders to do so.*/
     assertEquals(1, marketReports.size)
@@ -187,25 +195,31 @@ class SimulatorTest {
     val marketEventsFile10 = new File("src/test/resources/twoMarketFiles/10.csv")
     val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
-    val trader = new ITrader {
-      def execute(ctx: ITraderContext) = throw new RuntimeException("Trader error - it's just for testing purpose.")
+    val traderFactory = new ISimulator.TraderFactory[ITrader] {
+      def create() = new ITrader {
+        def execute(ctx: ITraderContext) = throw new RuntimeException("Trader error - it's just for testing purpose.")
+      }
     }
 
     /**Run market simulation.*/
-    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), trader :: Nil, (progress: Int) => {}).marketReports
+    val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), traderFactory :: Nil, (progress: Int) => {}).marketReports
 
     assertEquals(0, marketReports.size)
   }
 
   /**
    * Test scenarios for runSimulation - analysing multiple traders.
-   * */
+   */
   @Test
   def testTwoTradersOneMatchedBetsOnTwoMarkets {
     val marketEventsFile10 = new File("src/test/resources/twoMarketFiles/10.csv")
     val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
 
-    val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
+    val traderFactory = new ISimulator.TraderFactory[ITrader] {
+      def create() = new SimpleTrader()
+    }
+
+    val twoTraders = traderFactory :: traderFactory :: Nil
     /**Run market simulation.*/
     val marketReports = simulator.runSimulation(TreeMap(10l -> marketEventsFile10, 20l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
 
@@ -218,11 +232,14 @@ class SimulatorTest {
 
     assertEquals(2, marketReport1.traderReports.size)
     assertTraderReport(1.058, 2, 2, marketReport1.traderReports(0))
-    assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport1.traderReports(0).trader)
+    assertEquals(RegisteredTrader(3, marketReports(0).traderReports(0).trader.trader), marketReport1.traderReports(0).trader)
     assertTraderReport(1.058, 2, 2, marketReport1.traderReports(1))
-    assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport1.traderReports(1).trader)
-    assertEquals(2, twoTraders(0).initCalledTimes.get)
-    assertEquals(2, twoTraders(0).afterCalledTimes.get)
+
+    assertEquals(RegisteredTrader(4, marketReports(0).traderReports(1).trader.trader), marketReport1.traderReports(1).trader)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
 
     /**Check report for the second market.*/
     val marketReport2 = marketReports(1)
@@ -230,11 +247,14 @@ class SimulatorTest {
 
     assertEquals(2, marketReport2.traderReports.size)
     assertTraderReport(0.6, 1, 1, marketReport2.traderReports(0))
-    assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport2.traderReports(0).trader)
+    assertEquals(RegisteredTrader(3, marketReports(1).traderReports(0).trader.trader), marketReport2.traderReports(0).trader)
     assertTraderReport(0.6, 1, 1, marketReport2.traderReports(1))
-    assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport2.traderReports(1).trader)
-    assertEquals(2, twoTraders(1).initCalledTimes.get)
-    assertEquals(2, twoTraders(1).afterCalledTimes.get)
+    assertEquals(RegisteredTrader(4, marketReports(1).traderReports(1).trader.trader), marketReport2.traderReports(1).trader)
+    
+    assertEquals(1, marketReports(0).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
   }
 
   @Test
@@ -244,7 +264,11 @@ class SimulatorTest {
     val marketEventsFile20 = new File("src/test/resources/twoMarketFiles/20.csv")
     val empyMarketFile1 = new File("src/test/resources/marketDataEmpty/10.csv")
 
-    val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
+    val traderFactory = new ISimulator.TraderFactory[ITrader] {
+      def create() = new SimpleTrader()
+    }
+
+    val twoTraders = traderFactory :: traderFactory :: Nil
 
     var progressSum = 0l
     val progressBar = (progress: Int) => { progressSum += progress; progressSum += progressSum * 2; println("market simulation progress=" + progress + "%") }
@@ -255,8 +279,7 @@ class SimulatorTest {
         3l -> empyMarketFile1,
         4l -> empyMarketFile1,
         10l -> marketEventsFile10,
-        20l -> marketEventsFile20)
-      , twoTraders, progressBar).marketReports
+        20l -> marketEventsFile20), twoTraders, progressBar).marketReports
 
     assertEquals(2, marketReports.size)
     assertEquals(26562, progressSum)
@@ -264,17 +287,17 @@ class SimulatorTest {
 
   /**
    * Test scenarios for registerTrader.
-   * */
+   */
 
   @Test
   def testRegisterTrader {
     val runners = new Runner(1, "runner 1") :: new Runner(2, "runner 2") :: Nil
     val market = betex.createMarket(1, "market1", "event name", 1, new Date(0), runners)
 
-    val traderCtx1 = simulator.registerTrader(market,null)
+    val traderCtx1 = simulator.registerTrader(market, null)
     assertEquals(3, traderCtx1.userId)
 
-    val traderCtx2 = simulator.registerTrader(market,null)
+    val traderCtx2 = simulator.registerTrader(market, null)
     assertEquals(4, traderCtx2.userId)
   }
 

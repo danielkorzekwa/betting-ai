@@ -32,7 +32,7 @@ class UserInputParserTest {
     val inputData = UserInputParser.parse(Array("marketDataDir=src/test/resources/marketDataPlaceAndCancelLayBet", "traderImpl=dk.bettingai.marketsimulator.trader.examples.NopTrader"))
     assertEquals(1, inputData.marketData.size)
     assertEquals("10.csv", inputData.marketData(10).getName)
-    assertTrue(inputData.trader.isInstanceOf[NopTrader])
+    assertEquals(classOf[NopTrader],inputData.traderFactory.create().getClass)
   }
 
   @Test
@@ -41,7 +41,7 @@ class UserInputParserTest {
     assertEquals(2, inputData.marketData.size)
     assertEquals("10.csv", inputData.marketData(10).getName)
     assertEquals("20.csv", inputData.marketData(20).getName)
-    assertTrue(inputData.trader.isInstanceOf[NopTrader])
+    assertEquals(classOf[NopTrader],inputData.traderFactory.create().getClass)
   }
 
   @Test
@@ -51,7 +51,7 @@ class UserInputParserTest {
     assertEquals(2, inputData.marketData.size)
     assertEquals("10.csv", inputData.marketData(10).getName)
     assertEquals("20.csv", inputData.marketData(20).getName)
-    assertTrue(inputData.trader.isInstanceOf[NopTrader])
+    assertEquals(classOf[NopTrader],inputData.traderFactory.create().getClass)
     assertEquals("./", inputData.reportDir)
   }
 
@@ -62,7 +62,7 @@ class UserInputParserTest {
     assertEquals(2, inputData.marketData.size)
     assertEquals("10.csv", inputData.marketData(10).getName)
     assertEquals("20.csv", inputData.marketData(20).getName)
-    assertTrue(inputData.trader.isInstanceOf[NopTrader])
+    assertEquals(classOf[NopTrader],inputData.traderFactory.create().getClass)
     assertEquals("./target", inputData.reportDir)
   }
 

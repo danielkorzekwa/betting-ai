@@ -11,6 +11,7 @@ import dk.bettingai.marketsimulator._
 import ISimulator._
 import dk.bettingai.tradingoptimiser._
 import dk.bettingai.tradingoptimiser.nn._
+import dk.bettingai.marketsimulator.ISimulator._
 
 class MultiNomailNeuralTraderTest {
 
@@ -19,7 +20,10 @@ class MultiNomailNeuralTraderTest {
     val bank = 1000
     //val marketData = MarketData("c:/daniel/marketdata10")
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
-    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => MultiNomialNeuralTrader(network), bank)
+    def getTraderFactory(network: BasicNetwork) = new TraderFactory[MultiNomialNeuralTrader] {
+      def create() = MultiNomialNeuralTrader(network)
+    }
+    val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => getTraderFactory(network), bank)
     val network = MultiNomialNeuralTrader.createNetwork()
 
     /**Min population size should be 50.*/
@@ -31,7 +35,10 @@ class MultiNomailNeuralTraderTest {
       println("Epoch #" + i + " Score:" + train.getError());
       if (train.getError > bestScore) {
         bestScore = train.getError
-        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, MultiNomialNeuralTrader(train.getNetwork),"./target",bank), System.out)
+        val traderFactory = new TraderFactory[MultiNomialNeuralTrader] {
+          def create() = MultiNomialNeuralTrader(train.getNetwork)
+        }
+        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, traderFactory, "./target", bank), System.out)
       }
     }
   }

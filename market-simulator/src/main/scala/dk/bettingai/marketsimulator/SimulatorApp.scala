@@ -9,7 +9,7 @@ import scala.collection._
 import immutable.TreeMap
 import scala.annotation._
 import dk.bettingai.marketsimulator.reporting._
-
+import dk.bettingai.marketsimulator.ISimulator._
 import com.ibm.icu.text.SimpleDateFormat
 
 /**
@@ -48,7 +48,7 @@ object SimulatorApp {
     console.print(" Simulation progress:")
     val time = System.currentTimeMillis
 
-    val marketRiskReports = simulator.runSimulation(inputData.marketData, inputData.trader :: Nil, (progress: Int) => console.print(" " + progress + "%"))
+    val marketRiskReports = simulator.runSimulation(inputData.marketData, inputData.traderFactory :: Nil, (progress: Int) => console.print(" " + progress + "%"))
 
     /**Print market simulation report.*/
     console.print("\nSimulation is finished in %s milliseconds.".format((System.currentTimeMillis - time)))
@@ -57,7 +57,7 @@ object SimulatorApp {
     generateHtmlReport(marketRiskReports.marketReports, inputData.reportDir)
     console.print("DONE")
 
-    console.print("\n\nExpected profit report for trader " + inputData.trader.getClass.getName + ":")
+    console.print("\n\nExpected profit report for trader " + inputData.traderFactory.create().getClass.getName + ":")
     console.print("\nCommission on winnings=" + round(commission * 100, 2) + "%")
     console.print("\nAmount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)=" + inputData.bank)
     printMarketReport(marketRiskReports.marketReports, console)

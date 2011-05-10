@@ -8,6 +8,7 @@ import dk.bettingai.tradingoptimiser._
 import dk.bettingai.marketsimulator.betex.PriceUtil._
 import HillClimbing._
 import CoevolutionHillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
 
 /**
  * Run trader implementation.
@@ -52,14 +53,18 @@ class PricePriceSlopeTraderEscapeFromMinumumTest {
         val backPriceSlopeSignal = solution.trader.backPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
         val layPriceSlopeSignal = solution.trader.layPriceSlopeSignal + ((rand.nextInt(11) - 5) * 0.001)
         val maxPrice = move(solution.trader.maxPrice, rand.nextInt(11) - 5)
-        PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, 2, -10, 10)
+        new TraderFactory[PricePriceSlopeTrader]() {
+          def create() = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, 2, -10, 10)
+        }
       } else {
         val backPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
         val layPriceSlopeSignal = ((rand.nextInt(11) - 5) * 0.01)
         val maxPrice = priceUp(1 / rand.nextDouble)
-        val trader = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, 20, -10, 10)
+        val traderFactory = new TraderFactory[PricePriceSlopeTrader]() {
+          def create() = PricePriceSlopeTrader("trader" + nextTraderId, backPriceSlopeSignal, layPriceSlopeSignal, maxPrice, 20, -10, 10)
+        }
         log.info("Escaping from local maximum (number of matched bets=0). " + trader)
-        trader
+        traderFactory
       }
     }
     val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, bank).optimise(trader, generationNum)
