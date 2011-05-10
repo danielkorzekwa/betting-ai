@@ -4,7 +4,7 @@ import java.io._
 import scala.io._
 import dk.bettingai.marketsimulator.trader._
 import scala.collection.immutable.TreeMap
-
+import dk.bettingai.marketsimulator.ISimulator._
 /**
  * Parses input arguments to the SimulationApp.
  *
@@ -34,16 +34,22 @@ object UserInputParser {
     val marketDataSources = marketDataDir.listFiles.filter(_.getName.endsWith(".csv")).map(f => f.getName.split("\\.")(0).toLong -> f)
 
     /**Load trader implementation class.*/
-    val traderImpl =
+    val traderClass:Class[ITrader] =
       try {
-        Class.forName(argsMap("traderImpl")).newInstance()
+        val traderClass = Class.forName(argsMap("traderImpl"))
+        traderClass.asInstanceOf[Class[ITrader]]
       } catch {
         case e: Exception => throw new IllegalArgumentException("Can't load trader implementation class: " + argsMap("traderImpl") + ". Details: " + e)
       }
 
     val htmlReportDir = argsMap.getOrElse("htmlReportDir", "./")
-    val bank = argsMap.getOrElse("bank","2500").toDouble
-    UserInputData(TreeMap(marketDataSources: _*), traderImpl.asInstanceOf[ITrader], htmlReportDir, bank)
+    val bank = argsMap.getOrElse("bank", "2500").toDouble
+    
+     val traderFactory = new TraderFactory[ITrader] {
+    	def create() = traderClass.newInstance()
+    }
+    
+    UserInputData(TreeMap(marketDataSources: _*), traderFactory, htmlReportDir, bank)
   }
 
   /**

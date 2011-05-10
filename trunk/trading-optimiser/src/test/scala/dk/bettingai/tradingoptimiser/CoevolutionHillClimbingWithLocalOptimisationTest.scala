@@ -7,6 +7,7 @@ import dk.bettingai.marketsimulator.betex.PriceUtil._
 import org.slf4j._
 import HillClimbing._
 import CoevolutionHillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
 
 class CoevolutionHillClimbingWithLocalOptimisationTest {
 
@@ -14,9 +15,11 @@ class CoevolutionHillClimbingWithLocalOptimisationTest {
 
   private val rand = new Random(System.currentTimeMillis)
 
-  private def restart(solution: Solution[PriceTrader]): PriceTrader = {
+  private def restart(solution: Solution[PriceTrader]): TraderFactory[PriceTrader] = {
     val price = priceUp(1 / rand.nextDouble)
-    PriceTrader(price)
+    new TraderFactory[PriceTrader]() {
+    	def create()=PriceTrader(price)
+    }
   }
 
   private val populationSize = 5

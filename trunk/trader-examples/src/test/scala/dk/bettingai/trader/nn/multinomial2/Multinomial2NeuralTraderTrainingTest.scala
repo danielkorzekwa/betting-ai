@@ -12,6 +12,8 @@ import ISimulator._
 import dk.bettingai.tradingoptimiser._
 import dk.bettingai.tradingoptimiser.nn._
 import org.encog.persist.EncogPersistedCollection
+import dk.bettingai.marketsimulator.ISimulator._
+import dk.bettingai.marketsimulator.ISimulator._
 
 class Multinomial2NeuralTraderTrainingTest {
 
@@ -19,7 +21,10 @@ class Multinomial2NeuralTraderTrainingTest {
 
   //val marketData = MarketData("c:/daniel/marketdata10")
   val marketData = MarketData("./src/test/resources/five_hr_10mins_before_inplay")
-  val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => { Multinomial2NeuralTrader(network) }, bank)
+  def getTraderFactory(network: BasicNetwork) = new TraderFactory[Multinomial2NeuralTrader] {
+    def create() = Multinomial2NeuralTrader(network)
+  }
+  val neuralTraderScore = new NeuralTraderScoreCalc(marketData, network => { getTraderFactory(network) }, bank)
   val network = Multinomial2NeuralTrader.createNetwork()
 
   /**Min population size should be 50.*/
@@ -37,7 +42,10 @@ class Multinomial2NeuralTraderTrainingTest {
       println("Epoch #" + i + " Score:" + train.getError());
       if (train.getError > bestScore) {
         bestScore = train.getError
-        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, Multinomial2NeuralTrader(train.getNetwork), "./target", bank), System.out)
+        val traderFactory = new TraderFactory[Multinomial2NeuralTrader] {
+          def create() = Multinomial2NeuralTrader(train.getNetwork)
+        }
+        dk.bettingai.marketsimulator.SimulatorApp.run(UserInputData(marketData.data, traderFactory, "./target", bank), System.out)
         nnResource.add("nn", train.getNetwork)
       }
     }

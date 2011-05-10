@@ -4,6 +4,8 @@ import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator._
 import ISimulator._
 import HillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
+
 
 /** Search for optimal trader using co-evolution based gradient ascent algorithm. Algorithm 6 from Essentials of metaheuristics book 
  *  (http://www.goodreads.com/book/show/9734814-essentials-of-metaheuristics) with a one difference that individuals in population compete 
@@ -19,7 +21,7 @@ import HillClimbing._
  * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
  *
  */
-case class CoevolutionHillClimbing[T <: ITrader](marketData: MarketData, mutate: (Solution[T]) => T, populationSize: Int, bank:Double) extends HillClimbing[T] {
+case class CoevolutionHillClimbing[T <: ITrader](marketData: MarketData, mutate: (Solution[T]) => TraderFactory[T], populationSize: Int, bank:Double) extends HillClimbing[T] {
 
   def breed(trader: Solution[T]): Solution[T] = {
     /** Born 10 traders.*/
@@ -32,7 +34,7 @@ case class CoevolutionHillClimbing[T <: ITrader](marketData: MarketData, mutate:
     val simulationReport = simulator.runSimulation(marketData.data, population.toList, p => {})
 
     val bestSolution = simulationReport.marketReports match {
-      case Nil => Solution(population.head, 0d, 0d)
+      case Nil => Solution(population.head.create(), 0d, 0d)
       case x :: xs => {
         val traders = simulationReport.marketReports.head.traderReports.map(_.trader)
         val tradersFitness: List[Tuple2[RegisteredTrader, Double]] = traders.map(t => t -> {

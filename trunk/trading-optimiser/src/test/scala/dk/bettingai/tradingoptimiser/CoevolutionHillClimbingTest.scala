@@ -10,6 +10,7 @@ import dk.bettingai.marketsimulator.betex.PriceUtil._
 import java.util.Random
 import HillClimbing._
 import CoevolutionHillClimbing._
+import dk.bettingai.marketsimulator.ISimulator._
 
 class CoevolutionHillClimbingTest {
 
@@ -29,8 +30,12 @@ class CoevolutionHillClimbingTest {
 
     val marketData = MarketData("./src/test/resources/one_hr_10mins_before_inplay")
     val progress = (progress: Progress[PriceTrader]) => log.info("Iter number=" + progress.iterationNum + ", bestSoFar=" + progress.bestSoFar + ", currentBest=" + progress.currentBest)
-    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
-    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize,1000).optimise(trader, generationNum, Option(progress))
+    val mutate = (solution: Solution[PriceTrader]) => new TraderFactory[PriceTrader]() {
+      val price = move(solution.trader.price, rand.nextInt(11) - 5)
+      def create() = new PriceTrader(price)
+    }
+
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, 1000).optimise(trader, generationNum, Option(progress))
     assertTrue(bestSolution.quality != 0)
     assertTrue(bestSolution.matchedBetsNum > 0)
     log.info("Best solution=" + bestSolution)
@@ -42,8 +47,11 @@ class CoevolutionHillClimbingTest {
     log.info("Initial trader=" + trader)
 
     val marketData = MarketData("./src/test/resources/two_hr_10mins_before_inplay")
-    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
-    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize,10000).optimise(trader, generationNum)
+    val mutate = (solution: Solution[PriceTrader]) => new TraderFactory[PriceTrader]() {
+      val price = move(solution.trader.price, rand.nextInt(11) - 5)
+      def create() = new PriceTrader(price)
+    }
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, 10000).optimise(trader, generationNum)
     assertTrue(bestSolution.quality != 0)
     assertTrue(bestSolution.matchedBetsNum != 0)
     log.info("Best solution=" + bestSolution)
@@ -55,8 +63,11 @@ class CoevolutionHillClimbingTest {
 
     val marketData = MarketData()
     val progress = (progress: Progress[PriceTrader]) => log.info("Iter number=" + progress.iterationNum + ", bestSoFar=" + progress.bestSoFar + ", currentBest=" + progress.currentBest)
-    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
-    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize,1000).optimise(trader, generationNum, Option(progress))
+    val mutate = (solution: Solution[PriceTrader]) => new TraderFactory[PriceTrader]() {
+      val price = move(solution.trader.price, rand.nextInt(11) - 5)
+      def create() = new PriceTrader(price)
+    }
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, 1000).optimise(trader, generationNum, Option(progress))
     assertEquals(0, bestSolution.quality, 0)
     assertEquals(0, bestSolution.matchedBetsNum, 0)
 
@@ -68,8 +79,11 @@ class CoevolutionHillClimbingTest {
     log.info("Initial trader=" + trader)
 
     val marketData = MarketData("./src/test/resources/empty_market_files")
-    val mutate = (solution: Solution[PriceTrader]) => new PriceTrader(move(solution.trader.price, rand.nextInt(11) - 5))
-    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize,1000).optimise(trader, generationNum)
+    val mutate = (solution: Solution[PriceTrader]) => new TraderFactory[PriceTrader]() {
+      val price = move(solution.trader.price, rand.nextInt(11) - 5)
+      def create() = new PriceTrader(price)
+    }
+    val bestSolution = CoevolutionHillClimbing(marketData, mutate, populationSize, 1000).optimise(trader, generationNum)
     assertEquals(0, bestSolution.quality, 0)
     assertEquals(0, bestSolution.matchedBetsNum, 0)
 

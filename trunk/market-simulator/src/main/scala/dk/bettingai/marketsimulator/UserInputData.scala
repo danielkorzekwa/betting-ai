@@ -3,6 +3,7 @@ package dk.bettingai.marketsimulator
 import dk.bettingai.marketsimulator.trader._
 import java.io.File
 import scala.collection.immutable.TreeMap
+import dk.bettingai.marketsimulator.ISimulator._
 
 /**This class represents input parameters for Market Simulator Application.
  * 
@@ -14,4 +15,4 @@ import scala.collection.immutable.TreeMap
  * @param reportDir Directory the html report is written to.
  * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion).
  * */
-case class UserInputData(marketData: TreeMap[Long, File], trader: ITrader, reportDir: String, bank: Double=2500)
+case class UserInputData(marketData: TreeMap[Long, File], traderFactory: TraderFactory[_ <: ITrader], reportDir: String, bank: Double=2500)

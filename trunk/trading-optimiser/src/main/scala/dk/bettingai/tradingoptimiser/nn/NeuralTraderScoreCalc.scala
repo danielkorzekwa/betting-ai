@@ -5,6 +5,7 @@ import org.encog.neural.networks.BasicNetwork
 import dk.bettingai.marketsimulator._
 import dk.bettingai.tradingoptimiser._
 import dk.bettingai.marketsimulator.trader._
+import dk.bettingai.marketsimulator.ISimulator._
 
 /**
  * This class represents a Calculate Score function used by Encog Neural Networks Framework to train neural network with genetic algorithm.
@@ -17,7 +18,7 @@ import dk.bettingai.marketsimulator.trader._
  * @param createTrader Function that creates a new trader that score is calculated for.
  * @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)
  */
-class NeuralTraderScoreCalc(marketData: MarketData, createTrader: (BasicNetwork) => ITrader, bank:Double) extends CalculateScore {
+class NeuralTraderScoreCalc(marketData: MarketData, createTrader: (BasicNetwork) => TraderFactory[_ <: ITrader], bank:Double) extends CalculateScore {
 
   def calculateScore(network: BasicNetwork): Double = {
     /**Create simulation environment.*/

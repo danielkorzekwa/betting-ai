@@ -14,15 +14,19 @@ import scala.collection._
 import immutable.TreeMap
 import ISimulator._
 import SimulatorTest._
+import dk.bettingai.marketsimulator.trader.ITrader
 
 class SimulatorRealMarketDataTest {
 
-  private val traders = new SimpleTrader() :: Nil
-  private val simulator = Simulator(0,1000)
+  private val traderFactory = new ISimulator.TraderFactory[ITrader] {
+    def create() = new SimpleTrader()
+  }
+  private val traders = traderFactory :: Nil
+  private val simulator = Simulator(0, 1000)
 
   /**
    * Test scenarios for runSimulation - analysing single trader only.
-   * */
+   */
   @Test
   def testOneTraderRealData {
     val marketEventsFile10 = new File("src/test/resources/marketRealDataTwoMarkets/101655610.csv")
@@ -47,19 +51,25 @@ class SimulatorRealMarketDataTest {
     assertEquals(11256, marketReports(1).traderReports(0).matchedBetsNumber)
     assertEquals(672, marketReports(1).traderReports(0).unmatchedBetsNumber)
 
-    assertEquals(2, traders.head.initCalledTimes.get)
-    assertEquals(2, traders.head.afterCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+      assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1, marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
   }
 
   /**
    * Test scenarios for runSimulation - analysing multiple traders.
-   * */
+   */
   @Test
   def testTwoTradersRealData {
     val marketEventsFile10 = new File("src/test/resources/marketRealDataTwoMarkets/101655610.csv")
     val marketEventsFile20 = new File("src/test/resources/marketRealDataTwoMarkets/101655622.csv")
 
-    val twoTraders = new SimpleTrader() :: new SimpleTrader() :: Nil
+    val traderFactory = new ISimulator.TraderFactory[ITrader] {
+      def create() = new SimpleTrader()
+    }
+
+    val twoTraders = traderFactory :: traderFactory :: Nil
     /**Run market simulation.*/
     val marketReports = simulator.runSimulation(TreeMap(101655610l -> marketEventsFile10, 101655622l -> marketEventsFile20), twoTraders, (progress: Int) => {}).marketReports
 
@@ -70,22 +80,26 @@ class SimulatorRealMarketDataTest {
     assertEquals(2, marketReport1.traderReports.size)
     assertMarketReport(101655610, "1m Hcap", "/GB/Muss 22nd Aug", marketReport1)
     assertTraderReport(-386.316, 12437, 719, marketReport1.traderReports(0))
-    assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport1.traderReports(0).trader)
+    assertEquals(RegisteredTrader(3,  marketReports(0).traderReports(0).trader.trader), marketReport1.traderReports(0).trader)
     assertTraderReport(-402.047, 12379, 752, marketReport1.traderReports(1))
-    assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport1.traderReports(1).trader)
-    assertEquals(2, twoTraders(0).initCalledTimes.get)
-    assertEquals(2, twoTraders(0).afterCalledTimes.get)
+    assertEquals(RegisteredTrader(4, marketReports(0).traderReports(1).trader.trader), marketReport1.traderReports(1).trader)
+    assertEquals(1,  marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1,  marketReports(0).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+      assertEquals(1,  marketReports(0).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1,  marketReports(0).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
 
     /**Check report for the second market.*/
     val marketReport2 = marketReports(1)
     assertEquals(2, marketReport2.traderReports.size)
     assertMarketReport(101655622, "1m Hcap", "/GB/Muss 22nd Aug - 2", marketReport2)
     assertTraderReport(-172.720, 11238, 595, marketReport2.traderReports(0))
-    assertEquals(RegisteredTrader(3, twoTraders(0)), marketReport2.traderReports(0).trader)
+    assertEquals(RegisteredTrader(3, marketReports(1).traderReports(0).trader.trader), marketReport2.traderReports(0).trader)
     assertTraderReport(-176.796, 11220, 610, marketReport2.traderReports(1))
-    assertEquals(RegisteredTrader(4, twoTraders(1)), marketReport2.traderReports(1).trader)
+    assertEquals(RegisteredTrader(4, marketReports(1).traderReports(1).trader.trader), marketReport2.traderReports(1).trader)
 
-    assertEquals(2, twoTraders(1).initCalledTimes.get)
-    assertEquals(2, twoTraders(1).afterCalledTimes.get)
+    assertEquals(1,  marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1,  marketReports(1).traderReports(0).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
+     assertEquals(1,  marketReports(1).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].initCalledTimes.get)
+    assertEquals(1,  marketReports(1).traderReports(1).trader.trader.asInstanceOf[SimpleTrader].afterCalledTimes.get)
   }
 }

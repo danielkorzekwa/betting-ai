@@ -1,13 +1,11 @@
 package dk.bettingai.marketsimulator
 
 import ISimulator._
-import scala.io._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.risk._
 import java.io.File
 import dk.bettingai.marketsimulator.betex.api._
-import scala.collection._
-import immutable.TreeMap
+import scala.collection.immutable.TreeMap
 
 /**This trait represents a simulator that processes market events, analyses traders  and returns analysis reports.
  * 
@@ -27,6 +25,10 @@ object ISimulator {
     def execute(ctx: ITraderContext) = trader.execute(ctx)
     override def after(ctx: ITraderContext) = trader.after(ctx)
   }
+  
+  trait TraderFactory[T <: ITrader] {
+	  def create():T
+  }
 }
 trait ISimulator {
 
@@ -36,7 +38,7 @@ trait ISimulator {
    * @param traders Traders to analyse, all they are analysed on the same time, so they compete against each other
    * @param p Progress listener. Value between 0% and 100% is passed as an function argument.
    */
-  def runSimulation(marketData: TreeMap[Long, File], traders: List[ITrader], p: (Int) => Unit): SimulationReport
+  def runSimulation(marketData: TreeMap[Long, File], traders: List[TraderFactory[_ <: ITrader]], p: (Int) => Unit): SimulationReport
 
   /**Registers new trader and return trader context. 
    * This context can be used to trigger some custom traders that are registered manually by a master trader, 
