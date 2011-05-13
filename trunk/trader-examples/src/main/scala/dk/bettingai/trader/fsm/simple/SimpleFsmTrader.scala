@@ -1,6 +1,5 @@
 package dk.bettingai.trader.fsm.simple
 
-import dk.bettingai.trader.fsm.simple.SimpleFsmTrader._
 import dk.bettingai.trader._
 import scala.collection._
 import dk.bettingai.marketsimulator.trader._
@@ -62,7 +61,6 @@ class SimpleFsmTrader extends ITrader {
 
   def execute(ctx: ITraderContext) {
     backTraders.foreach(t => t.execute(ctx))
-
   }
 
 }
