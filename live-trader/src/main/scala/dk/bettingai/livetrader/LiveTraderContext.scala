@@ -186,7 +186,7 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
   }
   
    /**Returns all matched and unmatched portions of a bet.*/
-  def getBet(betId:Long): List[IBet] = throw new UnsupportedOperationException("Not implemented yet.")
+  def getBet(betId:Long): List[IBet] = marketService.getBet(betId)
 
   /**
    * Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange.
