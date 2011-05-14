@@ -332,6 +332,19 @@ class LiveTraderContextTest {
     assertEquals(Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None) :: Bet(101, 1000, 6, 2.4, LAY, U, 1, 11, None) :: matchedBet :: Nil, allBets)
   }
 
+  /**Tests for getBet*/
+  @Test
+  def getBet {
+    val bet = Bet(1, 200, 3, 2.1, BACK, U, 1, 11, None) :: Bet(1, 200, 7, 2.1, BACK, M, 1, 11, None) :: Nil
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).getBet(100); will(returnValue(bet))
+      }
+    })
+
+    assertEquals(bet, liveCtx.getBet(100))
+  }
+
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
   private class SExpectations extends Expectations {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
