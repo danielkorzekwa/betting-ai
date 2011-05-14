@@ -35,7 +35,7 @@ case class RunnerTrader(val runnerId: Long) extends ITrader {
           state = BackPlaced(bet)
         }
         case BackPlaced(backBet) => {
-          if (matchedBets.exists(b => b.betId == backBet.betId)) {
+          if (ctx.getBet(backBet.betId).exists(b => b.betStatus == M)) {
             val bet = ctx.placeBet(betSize, bestPrices._1.price, LAY, runnerId)
             state = LayPlaced(bet)
           } else if (bestPrices._2.price < backBet.betPrice) {
@@ -45,7 +45,7 @@ case class RunnerTrader(val runnerId: Long) extends ITrader {
           }
         }
         case LayPlaced(layBet) => {
-          if (matchedBets.exists(b => b.betId == layBet.betId)) {
+          if (ctx.getBet(layBet.betId).exists(b => b.betStatus == M)) {
             state = Init
           } else if (bestPrices._1.price > layBet.betPrice) {
             try { ctx.cancelBet(layBet.betId) } catch { case _ => {} }

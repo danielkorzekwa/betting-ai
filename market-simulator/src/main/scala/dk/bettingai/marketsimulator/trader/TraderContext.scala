@@ -155,6 +155,9 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
    */
   def getBets(matchedBetsOnly: Boolean): List[IBet] = market.getBets(userId, matchedBetsOnly)
 
+  /**Returns all matched and unmatched portions of a bet.*/
+  def getBet(betId:Long): List[IBet] = market.getBets(userId).filter(b => b.betId == betId)
+  
   /** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
    *  Prices with zero volume are not returned by this method.
    * 
