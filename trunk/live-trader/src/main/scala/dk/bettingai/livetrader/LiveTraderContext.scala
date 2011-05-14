@@ -184,6 +184,9 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
 	 	  case false => userBetsState.getUserBets(marketId)
 	  }
   }
+  
+   /**Returns all matched and unmatched portions of a bet.*/
+  def getBet(betId:Long): List[IBet] = throw new UnsupportedOperationException("Not implemented yet.")
 
   /**
    * Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange.
@@ -205,11 +208,12 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
     marketTradedVolume.get(runnerId).totalTradedVolume
   }
 
-  def risk(): MarketExpectedProfit = {
+   /** @param bank Amount of money in a bank (http://en.wikipedia.org/wiki/Kelly_criterion)*/
+  def risk(bank:Double): MarketExpectedProfit = {
     if (marketExpectedProfit.isEmpty) {
       val matchedUserBets = userBetsState.getUserBets(marketId, Option(M))
       val probs = ProbabilityCalculator.calculate(getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
-      marketExpectedProfit = Option(ExpectedProfitCalculator.calculate(matchedUserBets, probs, commission))
+      marketExpectedProfit = Option(ExpectedProfitCalculator.calculate(matchedUserBets, probs, commission,bank))
     }
 
     marketExpectedProfit.get
