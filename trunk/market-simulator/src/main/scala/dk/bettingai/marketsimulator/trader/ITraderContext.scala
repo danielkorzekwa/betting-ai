@@ -100,6 +100,9 @@ import com.espertech.esper.client._
      */
     def getBets(matchedBetsOnly: Boolean): List[IBet]
 
+    /**Returns all matched and unmatched portions of a bet.*/
+    def getBet(betId:Long): List[IBet]
+    
     /** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
      *  Prices with zero volume are not returned by this method.
      * 
