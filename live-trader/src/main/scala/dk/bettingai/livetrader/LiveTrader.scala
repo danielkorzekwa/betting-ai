@@ -33,7 +33,7 @@ case object StartTrader
 case object StopTrader
 case object ExecuteTrader
 
-case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketService, commission: Double, startInMinutesFrom: Int, startInMinutesTo: Int, marketDiscoveryIntervalSec: Long, menuPathFilter: String) {
+case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketService, commission: Double, bank:Double,startInMinutesFrom: Int, startInMinutesTo: Int, marketDiscoveryIntervalSec: Long, menuPathFilter: String) {
   private val log = LoggerFactory.getLogger(getClass)
 
   /**key - epnID.*/
@@ -130,7 +130,7 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
               traderContext.get.setEventTimestamp(eventTimestamp)
 
               /**Fill the cache with responses from those operations.*/
-              traderContext.get.risk()
+              traderContext.get.risk(bank)
               traderContext.get.getBestPrices()
               if (!traderContext.get.runners.isEmpty)
                 traderContext.get.getTotalTradedVolume(traderContext.get.runners.head.runnerId)

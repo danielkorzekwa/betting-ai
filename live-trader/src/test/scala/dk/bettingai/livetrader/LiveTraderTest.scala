@@ -26,13 +26,13 @@ class LiveTraderTest {
   private val marketDetails = new MarketDetails(marketId, "market Name", "menuPath", numOfWinners, marketTime, marketRunners)
 
   private val commission = 0.05
-
+  private val bank = 100
   private val mockery = new Mockery()
   private val marketService = mockery.mock(classOf[IMarketService])
 
   private val menuPathFilter = "Strat 1st Apr"
 
-  private val liveTrader = LiveTrader(trader, interval, marketService, commission, -60, 12, 60, menuPathFilter)
+  private val liveTrader = LiveTrader(trader, interval, marketService, commission, bank, -60, 12, 60, menuPathFilter)
 
   @Test
   def liveTraderStart {

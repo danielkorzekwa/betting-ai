@@ -216,7 +216,7 @@ class LiveTraderContextTest {
       }
     })
 
-    val risk = liveCtx.risk
+    val risk = liveCtx.risk(100)
     assertEquals(-0.768, risk.marketExpectedProfit, 0.001)
   }
 
