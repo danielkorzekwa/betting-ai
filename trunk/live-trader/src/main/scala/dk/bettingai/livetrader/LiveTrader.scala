@@ -16,6 +16,7 @@ import dk.bettingai.marketsimulator.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.bettingai.marketsimulator.betex.BetUtil._
+import dk.bettingai.marketsimulator.risk._
 
 /**
  * This class allows for running trader on a betting exchange market. Trader observes a market and places some bets.
@@ -33,7 +34,7 @@ case object StartTrader
 case object StopTrader
 case object ExecuteTrader
 
-case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketService, commission: Double, bank:Double,startInMinutesFrom: Int, startInMinutesTo: Int, marketDiscoveryIntervalSec: Long, menuPathFilter: String) {
+case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketService, commission: Double, bank: Double, startInMinutesFrom: Int, startInMinutesTo: Int, marketDiscoveryIntervalSec: Long, menuPathFilter: String) {
   private val log = LoggerFactory.getLogger(getClass)
 
   /**key - epnID.*/
@@ -111,15 +112,22 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
 
               /**Verify UserBetsState.*/
               if (traderContext.isDefined) {
-                val userBets = marketService.getUserBets(traderContext.get.marketId,None)
+                val userBets = marketService.getUserBets(traderContext.get.marketId, None)
+
+                val probs = ProbabilityCalculator.calculate(traderContext.get.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
+                val risk = ExpectedProfitCalculator.calculate(userBets.filter(b => b.betStatus == M), probs, commission, bank)
+
                 val userBetsFromState = traderContext.get.getBets(false)
-                log.info("VERIFY ubets=%s/%s, mBets=%s/%s, uBetsSize=%s/%s, mBetsSize=%s/%s".format(
+
+                log.info("VERIFY [live/cached] ubets=%s/%s, mBets=%s/%s, uBetsSize=%s/%s, mBetsSize=%s/%s, ep=%s/%s".format(
                   userBets.filter(_.betStatus == U).size,
                   userBetsFromState.filter(_.betStatus == U).size,
                   userBets.filter(_.betStatus == M).size,
                   userBetsFromState.filter(_.betStatus == M).size,
                   totalStake(userBets.filter(_.betStatus == U)), totalStake(userBetsFromState.filter(_.betStatus == U)),
-                  totalStake(userBets.filter(_.betStatus == M)), totalStake(userBetsFromState.filter(_.betStatus == M))))
+                  totalStake(userBets.filter(_.betStatus == M)), totalStake(userBetsFromState.filter(_.betStatus == M)),
+                  risk.marketExpectedProfit,
+                  traderContext.get.risk(bank).marketExpectedProfit))
 
               }
             }
