@@ -64,7 +64,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @return List of market ids.
    */
   def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: String): List[Long] = {
-    
+
     /**7 - HorceRacing markets*/
     val eventTypeIds: java.util.Set[Integer] = Set(new Integer(7))
     val markets = betfairService.getMarkets(marketTimeFrom, marketTimeTo, eventTypeIds)
@@ -87,7 +87,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @throw
    */
   def getMarketRunners(marketId: Long): MarketRunners = {
-    
+
     /**Get runner prices and runner traded volume*/
     val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
 
@@ -123,7 +123,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @return market prices, key - runnerId, ,valuee - list of runner prices (toBack and toLay)
    */
   def getMarketPrices(marketId: Long): MarketPrices = {
-    
+
     val bfMarketRunners = betfairService.getMarketRunners(marketId.asInstanceOf[Int])
     if (bfMarketRunners != null) {
       def toRunnerPrices(bfPrices: java.util.List[BFRunnerPrice]): List[IRunnerPrice] = bfPrices.map(p => new RunnerPrice(p.getPrice, p.getTotalToBack, p.getTotalToLay)).toList
@@ -144,7 +144,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @return Traded volume for all market runners, key - runnerId, ,value - runner traded volume for all prices.
    */
   def getMarketTradedVolume(marketId: Long): Map[Long, IRunnerTradedVolume] = {
-    
+
     val bfTradedVolume = betfairService.getMarketTradedVolume(marketId.asInstanceOf[Int])
 
     def toPriceTradedVolume(bfPriceTradedVolume: java.util.List[BFPriceTradedVolume]): IRunnerTradedVolume = {
@@ -158,7 +158,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
   }
 
   def getMarketDetails(marketId: Long): IMarketService.MarketDetails = {
-   
+
     val bfMarketDetails = betfairService.getMarketDetails(marketId.asInstanceOf[Int])
 
     val runners = bfMarketDetails.getRunners.map(r => new RunnerDetails(r.getSelectionId, r.getSelectionName)).toList
@@ -167,7 +167,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
   }
 
   def getUserMatchedBets(marketId: Long, matchedSince: Date): List[IBet] = {
-   
+
     val muBets = betfairService.getMUBets(BFBetStatus.M, marketId.toInt, matchedSince)
 
     toBets(muBets)
@@ -181,7 +181,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @return
    */
   def getUserBets(marketId: Long, betStatus: Option[BetStatusEnum] = None): List[IBet] = {
-   
+
     val bfBets = betStatus match {
       case None => betfairService.getMUBets(BFBetStatus.MU, marketId.toInt)
       case Some(M) => betfairService.getMUBets(BFBetStatus.M, marketId.toInt)
@@ -189,6 +189,12 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     }
 
     toBets(bfBets)
+  }
+
+  /**Returns all matched and unmatched portions of a bet.*/
+  def getBet(betId: Long): List[IBet] = {
+	  val bet = betfairService.getMUBet(betId)
+	  toBets(bet)
   }
 
   private def toBets(bfBets: java.util.List[BFMUBet]): List[IBet] = {
@@ -219,7 +225,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
    * @return The bet that was placed.
    */
   def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, marketId: Long, runnerId: Long): IBet = {
-   
+
     def betTypeValue(b: BetTypeEnum): BFBetType = betType match {
       case BACK => BFBetType.B
       case LAY => BFBetType.L
@@ -227,4 +233,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     val betResult = betfairService.placeBet(marketId.toInt, runnerId.toInt, betTypeValue(betType), betPrice, betSize, true)
     Bet(betResult.getBetId, -1l, betResult.getSize(), betResult.getPrice(), betType, marketId, runnerId)
   }
+  
+   /**Cancel a bet for a given bet id.*/
+  def cancelBet(betId:Long) = betfairService.cancelBet(betId)
 }

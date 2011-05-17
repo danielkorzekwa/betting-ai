@@ -161,7 +161,7 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    *
    * @return amount cancelled
    */
-  def cancelBet(betId: Long): Double = throw new UnsupportedOperationException("Not implemented yet")
+  def cancelBet(betId: Long): Double = { marketService.cancelBet(betId); -1d /** amount cancelled is not available now*/}
 
   /**
    * Place hedge bet on a market runner to make ifwin/iflose profits even. Either back or lay bet is placed on best available price.

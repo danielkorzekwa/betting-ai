@@ -54,8 +54,8 @@ class MarketServiceIntegrationTest {
   def getMatchedBets {
     val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
     if (!markets.isEmpty) {
-      val unmatchedBets = marketService.getUserBets(markets.head, Option(M))
-      unmatchedBets.foreach(b => assertTrue("Only matched bets should be returned here=" + b, b.betStatus == M))
+      val matchedBets = marketService.getUserBets(markets.head, Option(M))
+      matchedBets.foreach(b => assertTrue("Only matched bets should be returned here=" + b, b.betStatus == M))
     }
   }
 
@@ -64,6 +64,18 @@ class MarketServiceIntegrationTest {
     val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
     if (!markets.isEmpty) {
       val unmatchedBets = marketService.getUserBets(markets.head)
+    }
+  }
+
+  @Test
+  def getBet {
+    val markets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)))
+    if (!markets.isEmpty) {
+      val unmatchedBets = marketService.getUserBets(markets.head)
+      if (!unmatchedBets.isEmpty) {
+        val bets = marketService.getBet(unmatchedBets.head.betId)
+        assertTrue(bets.size > 0)
+      }
     }
   }
 
@@ -85,5 +97,9 @@ class MarketServiceIntegrationTest {
       assertTrue(tradedVolume.size > 2)
       tradedVolume.values.foreach(tv => assertTrue("No traded volume for runner", tv.pricesTradedVolume.size > 0))
     }
+  }
+  
+  @Test def cancelBet_betNotFound {
+	  marketService.cancelBet(1234)
   }
 }

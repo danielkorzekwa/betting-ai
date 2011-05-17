@@ -341,8 +341,18 @@ class LiveTraderContextTest {
         one(marketService).getBet(100); will(returnValue(bet))
       }
     })
-
     assertEquals(bet, liveCtx.getBet(100))
+  }
+
+  @Test
+  def cancelBet {
+    mockery.checking(new SExpectations() {
+      {
+        one(marketService).cancelBet(1234);
+      }
+    })
+
+    liveCtx.cancelBet(1234)
   }
 
   /**The 'with' method from jmock can't be used in Scala, therefore it's changed to 'withArg' method*/
