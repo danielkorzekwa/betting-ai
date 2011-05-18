@@ -149,4 +149,11 @@ import com.espertech.esper.client._
      * */
     def getEPNStatement(eplID:String):EPStatement
     
+   /**Register listener on those matched bets, which match filter criteria
+   * 
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addMatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit)
+    
   }

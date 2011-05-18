@@ -14,7 +14,7 @@ class BetUtilTest {
 	}
 
 	@Test def testAvgPrice {
-		val bets = Bet(100,123,2,2,BACK,1,11) ::Bet(101,123,3,3,BACK,1,12) :: Nil
+		val bets = Bet(100,123,2,2,BACK,1,11,100) ::Bet(101,123,3,3,BACK,1,12,100) :: Nil
 		assertEquals(2.6,BetUtil.avgPrice(bets),0)
 	}
 
@@ -25,7 +25,7 @@ class BetUtilTest {
 	}
 
 	@Test def testTotalStake {
-		val bets = Bet(100,123,2,2,BACK,1,11) :: Bet(101,123,3,3,BACK,1,12) :: Nil
+		val bets = Bet(100,123,2,2,BACK,1,11,100) :: Bet(101,123,3,3,BACK,1,12,100) :: Nil
 		assertEquals(5,BetUtil.totalStake(bets),0)
 	}
 
@@ -40,8 +40,8 @@ class BetUtilTest {
 	}
 
 	@Test  def testGetRunnerPrices {
-		val bets = Bet(100,122,13,2.1,LAY,1,11) ::Bet(100,121,3,2.2,LAY,1,11) :: 
-			Bet(102,122,5,2.2,LAY,1,11):: Bet(103,121,8,2.4,BACK,1,11) :: Bet(104,122,25,2.5,BACK,1,11) :: Nil
+		val bets = Bet(100,122,13,2.1,LAY,1,11,100) ::Bet(100,121,3,2.2,LAY,1,11,100) :: 
+			Bet(102,122,5,2.2,LAY,1,11,100):: Bet(103,121,8,2.4,BACK,1,11,100) :: Bet(104,122,25,2.5,BACK,1,11,100) :: Nil
 
 			val runnerPrices = BetUtil.mapToPrices(bets)
 			assertEquals(4,runnerPrices.size)
@@ -60,7 +60,7 @@ class BetUtilTest {
 	}
 
 	@Test  def testGetRunnerLayAndBackBetsonTheSamePrice {
-		val bets = Bet(100,122,5,2.4,BACK,1,11) ::Bet(101,122,8,2.4,LAY,1,11) :: Nil
+		val bets = Bet(100,122,5,2.4,BACK,1,11,100) ::Bet(101,122,8,2.4,LAY,1,11,100) :: Nil
 
 		val runnerPrices = BetUtil.mapToPrices(bets)
 

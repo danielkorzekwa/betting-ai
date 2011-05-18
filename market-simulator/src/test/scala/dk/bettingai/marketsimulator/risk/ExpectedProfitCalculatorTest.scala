@@ -31,7 +31,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test(expected = classOf[IllegalArgumentException])
   def testCalculateNoProbabilities {
-    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map()
     val commission = 0d
       val bank = 1000
@@ -40,7 +40,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test(expected = classOf[IllegalArgumentException])
   def testCalculateWrongProbabilities {
-    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(12l -> 2.1)
       val bank = 1000
     ExpectedProfitCalculator.calculate(bets, probabilities, 0,bank)
@@ -48,7 +48,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test(expected = classOf[IllegalArgumentException])
   def testCalculateBetsOnDifferentMarkets {
-    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11), Bet(101, 123, 10, 2, BACK, 2, 11))
+    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11,100), Bet(101, 123, 10, 2, BACK, 2, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 2.1)
       val bank = 1000
     ExpectedProfitCalculator.calculate(bets, probabilities, 0,bank)
@@ -57,7 +57,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateOneBackBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 1 / 1.5d)
     val commission = 0d
       val bank = 1000
@@ -74,7 +74,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateOneBackBetProbabilityChanged1 {
-    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 4d, 12l -> 3d / 4d)
     val commission = 0d
       val bank = 1000
@@ -90,7 +90,7 @@ class ExpectedProfitCalculatorTest {
   }
   @Test
   def testCalculateOneBackBetProbabilityChanged2 {
-    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 1.5, 12l -> 1d / 3)
     val commission = 0
       val bank = 1000
@@ -107,7 +107,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateOneLayBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 2, LAY, 1, 11))
+    val bets = List(Bet(100, 123, 10, 2, LAY, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2d, 12l -> 1d / 2d)
     val commission = 0
       val bank = 1000
@@ -124,7 +124,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateOneLayBetProbabilityChanged1 {
-    val bets = List(Bet(100, 123, 10, 2, LAY, 1, 11))
+    val bets = List(Bet(100, 123, 10, 2, LAY, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 2d / 3d)
     val commission = 0
       val bank = 1000
@@ -141,7 +141,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateOneLayBetProbabilityChanged2 {
-    val bets = List(Bet(100, 123, 10, 2.5, LAY, 1, 11))
+    val bets = List(Bet(100, 123, 10, 2.5, LAY, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 1.5, 12l -> 1d / 3d)
     val commission = 0
       val bank = 1000
@@ -158,7 +158,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoBackBetsOnTwoRunnersBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 1.5, BACK, 1, 11), Bet(101, 123, 10, 3, BACK, 1, 12))
+    val bets = List(Bet(100, 123, 10, 1.5, BACK, 1, 11,100), Bet(101, 123, 10, 3, BACK, 1, 12,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1 / 1.5, 12l -> 1d / 3d, 13l -> 0d)
     val commission = 0
       val bank = 1000
@@ -176,7 +176,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoBackBetsOnTwoRunnersBetProbabilityChanged {
-    val bets = List(Bet(100, 123, 10, 1.5, BACK, 1, 11), Bet(101, 123, 10, 3, BACK, 1, 12))
+    val bets = List(Bet(100, 123, 10, 1.5, BACK, 1, 11,100), Bet(101, 123, 10, 3, BACK, 1, 12,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 1 / 1.5)
     val commission = 0
       val bank = 1000
@@ -193,7 +193,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoLayBetsOnTwoRunnersBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 1.5, LAY, 1, 11), Bet(101, 123, 10, 3, LAY, 1, 12))
+    val bets = List(Bet(100, 123, 10, 1.5, LAY, 1, 11,100), Bet(101, 123, 10, 3, LAY, 1, 12,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1 / 1.5, 12l -> 1d / 3d)
     val commission = 0
       val bank = 1000
@@ -210,7 +210,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoLayBetsOnTwoRunnersBetProbabilityChanged {
-    val bets = List(Bet(100, 123, 10, 1.5, LAY, 1, 11), Bet(100, 123, 10, 3, LAY, 1, 12))
+    val bets = List(Bet(100, 123, 10, 1.5, LAY, 1, 11,100), Bet(100, 123, 10, 3, LAY, 1, 12,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 1 / 1.5)
     val commission = 0
       val bank = 1000
@@ -227,7 +227,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoBackBetsAndTwoLayBetsOnThreeRunnersBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11), Bet(101, 123, 10, 3, BACK, 1, 12), Bet(100, 123, 10, 6, BACK, 1, 13), Bet(102, 123, 10, 2, LAY, 1, 11), Bet(100, 123, 10, 3, LAY, 1, 12), Bet(103, 123, 10, 6, LAY, 1, 13))
+    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11,100), Bet(101, 123, 10, 3, BACK, 1, 12,100), Bet(100, 123, 10, 6, BACK, 1, 13,100), Bet(102, 123, 10, 2, LAY, 1, 11,100), Bet(100, 123, 10, 3, LAY, 1, 12,100), Bet(103, 123, 10, 6, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1 / 2, 12l -> 1 / 3, 13l -> 1 / 6)
     val commission = 0
       val bank = 1000
@@ -245,7 +245,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testCalculateTwoBackBetsAndTwoLayBetsOnTwoRunnersBetProbabilityChanged {
-    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11), Bet(100, 123, 10, 3, BACK, 1, 12), Bet(101, 123, 10, 6, BACK, 1, 13), Bet(102, 123, 10, 2, LAY, 1, 11), Bet(103, 123, 10, 3, LAY, 1, 12), Bet(104, 123, 10, 6, LAY, 1, 13))
+    val bets = List(Bet(100, 123, 10, 2, BACK, 1, 11,100), Bet(100, 123, 10, 3, BACK, 1, 12,100), Bet(101, 123, 10, 6, BACK, 1, 13,100), Bet(102, 123, 10, 2, LAY, 1, 11,100), Bet(103, 123, 10, 3, LAY, 1, 12,100), Bet(104, 123, 10, 6, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1 / 6, 12l -> 1 / 3, 13l -> 1 / 2)
     val commission = 0
       val bank = 1000
@@ -264,18 +264,18 @@ class ExpectedProfitCalculatorTest {
   @Test
   def testCalculateALotOfBetsHedgesToZeroProbabilitiesChanged {
     val bets = List(
-      Bet(100, 123, 10, 2, BACK, 1, 11),
-      Bet(101, 123, 10, 3, BACK, 1, 12),
-      Bet(102, 123, 10, 6, BACK, 1, 13),
-      Bet(103, 123, 10, 2, LAY, 1, 11),
-      Bet(104, 123, 10, 3, LAY, 1, 12),
-      Bet(105, 123, 10, 6, LAY, 1, 13),
-      Bet(106, 123, 13, 4, BACK, 1, 11),
-      Bet(107, 123, 14, 5, BACK, 1, 12),
-      Bet(108, 123, 15, 6, BACK, 1, 13),
-      Bet(109, 123, 13, 4, LAY, 1, 11),
-      Bet(110, 123, 14, 5, LAY, 1, 12),
-      Bet(111, 123, 15, 6, LAY, 1, 13))
+      Bet(100, 123, 10, 2, BACK, 1, 11,100),
+      Bet(101, 123, 10, 3, BACK, 1, 12,100),
+      Bet(102, 123, 10, 6, BACK, 1, 13,100),
+      Bet(103, 123, 10, 2, LAY, 1, 11,100),
+      Bet(104, 123, 10, 3, LAY, 1, 12,100),
+      Bet(105, 123, 10, 6, LAY, 1, 13,100),
+      Bet(106, 123, 13, 4, BACK, 1, 11,100),
+      Bet(107, 123, 14, 5, BACK, 1, 12,100),
+      Bet(108, 123, 15, 6, BACK, 1, 13,100),
+      Bet(109, 123, 13, 4, LAY, 1, 11,100),
+      Bet(110, 123, 14, 5, LAY, 1, 12,100),
+      Bet(111, 123, 15, 6, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1 / 6, 12l -> 1 / 3, 13l -> 1 / 2)
     val commission = 0
       val bank = 1000
@@ -294,7 +294,7 @@ class ExpectedProfitCalculatorTest {
   /**Test scenarios for wealth.*/
   @Test
   def testWealthOneBackBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 10, 3, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 1 / 1.5d)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 100)
@@ -314,7 +314,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneLayBetProbabilityNotChanged {
-    val bets = List(Bet(100, 123, 10, 3, LAY, 1, 11))
+    val bets = List(Bet(100, 123, 10, 3, LAY, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 3d, 12l -> 1 / 1.5d)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 100)
@@ -334,7 +334,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneBackBetProbabilityChanged1 {
-    val bets = List(Bet(100, 123, 10, 5, BACK, 1, 13))
+    val bets = List(Bet(100, 123, 10, 5, BACK, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 1000)
@@ -359,7 +359,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneLayBetProbabilityChanged1 {
-    val bets = List(Bet(100, 123, 10, 5, LAY, 1, 13))
+    val bets = List(Bet(100, 123, 10, 5, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 1000)
@@ -383,7 +383,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneBackBetProbabilityChanged2 {
-    val bets = List(Bet(100, 123, 100, 5, BACK, 1, 13))
+    val bets = List(Bet(100, 123, 100, 5, BACK, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 1000)
@@ -411,7 +411,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneLayBetProbabilityChanged2 {
-    val bets = List(Bet(100, 123, 100, 5, LAY, 1, 13))
+    val bets = List(Bet(100, 123, 100, 5, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 1000)
@@ -437,7 +437,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneBackBetProbabilityChanged3 {
-    val bets = List(Bet(100, 123, 1000, 5, BACK, 1, 13))
+    val bets = List(Bet(100, 123, 1000, 5, BACK, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 10000)
@@ -465,7 +465,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneLayBetProbabilityChanged3 {
-    val bets = List(Bet(100, 123, 1000, 5, LAY, 1, 13))
+    val bets = List(Bet(100, 123, 1000, 5, LAY, 1, 13,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val commission = 0d
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 10000)
@@ -492,7 +492,7 @@ class ExpectedProfitCalculatorTest {
   /**Tests against commission.*/
   @Test
   def testCalculateOneBackBetProbabilityNotChangedWithCommission {
-    val bets = List(Bet(100, 123, 100, 2, BACK, 1, 11))
+    val bets = List(Bet(100, 123, 100, 2, BACK, 1, 11,100))
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2d, 12l -> 1 / 2d)
     val commission = 0.03
     val bank = 1000
@@ -509,7 +509,7 @@ class ExpectedProfitCalculatorTest {
 
   @Test
   def testWealthOneBackBetProbabilityChanged1CommissionChanged {
-    val bets = List(Bet(100, 123, 10, 5, BACK, 1, 13))
+    val bets = List(Bet(100, 123, 10, 5, BACK, 1, 13,100))
     val commission = 0.05
     val probabilities: Map[Long, Double] = Map(11l -> 1d / 2, 12l -> 1d / 3, 13l -> 1d / 6)
     val expectedProfit = ExpectedProfitCalculator.calculate(bets, probabilities, commission, 1000)

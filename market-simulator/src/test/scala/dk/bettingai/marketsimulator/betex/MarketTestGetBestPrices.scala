@@ -22,11 +22,11 @@ class MarketTestGetBestPrices {
 	@Test def testGetBestPricesBothToBackAndToLayAreAvailable {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(100,122,13,2.1,LAY,11)
-		market.placeBet(101,121,3,2.2,LAY,11)
-		market.placeBet(102,122,5,2.2,LAY,11)
-		market.placeBet(103,121,9,2.4,BACK,11)
-		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(100,122,13,2.1,LAY,11,1000)
+		market.placeBet(101,121,3,2.2,LAY,11,1000)
+		market.placeBet(102,122,5,2.2,LAY,11,1000)
+		market.placeBet(103,121,9,2.4,BACK,11,1000)
+		market.placeBet(104,122,25,2.5,BACK,11,1000)
 
 		val bestPrices = market.getBestPrices(11)
 		assertEquals(2.2,bestPrices._1.price,0)
@@ -41,14 +41,14 @@ class MarketTestGetBestPrices {
 	@Test def testGetBestPricesBothToBackAndToLayAreAvailablePlusBetOnOtherRunner {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(100,122,13,2.1,LAY,11)
-		market.placeBet(101,121,3,2.2,LAY,11)
-		market.placeBet(102,122,5,2.2,LAY,11)
-		market.placeBet(103,121,8,2.4,BACK,11)
-		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(100,122,13,2.1,LAY,11,1000)
+		market.placeBet(101,121,3,2.2,LAY,11,1000)
+		market.placeBet(102,122,5,2.2,LAY,11,1000)
+		market.placeBet(103,121,8,2.4,BACK,11,1000)
+		market.placeBet(104,122,25,2.5,BACK,11,1000)
 
-		market.placeBet(105,122,13,2.3,LAY,12)
-		market.placeBet(106,122,25,2.3,BACK,12)
+		market.placeBet(105,122,13,2.3,LAY,12,1001)
+		market.placeBet(106,122,25,2.3,BACK,12,1001)
 
 		val bestPrices = market.getBestPrices(11)
 		assertEquals(2.2,bestPrices._1.price,0)
@@ -63,15 +63,15 @@ class MarketTestGetBestPrices {
 	@Test def testGetBestPricesBothToBackAndToLayAreAvailablePlusSettledBets {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(100,122,13,2.1,LAY,11)
-		market.placeBet(101,121,3,2.2,LAY,11)
-		market.placeBet(102,122,5,2.2,LAY,11)
-		market.placeBet(103,121,8,2.4,BACK,11)
-		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(100,122,13,2.1,LAY,11,1000)
+		market.placeBet(101,121,3,2.2,LAY,11,1000)
+		market.placeBet(102,122,5,2.2,LAY,11,1000)
+		market.placeBet(103,121,8,2.4,BACK,11,1000)
+		market.placeBet(104,122,25,2.5,BACK,11,1000)
 
 		/**Matching bets*/
-		market.placeBet(105,121,8,2.4,LAY,11)
-		market.placeBet(106,122,8,2.2,BACK,11)
+		market.placeBet(105,121,8,2.4,LAY,11,1000)
+		market.placeBet(106,122,8,2.2,BACK,11,1000)
 
 		val bestPrices = market.getBestPrices(11)
 		assertEquals(2.1,bestPrices._1.price,0)
@@ -86,8 +86,8 @@ class MarketTestGetBestPrices {
 	@Test def testGetBestPricesToBackPriceIsNotAvailable {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(103,121,8,2.4,BACK,11)
-		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(103,121,8,2.4,BACK,11,1000)
+		market.placeBet(104,122,25,2.5,BACK,11,1000)
 
 		val bestPrices = market.getBestPrices(11)
 		assertEquals(Double.NaN,bestPrices._1.price,0)
@@ -103,8 +103,8 @@ class MarketTestGetBestPrices {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
 		
-		market.placeBet(101,122,25,2.7,BACK,11)
-		market.placeBet(102,122,8,2.6,LAY,11)
+		market.placeBet(101,122,25,2.7,BACK,11,1000)
+		market.placeBet(102,122,8,2.6,LAY,11,1000)
 		
 		market.cancelBets(122,25,2.7,BACK,11)
 		market.cancelBets(122,8,2.6,LAY,11)
@@ -123,8 +123,8 @@ class MarketTestGetBestPrices {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
 		
-		market.placeBet(101,122,25,2.7,BACK,11)
-		market.placeBet(102,122,8,2.6,LAY,11)
+		market.placeBet(101,122,25,2.7,BACK,11,1000)
+		market.placeBet(102,122,8,2.6,LAY,11,1000)
 		
 		market.cancelBet(101)
 		market.cancelBet(102)
@@ -142,9 +142,9 @@ class MarketTestGetBestPrices {
 	@Test def testGetBestPricesToLayPriceIsNotAvailable {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(100,122,13,2.1,LAY,11)
-		market.placeBet(101,121,3,2.2,LAY,11)
-		market.placeBet(102,122,5,2.2,LAY,11)
+		market.placeBet(100,122,13,2.1,LAY,11,1000)
+		market.placeBet(101,121,3,2.2,LAY,11,1000)
+		market.placeBet(102,122,5,2.2,LAY,11,1000)
 
 		val bestPrices = market.getBestPrices(11)
 		assertEquals(2.2,bestPrices._1.price,0)
@@ -171,14 +171,14 @@ class MarketTestGetBestPrices {
 @Test def testGetBestPricesBothToBackAndToLayAreAvailableOnTwoRunners {
 		val market = new Market(1,"Match Odds","Man Utd vs Arsenal",1,new Date(2000),List(new Market.Runner(11,"Man Utd"),new Market.Runner(12,"Arsenal")))
 
-		market.placeBet(100,122,13,2.1,LAY,11)
-		market.placeBet(101,121,3,2.2,LAY,11)
-		market.placeBet(102,122,5,2.2,LAY,11)
-		market.placeBet(103,121,8,2.4,BACK,11)
-		market.placeBet(104,122,25,2.5,BACK,11)
+		market.placeBet(100,122,13,2.1,LAY,11,1000)
+		market.placeBet(101,121,3,2.2,LAY,11,1000)
+		market.placeBet(102,122,5,2.2,LAY,11,1000)
+		market.placeBet(103,121,8,2.4,BACK,11,1000)
+		market.placeBet(104,122,25,2.5,BACK,11,1000)
 
-		market.placeBet(105,122,13,2.6,LAY,12)
-		market.placeBet(106,122,25,2.8,BACK,12)
+		market.placeBet(105,122,13,2.6,LAY,12,1001)
+		market.placeBet(106,122,25,2.8,BACK,12,1001)
 
 		val bestPrices = market.getBestPrices()
 		assertEquals(2,bestPrices.size)

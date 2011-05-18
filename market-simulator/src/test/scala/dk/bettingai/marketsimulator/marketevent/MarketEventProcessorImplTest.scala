@@ -97,7 +97,7 @@ class MarketEventProcessorImplTest {
 		mockery.checking(new SExpectations(){
 			{
 				one(betex).findMarket(1);will(returnValue(market))
-				one(market).placeBet(100,123,10,3, IBet.BetTypeEnum.LAY, 11)
+				one(market).placeBet(100,123,10,3, IBet.BetTypeEnum.LAY, 11,1234568)
 			}
 		})
 
@@ -119,7 +119,7 @@ class MarketEventProcessorImplTest {
 		mockery.checking(new SExpectations(){
 			{
 				one(betex).findMarket(1);will(returnValue(market))
-				one(market).placeBet(101,345,10,3, IBet.BetTypeEnum.BACK, 11)
+				one(market).placeBet(101,345,10,3, IBet.BetTypeEnum.BACK, 11,1234569)
 			}
 		})
 

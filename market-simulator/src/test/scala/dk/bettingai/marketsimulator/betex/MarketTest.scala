@@ -34,7 +34,7 @@ class MarketTest {
   @Test(expected = classOf[NoSuchElementException])
   def testCancelBetForNotExistingBetId {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 2, 3, BACK, 11)
+    market.placeBet(100, 123, 2, 3, BACK, 11,1000)
 
     market.cancelBet(101)
   }
@@ -42,8 +42,8 @@ class MarketTest {
   @Test(expected = classOf[NoSuchElementException])
   def testCancelFullyMatchedBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 2, 3, BACK, 11)
-    market.placeBet(101, 123, 2, 3, LAY, 11)
+    market.placeBet(100, 123, 2, 3, BACK, 11,1000)
+    market.placeBet(101, 123, 2, 3, LAY, 11,1000)
 
     assertEquals(2, market.getBets(123).size)
     market.cancelBet(100)
@@ -52,7 +52,7 @@ class MarketTest {
   @Test
   def testCancelUnsettledBackBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 2, 3, BACK, 11)
+    market.placeBet(100, 123, 2, 3, BACK, 11,1000)
 
     assertEquals(1, market.getBets(123).size)
     assertEquals(2, market.cancelBet(100), 0)
@@ -62,7 +62,7 @@ class MarketTest {
   @Test
   def testCancelUnsettledLayBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 2, 3, LAY, 11)
+    market.placeBet(100, 123, 2, 3, LAY, 11,1000)
 
     assertEquals(1, market.getBets(123).size)
     assertEquals(2, market.cancelBet(100), 0)
@@ -72,8 +72,8 @@ class MarketTest {
   @Test
   def testCancelPartiallyMatchedBackBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 3, 3, BACK, 11)
-    market.placeBet(101, 123, 2, 3, LAY, 11)
+    market.placeBet(100, 123, 3, 3, BACK, 11,1000)
+    market.placeBet(101, 123, 2, 3, LAY, 11,1000)
 
     assertEquals(3, market.getBets(123).size)
     assertEquals(1, market.cancelBet(100), 0)
@@ -83,8 +83,8 @@ class MarketTest {
   @Test
   def testCancelPartiallyMatchedLayBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 123, 2, 3, BACK, 11)
-    market.placeBet(101, 123, 3, 3, LAY, 11)
+    market.placeBet(100, 123, 2, 3, BACK, 11,1000)
+    market.placeBet(101, 123, 3, 3, LAY, 11,1000)
 
     assertEquals(3, market.getBets(123).size)
     assertEquals(1, market.cancelBet(101), 0)
@@ -100,7 +100,7 @@ class MarketTest {
   def testGetBetsForNotExistingUser {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
-    market.placeBet(100, 123, 2, 1.5, BACK, 11)
+    market.placeBet(100, 123, 2, 1.5, BACK, 11,1000)
     assertEquals(0, market.getBets(1234).size)
   }
 
@@ -115,9 +115,9 @@ class MarketTest {
   def getBetsMatchedOnly {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
-    market.placeBet(100, 123, 2, 1.5, BACK, 11)
-    market.placeBet(101, 123, 3, 1.4, BACK, 11)
-    market.placeBet(102, 123, 2, 1.6, LAY, 11)
+    market.placeBet(100, 123, 2, 1.5, BACK, 11,1000)
+    market.placeBet(101, 123, 3, 1.4, BACK, 11,1000)
+    market.placeBet(102, 123, 2, 1.6, LAY, 11,1000)
 
     val matchedBets = market.getBets(123, true)
     assertEquals(2, matchedBets.size)
@@ -149,11 +149,11 @@ class MarketTest {
   def testGetRunnerPricesForUnmatchedBetsOnly {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
-    market.placeBet(100, 122, 13, 2.1, LAY, 11)
-    market.placeBet(101, 121, 3, 2.2, LAY, 11)
-    market.placeBet(102, 122, 5, 2.2, LAY, 11)
-    market.placeBet(103, 121, 8, 2.4, BACK, 11)
-    market.placeBet(104, 122, 25, 2.5, BACK, 11)
+    market.placeBet(100, 122, 13, 2.1, LAY, 11,1000)
+    market.placeBet(101, 121, 3, 2.2, LAY, 11,1000)
+    market.placeBet(102, 122, 5, 2.2, LAY, 11,1000)
+    market.placeBet(103, 121, 8, 2.4, BACK, 11,1000)
+    market.placeBet(104, 122, 25, 2.5, BACK, 11,1000)
 
     val runnerPrices = market.getRunnerPrices(11)
 
@@ -180,11 +180,11 @@ class MarketTest {
   def testGetRunnerPricesForUnmatchedBetsOnlyPlacedInDifferentOrder {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
-    market.placeBet(101, 121, 3, 2.2, LAY, 11)
-    market.placeBet(102, 122, 5, 2.2, LAY, 11)
-    market.placeBet(100, 122, 13, 2.1, LAY, 11)
-    market.placeBet(104, 122, 25, 2.5, BACK, 11)
-    market.placeBet(103, 121, 8, 2.4, BACK, 11)
+    market.placeBet(101, 121, 3, 2.2, LAY, 11,1000)
+    market.placeBet(102, 122, 5, 2.2, LAY, 11,1000)
+    market.placeBet(100, 122, 13, 2.1, LAY, 11,1000)
+    market.placeBet(104, 122, 25, 2.5, BACK, 11,1000)
+    market.placeBet(103, 121, 8, 2.4, BACK, 11,1000)
 
     val runnerPrices = market.getRunnerPrices(11)
 
@@ -212,15 +212,15 @@ class MarketTest {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
     /**Unmatched bets on runner 11.*/
-    market.placeBet(100, 122, 13, 2.1, LAY, 11)
-    market.placeBet(101, 121, 3, 2.2, LAY, 11)
-    market.placeBet(102, 122, 5, 2.2, LAY, 11)
-    market.placeBet(103, 121, 8, 2.4, BACK, 11)
-    market.placeBet(104, 122, 25, 2.5, BACK, 11)
+    market.placeBet(100, 122, 13, 2.1, LAY, 11,1000)
+    market.placeBet(101, 121, 3, 2.2, LAY, 11,1000)
+    market.placeBet(102, 122, 5, 2.2, LAY, 11,1000)
+    market.placeBet(103, 121, 8, 2.4, BACK, 11,1000)
+    market.placeBet(104, 122, 25, 2.5, BACK, 11,1000)
 
     /**Unmatched bets on runner 12.*/
-    market.placeBet(105, 122, 13, 2.1, LAY, 12)
-    market.placeBet(106, 122, 15, 2.4, BACK, 12)
+    market.placeBet(105, 122, 13, 2.1, LAY, 12,1001)
+    market.placeBet(106, 122, 15, 2.4, BACK, 12,1001)
 
     val runnerPrices = market.getRunnerPrices(11)
 
@@ -248,11 +248,11 @@ class MarketTest {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
     /**Unmatched bets.*/
-    market.placeBet(100, 122, 13, 2.1, LAY, 11)
-    market.placeBet(104, 122, 25, 2.5, BACK, 11)
+    market.placeBet(100, 122, 13, 2.1, LAY, 11,1000)
+    market.placeBet(104, 122, 25, 2.5, BACK, 11,1000)
 
     /**Matching bets.*/
-    market.placeBet(105, 122, 10, 2.5, LAY, 11)
+    market.placeBet(105, 122, 10, 2.5, LAY, 11,1000)
 
     val runnerPrices = market.getRunnerPrices(11)
 
@@ -271,8 +271,8 @@ class MarketTest {
   def testGetRunnerLayAndBackBetsonTheSamePrice {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
 
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.4, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.4, LAY, 11,1000)
 
     val runnerPrices = market.getRunnerPrices(11)
 
@@ -296,8 +296,8 @@ class MarketTest {
   @Test
   def testRunnerTradedVolumeNoMatchedBets {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.3, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.3, LAY, 11,1000)
 
     assertEquals(0, market.getRunnerTradedVolume(11).pricesTradedVolume.size)
   }
@@ -312,8 +312,8 @@ class MarketTest {
   @Test
   def testRunnerTradedVolumeOneMatchedBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
 
     val tradedVolume = market.getRunnerTradedVolume(11)
     assertEquals(1, tradedVolume.pricesTradedVolume.size)
@@ -324,10 +324,10 @@ class MarketTest {
   @Test
   def testRunnerTradedVolumeThreeMatchedBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
-    market.placeBet(102, 122, 4, 2.5, BACK, 11)
-    market.placeBet(103, 122, 2, 2.8, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
+    market.placeBet(102, 122, 4, 2.5, BACK, 11,1000)
+    market.placeBet(103, 122, 2, 2.8, LAY, 11,1000)
 
     val tradedVolume = market.getRunnerTradedVolume(11)
     assertEquals(3, tradedVolume.pricesTradedVolume.size)
@@ -344,10 +344,10 @@ class MarketTest {
   @Test
   def testRunnerTradedVolumeMatchedBetsOnTwoRunners {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
-    market.placeBet(102, 122, 4, 2.5, BACK, 12)
-    market.placeBet(103, 122, 2, 2.8, LAY, 12)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
+    market.placeBet(102, 122, 4, 2.5, BACK, 12,1001)
+    market.placeBet(103, 122, 2, 2.8, LAY, 12,1001)
 
     val tradedVolume11 = market.getRunnerTradedVolume(11)
     assertEquals(1, tradedVolume11.pricesTradedVolume.size)
@@ -374,8 +374,8 @@ class MarketTest {
   @Test
   def testTotalTradedVolumeNoMatchedBets {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.3, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.3, LAY, 11,1000)
 
     assertEquals(0, market.getTotalTradedVolume(11), 0)
   }
@@ -390,8 +390,8 @@ class MarketTest {
   @Test
   def testTotalTradedVolumeOneMatchedBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
 
     assertEquals(5, market.getTotalTradedVolume(11), 0)
   }
@@ -399,10 +399,10 @@ class MarketTest {
   @Test
   def testTotalTradedVolumeThreeMatchedBet {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
-    market.placeBet(102, 122, 4, 2.5, BACK, 11)
-    market.placeBet(103, 122, 2, 2.8, LAY, 11)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
+    market.placeBet(102, 122, 4, 2.5, BACK, 11,1000)
+    market.placeBet(103, 122, 2, 2.8, LAY, 11,1000)
 
     assertEquals(9, market.getTotalTradedVolume(11), 0)
   }
@@ -410,10 +410,10 @@ class MarketTest {
   @Test
   def testTotalTradedVolumeMatchedBetsOnTwoRunners {
     val market = new Market(1, "Match Odds", "Man Utd vs Arsenal", 1, new Date(2000), List(new Market.Runner(11, "Man Utd"), new Market.Runner(12, "Arsenal")))
-    market.placeBet(100, 122, 5, 2.4, BACK, 11)
-    market.placeBet(101, 122, 8, 2.6, LAY, 11)
-    market.placeBet(102, 122, 4, 2.5, BACK, 12)
-    market.placeBet(103, 122, 2, 2.8, LAY, 12)
+    market.placeBet(100, 122, 5, 2.4, BACK, 11,1000)
+    market.placeBet(101, 122, 8, 2.6, LAY, 11,1000)
+    market.placeBet(102, 122, 4, 2.5, BACK, 12,1001)
+    market.placeBet(103, 122, 2, 2.8, LAY, 12,1001)
 
     assertEquals(5, market.getTotalTradedVolume(11), 0)
     assertEquals(2, market.getTotalTradedVolume(12), 0)
