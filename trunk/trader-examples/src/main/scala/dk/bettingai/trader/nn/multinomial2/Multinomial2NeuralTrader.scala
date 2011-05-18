@@ -140,13 +140,13 @@ case class Multinomial2NeuralTrader extends ITrader {
         }
 
         if (!bestPrices._2.price.isNaN) {
-          val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._2.price, BACK, M, ctx.marketId, runnerId, None))
+          val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._2.price, BACK, M, ctx.marketId, runnerId,1000, None))
           val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission, bank)
           if (decision.getData(0) > 0 && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, BACK, runnerId)
         }
 
         if (!bestPrices._1.price.isNaN) {
-          val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._1.price, LAY, M, ctx.marketId, runnerId, None))
+          val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._1.price, LAY, M, ctx.marketId, runnerId,1000, None))
           val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission, bank)
           if (decision.getData(1) > 0 && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, LAY, runnerId)
         }
