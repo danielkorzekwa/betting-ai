@@ -36,7 +36,7 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
     }
 
     def getEPLStatements(): Map[String, String] = {
-      val priceSlopeEPL = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(120 sec).stat:linest(timestamp,prob, runnerId)"
+      val priceSlopeEPL = "select runnerId, slope from ProbEvent.std:groupwin(runnerId).win:time(30 sec).stat:linest(timestamp,prob, runnerId)"
       Map("priceSlope" -> priceSlopeEPL)
     }
 
@@ -62,13 +62,13 @@ class PriceSlopeTrader(val traderId: String, val backPriceSlopeSignal: Double, v
       val probs = ProbabilityCalculator.calculate(ctx.getBestPrices.mapValues(prices => prices._1.price -> prices._2.price), 1)
 
       if (!bestPrices._1.price.isNaN) {
-        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, None))
+        val matchedBetsBack = List(new Bet(1, 1, 2, bestPrices._1.price, BACK, M, ctx.marketId, runnerId, 1000,None))
         val riskBack = ExpectedProfitCalculator.calculate(matchedBetsBack, probs, ctx.commission,bank)
         if (priceSlope < backPriceSlopeSignal && riskBack.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._1.price, BACK, runnerId)
       }
 
       if (!bestPrices._2.price.isNaN) {
-        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, None))
+        val matchedBetsLay = List(new Bet(1, 1, 2, bestPrices._2.price, LAY, M, ctx.marketId, runnerId, 1000,None))
         val riskLay = ExpectedProfitCalculator.calculate(matchedBetsLay, probs, ctx.commission,bank)
         if (priceSlope > layPriceSlopeSignal && riskLay.marketExpectedProfit > -0.2) ctx.fillBet(2, bestPrices._2.price, LAY, runnerId)
       }
