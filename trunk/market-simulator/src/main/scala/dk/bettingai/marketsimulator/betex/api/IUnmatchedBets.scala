@@ -80,7 +80,7 @@ trait IUnmatchedBets {
         /**Find unmatched portion for a bet being placed.*/
         val unmatchedPortion = matchingResult.find(b => b.betId == bet.betId && b.betStatus == U)
         if (!unmatchedPortion.isEmpty) {
-          matchBetRec(new Bet(bet.betId, bet.userId, unmatchedPortion.get.betSize, bet.betPrice, bet.betType, U, bet.marketId, bet.runnerId,bet.matchedDate), priceToMatch)
+          matchBetRec(unmatchedPortion.get, priceToMatch)
         }
       } else {
         if (pricesToBeMatched.hasNext) {
@@ -144,7 +144,7 @@ trait IUnmatchedBets {
         priceBets -= betToCancel
         betToCancel.betSize
       } else {
-        val updatedBet = Bet(betToCancel.betId, betToCancel.userId, betToCancel.betSize - amountToCancel, betToCancel.betPrice, betToCancel.betType, betToCancel.marketId, betToCancel.runnerId)
+        val updatedBet = Bet(betToCancel.betId, betToCancel.userId, betToCancel.betSize - amountToCancel, betToCancel.betPrice, betToCancel.betType, betToCancel.marketId, betToCancel.runnerId,betToCancel.placedDate)
         priceBets.update(priceBets.indexOf(betToCancel, 0), updatedBet)
         amountToCancel
       }

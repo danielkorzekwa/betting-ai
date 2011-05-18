@@ -79,7 +79,7 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
    */
   def placeBet(betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = {
     val betId = nextBetId
-    market.placeBet(betId, userId, betSize, betPrice, betType, runnerId)
+    market.placeBet(betId, userId, betSize, betPrice, betType, runnerId,getEventTimestamp)
   }
 
   /** Places a bet on a betting exchange market.
@@ -211,5 +211,12 @@ class TraderContext(nextBetId: => Long, val userId: Int, market: IMarket, val co
      * @return EPStatement
      * */
     def getEPNStatement(eplID:String):EPStatement = marketSimActor.getEPNStatement(eplID)
+    
+     /**Register listener on those matched bets, which match filter criteria
+   * 
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addMatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) = market.addMatchedBetsListener(filter,listener)
   
 }

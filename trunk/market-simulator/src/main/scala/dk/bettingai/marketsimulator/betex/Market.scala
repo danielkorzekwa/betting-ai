@@ -62,7 +62,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
    * 
    * @return The bet that was placed.
    */
-  def placeBet(betId: Long, userId: Long, betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): IBet = {
+  def placeBet(betId: Long, userId: Long, betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long,placedDate:Long): IBet = {
 
     require(betSize > 0, "Bet size must be >0, betSize=" + betSize)
     require(runners.exists(s => s.runnerId == runnerId), "Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
@@ -70,7 +70,7 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
     betsIds += betId
 
-    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId,None)
+    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId,placedDate,None)
 
     /**Match bet.*/
     val matchedBets = betType match {

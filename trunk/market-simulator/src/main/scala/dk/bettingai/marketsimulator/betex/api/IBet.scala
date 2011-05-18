@@ -31,8 +31,10 @@ trait IBet {
 	val betStatus:BetStatusEnum.BetStatusEnum
 	val marketId:Long
 	val runnerId:Long
+	val placedDate:Long
 	/**None if bet is not matched.*/
 	val matchedDate:Option[Long]
+	
 	
 	/**Match two bets. Bet that the matchedBet method is executed on is always matched at the best available price. 
 	 * Examples: backBetWithPrice2.matchBet(layBetWithPrice3) = matched price 3,layBetWithPrice3.matchBet(backBetWithPrice2) = matched price 2. 

@@ -65,7 +65,7 @@ class MarketEventProcessorImpl(betex:IBetex) extends MarketEventProcessor{
 			eventMap("eventType") match {
 			case "PLACE_BET" => {	
 				val market = betex.findMarket( eventMap("marketId").toLong)
-				market.placeBet(nextBetId,userId,eventMap("betSize").toDouble,eventMap("betPrice").toDouble, IBet.BetTypeEnum.valueOf(eventMap("betType")).get,eventMap("runnerId").toLong)
+				market.placeBet(nextBetId,userId,eventMap("betSize").toDouble,eventMap("betPrice").toDouble, IBet.BetTypeEnum.valueOf(eventMap("betType")).get,eventMap("runnerId").toLong,timestamp)
 			}
 			case "CANCEL_BETS" => {
 				val market = betex.findMarket( eventMap("marketId").toLong)

@@ -13,18 +13,18 @@ class BetTest {
 	 **/
 	
 	@Test def testCreateBet{
-		new Bet(10,123,2,1.01,BACK,U,1,11,None)
-		new Bet(10,123,2,1.5,BACK,M,1,11,None)
-		new Bet(10,123,2,1000,BACK,M,1,11,None)
-		new Bet(10,123,100,3,LAY,U,1,11,None)
+		new Bet(10,123,2,1.01,BACK,U,1,11,1000,None)
+		new Bet(10,123,2,1.5,BACK,M,1,11,1000,None)
+		new Bet(10,123,2,1000,BACK,M,1,11,1000,None)
+		new Bet(10,123,100,3,LAY,U,1,11,1000,None)
 	}
 	
 	@Test(expected=classOf[IllegalArgumentException]) def testCreateBetPriceLessThanMin{
-		new Bet(10,123,2,1,BACK,U,1,11,None)
+		new Bet(10,123,2,1,BACK,U,1,11,1000,None)
 	}
 	
 	@Test(expected=classOf[IllegalArgumentException]) def testCreateBetPriceMoreThanMax{
-		new Bet(10,123,2,1001,BACK,U,1,11,None)
+		new Bet(10,123,2,1001,BACK,U,1,11,1000,None)
 	}
 	
 	/**
@@ -32,8 +32,8 @@ class BetTest {
 	 **/
 	
 	@Test def testMatchBetBackWithLay {
-		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -60,8 +60,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBackWithLayDifferentPrice {
-		val firstBet = new Bet(10,122,10,1.5,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,1.5,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -88,8 +88,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBigBackWithLay {
-		val firstBet = new Bet(10,122,12,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,12,2,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -125,8 +125,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBigBackWithLayDifferentPrice {
-		val firstBet = new Bet(10,122,12,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,3,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,12,2,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,3,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -162,8 +162,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBackWithBigLay {
-		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,15,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,15,2,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -199,8 +199,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBackWithBigLayDifferentPrice {
-		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,15,3,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,15,3,LAY,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -236,8 +236,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetLayWithBack {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -264,8 +264,8 @@ class BetTest {
 	}
 	
 		@Test def testMatchBetLayWithBackDifferentPrice {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,1.5,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,1.5,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -292,8 +292,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBigLayWithBack {
-		val firstBet = new Bet(10,122,14,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,14,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -329,8 +329,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBigLayWithBackDifferentPrice {
-		val firstBet = new Bet(10,122,14,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,1.5,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,14,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,1.5,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -366,8 +366,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetLayWithBigBack {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,15,2,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,15,2,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -403,8 +403,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetLayWithBigBackDifferentPrice {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,15,1.5,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,15,1.5,BACK,U,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -445,8 +445,8 @@ class BetTest {
 	 **/
 	
 	@Test def testMatchBetTwoBackBets {
-		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,BACK,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -473,8 +473,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetTwoLayBets {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -501,8 +501,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetDifferentMarketId {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,2,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,2,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -529,8 +529,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetDifferentRunnerId {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,1,12,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,1,12,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -556,8 +556,8 @@ class BetTest {
 		
 	}
 	@Test def testMatchBetFirstBackSecondLayPriceNotMatching {
-		val firstBet = new Bet(10,122,10,3,BACK,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,None)
+		val firstBet = new Bet(10,122,10,3,BACK,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,LAY,U,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -584,8 +584,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetFirstLaySecondBackPriceNotMatching {
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,3,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,3,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -612,8 +612,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetFirstBetAlreadyMatched{
-		val firstBet = new Bet(10,122,10,2,LAY,M,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,M,1,11,1000,None)
+		val secondBet = new Bet(11,123,10,2,BACK,U,1,11,1001,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -640,8 +640,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetSecondBetAlreadyMatched{
-		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,M,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,U,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,BACK,M,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		
@@ -668,8 +668,8 @@ class BetTest {
 	}
 	
 	@Test def testMatchBetBothBetsAlreadyMatched{
-		val firstBet = new Bet(10,122,10,2,LAY,M,1,11,None)
-		val secondBet = new Bet(11,123,10,2,BACK,M,1,11,None)
+		val firstBet = new Bet(10,122,10,2,LAY,M,1,11,1001,None)
+		val secondBet = new Bet(11,123,10,2,BACK,M,1,11,1000,None)
 		
 		val matchResult = firstBet.matchBet(secondBet)
 		

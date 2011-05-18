@@ -75,7 +75,7 @@ class TraderContextTest {
   @Test
   def testPlaceHedgeBetNoHedgeBetNoPricesToBet {
 
-    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l)
+    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l,1000)
     ctx.placeBet(2, 3, BACK, 11l)
 
     val hedgeBet: Option[IBet] = ctx.placeHedgeBet(11l)
@@ -84,8 +84,8 @@ class TraderContextTest {
 
   @Test
   def testPlaceHedgeBetLayHedgeBetIsPlaced {
-    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l)
-    market.placeBet(nextBetId(), 201l, 2, 4, BACK, 11l)
+    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l,1000)
+    market.placeBet(nextBetId(), 201l, 2, 4, BACK, 11l,1001)
     ctx.placeBet(2, 3, BACK, 11l)
 
     val hedgeBet: Option[IBet] = ctx.placeHedgeBet(11l)
@@ -103,8 +103,8 @@ class TraderContextTest {
 
   @Test
   def testPlaceHedgeBetBackHedgeBetIsPlaced {
-    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l)
-    market.placeBet(nextBetId(), 201l, 2, 4, BACK, 11l)
+    market.placeBet(nextBetId(), 201l, 2, 3, LAY, 11l,1000)
+    market.placeBet(nextBetId(), 201l, 2, 4, BACK, 11l,1001)
     ctx.placeBet(1.5, 4, LAY, 11l)
 
     val hedgeBet: Option[IBet] = ctx.placeHedgeBet(11l)
@@ -124,27 +124,27 @@ class TraderContextTest {
   @Test
   def getBet_unmatchedBetIsReturned {
     val bet = ctx.placeBet(2, 2.1, BACK, 11)
-    assertEquals(Bet(1, 200, 2, 2.1, BACK, U, 1, 11, None) :: Nil, ctx.getBet(bet.betId))
+    assertEquals(Bet(1, 200, 2, 2.1, BACK, U, 1, 11, 1234,None) :: Nil, ctx.getBet(bet.betId))
   }
 
   @Test
   def getBet_fullyMatchedBetIsReturned {
     val bet = ctx.placeBet(2, 2.1, BACK, 11)
-    market.placeBet(101, 1001, 2, 2.1, LAY, 11)
-    assertEquals(Bet(1, 200, 2, 2.1, BACK, M, 1, 11, None) :: Nil, ctx.getBet(bet.betId))
+    market.placeBet(101, 1001, 2, 2.1, LAY, 11,1000)
+    assertEquals(Bet(1, 200, 2, 2.1, BACK, M, 1, 11, 1234,Some(1000)) :: Nil, ctx.getBet(bet.betId))
   }
 
   @Test
   def getBet_partiallyMatchedBetIsReturned {
     val bet = ctx.placeBet(10, 2.1, BACK, 11)
-    market.placeBet(101, 1001, 7, 2.1, LAY, 11)
-    assertEquals(Bet(1, 200, 3, 2.1, BACK, U, 1, 11, None) :: Bet(1, 200, 7, 2.1, BACK, M, 1, 11, None) :: Nil, ctx.getBet(bet.betId))
+    market.placeBet(101, 1001, 7, 2.1, LAY, 11,1000)
+    assertEquals(Bet(1, 200, 3, 2.1, BACK, U, 1, 11, 1234,None) :: Bet(1, 200, 7, 2.1, BACK, M, 1, 11, 1234,Some(1000)) :: Nil, ctx.getBet(bet.betId))
   }
 
   @Test
   def getBet_betNotFound {
     val bet = ctx.placeBet(10, 2.1, BACK, 11)
-    market.placeBet(101, 1001, 7, 2.1, LAY, 11)
+    market.placeBet(101, 1001, 7, 2.1, LAY, 11,1000)
     assertEquals(Nil, ctx.getBet(bet.betId+1))
   }
 
