@@ -142,6 +142,7 @@ trait IUnmatchedBets {
       val betToCancel = betsToBeCancelled.next
       val betCanceledAmount = if (amountToCancel >= betToCancel.betSize) {
         priceBets -= betToCancel
+        
         betToCancel.betSize
       } else {
         val updatedBet = Bet(betToCancel.betId, betToCancel.userId, betToCancel.betSize - amountToCancel, betToCancel.betPrice, betToCancel.betType, betToCancel.marketId, betToCancel.runnerId,betToCancel.placedDate)
