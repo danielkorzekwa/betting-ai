@@ -10,13 +10,15 @@ import Market._
 import IMarket._
 import IRunnerTradedVolume._
 import scala.collection._
+import IUnmatchedBets._
 
-/**This class represents a market on a betting exchange.
+/**
+ * This class represents a market on a betting exchange.
  * @author korzekwad
  *
  */
 object Market {
-	case  class Runner(val runnerId: Long, val runnerName: String) extends IMarket.IRunner {
+  case class Runner(val runnerId: Long, val runnerName: String) extends IMarket.IRunner {
     override def toString = "Runner [runnerId=%s, runnerName=%s]".format(runnerId, runnerName)
   }
 
@@ -44,6 +46,12 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
   /**List of registered listeners (functions) to be triggered every time when a new bet is matched.*/
   private val matchedBetsListeners = new ListBuffer[(IBet) => Unit]()
 
+  /**List of registered listeners (functions) to be triggered every time when a bet is placed and not matched immediately.*/
+  private val unmatchedBetsListeners = new ListBuffer[(IBet) => Unit]()
+
+  /**List of registered listeners (functions) to be triggered every time when a bet is cancelled.*/
+  private val cancelBetsListeners = new ListBuffer[(IBet) => Unit]()
+
   require(numOfWinners > 0, "numOfWinners should be bigger than 0, numOfWinners=" + numOfWinners)
   require(runners.size > 1, "Number of market runners should be bigger than 1, numOfRunners=" + runners.size)
   /**Returns Map[price,bets] for runnerId*/
@@ -51,18 +59,19 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     bets.getOrElseUpdate(runnerId, scala.collection.mutable.Map[Double, ListBuffer[IBet]]())
   }
 
-  /** Places a bet on a betting exchange market.
-   * 
+  /**
+   * Places a bet on a betting exchange market.
+   *
    * @param betId
    * @param userId
    * @param betSize
    * @param betPrice
    * @param betType
    * @param runnerId
-   * 
+   *
    * @return The bet that was placed.
    */
-  def placeBet(betId: Long, userId: Long, betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long,placedDate:Long): IBet = {
+  def placeBet(betId: Long, userId: Long, betSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long, placedDate: Long): IBet = {
 
     require(betSize > 0, "Bet size must be >0, betSize=" + betSize)
     require(runners.exists(s => s.runnerId == runnerId), "Can't place bet on a market. Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
@@ -70,24 +79,30 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
     betsIds += betId
 
-    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId,placedDate,None)
+    val newBet = new Bet(betId, userId, betSize, betPrice, betType, U, marketId, runnerId, placedDate, None)
 
     /**Match bet.*/
-    val matchedBets = betType match {
+    val betMatchingResult: BetMatchingResult = betType match {
       case BACK => {
         val betMatchingResults = layBets.matchBet(newBet)
         betMatchingResults.unmatchedBet.foreach(b => backBets.addBet(b))
-        betMatchingResults.matchedBets
+
+        betMatchingResults
       }
       case LAY => {
         val betMatchingResults = backBets.matchBet(newBet)
         betMatchingResults.unmatchedBet.foreach(b => layBets.addBet(b))
-        betMatchingResults.matchedBets
+        betMatchingResults
       }
     }
 
+    /**Trigger unmatched bets listeners.*/
+    if (betMatchingResult.unmatchedBet.isDefined) {
+      unmatchedBetsListeners.foreach(l => l(betMatchingResult.unmatchedBet.get))
+    }
+
     /**Add matched bets.*/
-    for (matchedBet <- matchedBets) {
+    for (matchedBet <- betMatchingResult.matchedBets) {
       matchedBet.betType match {
         case BACK => {
           matchedBackBets += matchedBet
@@ -104,30 +119,33 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     newBet
   }
 
-  /** Cancels a bet on a betting exchange market.
+  /**
+   * Cancels a bet on a betting exchange market.
    *
    * @param betId Unique id of a bet to be cancelled.
-   * 
+   *
    * @return amount cancelled
    * @throws NoSuchElementException is thrown if no unmatched bet for betId/userId found.
    */
   def cancelBet(betId: Long): Double = {
 
     val backCancelledAmount = backBets.cancelBet(betId)
-    if (backCancelledAmount > 0) backCancelledAmount else {
+    if (backCancelledAmount > 0) backCancelledAmount
+    else {
       val layCancelledAmount = layBets.cancelBet(betId)
       if (layCancelledAmount > 0) layCancelledAmount else throw new NoSuchElementException("Bet not found for bet id=" + betId)
     }
   }
 
-  /** Cancels bets on a betting exchange market.
-   * 
-   * @param userId 
+  /**
+   * Cancels bets on a betting exchange market.
+   *
+   * @param userId
    * @param betsSize Total size of bets to be cancelled.
    * @param betPrice The price that bets are cancelled on.
    * @param betType
-   * @param runnerId 
-   * 
+   * @param runnerId
+   *
    * @return Amount cancelled. Zero is returned if nothing is available to cancel.
    */
   def cancelBets(userId: Long, betsSize: Double, betPrice: Double, betType: BetTypeEnum, runnerId: Long): Double = {
@@ -137,12 +155,14 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
       case LAY => layBets.cancelBets(userId, betsSize, betPrice, runnerId)
     }
 
+    cancelBetsListeners.foreach(l => l(new Bet(-1l, userId, amountCancelled, betPrice, betType, U, marketId, runnerId, -1l, None)))
     amountCancelled
   }
 
-  /** Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange. 
+  /**
+   * Returns total unmatched volume to back and to lay at all prices for all runners in a market on a betting exchange.
    *  Prices with zero volume are not returned by this method.
-   * 
+   *
    * @param runnerId Unique runner id that runner prices are returned for.
    * @return
    */
@@ -158,11 +178,12 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     betsByPriceMap.map(entry => new RunnerPrice(entry._1, totalStake(entry._2, LAY), totalStake(entry._2, BACK))).toList.sortWith(_.price < _.price)
   }
 
-  /**Returns best toBack/toLay prices for market runner.
+  /**
+   * Returns best toBack/toLay prices for market runner.
    * Element 1 - best price to back, element 2 - best price to lay
    * Double.NaN is returned if price is not available.
-   * @return 
-   * */
+   * @return
+   */
   def getBestPrices(runnerId: Long): Tuple2[IRunnerPrice, IRunnerPrice] = {
 
     require(runners.exists(s => s.runnerId == runnerId), "Market runner not found for marketId/runnerId=" + marketId + "/" + runnerId)
@@ -174,8 +195,9 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
 
   }
 
-  /**Returns best toBack/toLay prices for market.
-   * 
+  /**
+   * Returns best toBack/toLay prices for market.
+   *
    * @return Key - runnerId, Value - market prices (element 1 - priceToBack, element 2 - priceToLay)
    */
   def getBestPrices(): Map[Long, Tuple2[IRunnerPrice, IRunnerPrice]] = {
@@ -200,16 +222,18 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     totalTradedVolume.getOrElse(runnerId, 0)
   }
 
-  /**Returns all bets placed by user on that market.
+  /**
+   * Returns all bets placed by user on that market.
    *
-   *@param userId
+   * @param userId
    */
   def getBets(userId: Int): List[IBet] = backBets.getBets(userId) ::: layBets.getBets(userId) ::: matchedBackBets.filter(b => b.userId == userId).toList ::: matchedLayBets.filter(b => b.userId == userId).toList
 
-  /**Returns all bets placed by user on that market.
+  /**
+   * Returns all bets placed by user on that market.
    *
-   *@param userId
-   *@param matchedBetsOnly If true then matched bets are returned only, 
+   * @param userId
+   * @param matchedBetsOnly If true then matched bets are returned only,
    * otherwise all unmatched and matched bets for user are returned.
    */
   def getBets(userId: Int, matchedBetsOnly: Boolean): List[IBet] = {
@@ -220,8 +244,9 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     bets
   }
 
-  /**Returns bet for a number o criteria.
-   * 
+  /**
+   * Returns bet for a number o criteria.
+   *
    * @param userId
    * @param betStatus
    * @param betType
@@ -242,13 +267,33 @@ class Market(val marketId: Long, val marketName: String, val eventName: String, 
     bets.filter(b => b.userId == userId)
   }
 
-  /**Register listener on those matched bets, which match filter criteria
-   * 
+  /**
+   * Register listener on those matched bets, which match filter criteria
+   *
    * @param filter If true then listener is triggered for this bet.
    * @param listener
    */
   def addMatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) = {
     matchedBetsListeners += { (bet: IBet) => if (filter(bet)) listener(bet) }
+  }
+
+  /**
+   * Register listener on those unmatched bets, which match filter criteria
+   *
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addUnmatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) {
+    unmatchedBetsListeners += { (bet: IBet) => if (filter(bet)) listener(bet) }
+  }
+
+  /**
+   * Register listener on cancelled bets.
+   *
+   * @param listener
+   */
+  def addCancelledBetsListener(listener: (IBet) => Unit) {
+    cancelBetsListeners += listener
   }
 
   override def toString = "Market [marketId=%s, marketName=%s, eventName=%s, numOfWinners=%s, marketTime=%s, runners=%s]".format(marketId, marketName, eventName, numOfWinners, marketTime, runners)
