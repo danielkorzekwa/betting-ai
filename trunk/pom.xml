@@ -40,6 +40,8 @@
 	<!-- Define the sub-components -->
 	<modules>
 		<!-- <module>betting-oracle</module> -->
+		<module>betting-risk</module>
+		<module>betex</module>
 		<module>market-simulator</module>
 		<module>trader-examples</module>
 		<module>market-data-collector</module>
