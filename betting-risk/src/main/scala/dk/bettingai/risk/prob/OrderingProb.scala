@@ -1,5 +1,7 @@
 package dk.bettingai.risk.prob
 
+import scala.collection._
+
 /**
  * This trait calculates ordering probabilities for place (2 winners) and show( 3 winners) markets.
  * Those probabilities are derived from win probabilities.

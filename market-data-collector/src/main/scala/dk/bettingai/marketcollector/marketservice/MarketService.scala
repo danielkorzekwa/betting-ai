@@ -28,42 +28,20 @@ object MarketService {
 
 class MarketService(betfairService: BetFairService) extends IMarketService {
 
-  /**
+   /**
    * Returns markets from betfair betting exchange that fulfil the following criteria:
    * - UK Horse Racing
-   * - Win only markets
    * - Active markets
    * - isInPlay
    * - isBsbMarket.
    *
    * @param marketTimeFrom Filter markets by market time.
    * @param marketTimeTo Filter markets by market time.
-   *
+   * @param menuPathFilter Returns those markets only for which market.menuPath.contains(menuPathFilter)
+   * @param maxNumOfWinners, e.g. if 1 then only winner markets are returned, if 3 then winner, place and show markets are returned
    * @return List of market ids.
    */
-  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date): List[Long] = {
-    /**7 - HorceRacing markets*/
-    val eventTypeIds: java.util.Set[Integer] = Set(new Integer(7))
-    val markets = betfairService.getMarkets(marketTimeFrom, marketTimeTo, eventTypeIds)
-
-    val filteredMarkets = markets.filter(m => m.getMarketStatus == "ACTIVE" && m.getEventHierarchy.startsWith("/7/298251/") && m.isTurningInPlay && m.isBsbMarket && m.getNumberOfWinners == 1)
-    filteredMarkets.map(_.getMarketId.asInstanceOf[Long]).toList
-  }
-
-  /**
-   * Returns markets from betfair betting exchange that fulfil the following criteria:
-   * - UK Horse Racing
-   * - Win only markets
-   * - Active markets
-   * - isInPlay
-   * - isBsbMarket.
-   *
-   * @param marketTimeFrom Filter markets by market time.
-   * @param marketTimeTo Filter markets by market time.
-   *
-   * @return List of market ids.
-   */
-  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: String): List[Long] = {
+  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: Option[String]=None, maxNumOfWinners: Option[Int] = None): List[Long] = {
 
     /**7 - HorceRacing markets*/
     val eventTypeIds: java.util.Set[Integer] = Set(new Integer(7))
@@ -72,8 +50,10 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
     val filteredMarkets = markets.filter(m => m.getMarketStatus == "ACTIVE" &&
       m.getEventHierarchy.startsWith("/7/298251/") &&
       m.isTurningInPlay &&
-      m.isBsbMarket && m.getNumberOfWinners == 1
-      && m.getMenuPath.contains(menuPathFilter))
+      m.isBsbMarket && 
+      (maxNumOfWinners.isEmpty || m.getNumberOfWinners <= maxNumOfWinners.get)
+      && 
+      (menuPathFilter.isEmpty || m.getMenuPath.contains(menuPathFilter.get)))
 
     filteredMarkets.map(_.getMarketId.asInstanceOf[Long]).toList
 
@@ -199,9 +179,9 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
 
   private def toBets(bfBets: java.util.List[BFMUBet]): List[IBet] = {
     val bets = for (b <- bfBets) yield if (b.getMatchedDate != null)
-      new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(), b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId, Option(b.getMatchedDate.getTime))
+      new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(), b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId,b.getPlacedDate.getTime, Option(b.getMatchedDate.getTime))
     else
-      new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(), b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId, None)
+      new Bet(b.getBetId(), -1, b.getSize(), b.getPrice(), b.getBetType, b.getBetStatus, b.getMarketId, b.getSelectionId, b.getPlacedDate.getTime,None)
     bets.toList
   }
   private implicit def toBetType(betType: BFBetType): BetTypeEnum = betType match {
@@ -231,7 +211,7 @@ class MarketService(betfairService: BetFairService) extends IMarketService {
       case LAY => BFBetType.L
     }
     val betResult = betfairService.placeBet(marketId.toInt, runnerId.toInt, betTypeValue(betType), betPrice, betSize, true)
-    Bet(betResult.getBetId, -1l, betResult.getSize(), betResult.getPrice(), betType, marketId, runnerId)
+    Bet(betResult.getBetId, -1l, betResult.getSize(), betResult.getPrice(), betType, marketId, runnerId, betResult.getBetDate.getTime)
   }
   
    /**Cancel a bet for a given bet id.*/

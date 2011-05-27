@@ -34,7 +34,8 @@ object MarketCollectorApp {
 
 		/**Create event collector task.*/
 		val marketService = new MarketService(betfairService)
-		val eventCollectorTask = new EventCollectorTask(marketService,inputData("startInMinutesFrom").toInt,inputData("startInMinutesTo").toInt,inputData("marketDataDir"),inputData("discoveryInterval").toInt)
+		val maxNumberOfWinners = if(inputData.contains("maxNumOfWinners")) Option(inputData("maxNumOfWinners").toInt) else None
+		val eventCollectorTask = new EventCollectorTask(marketService,inputData("startInMinutesFrom").toInt,inputData("startInMinutesTo").toInt,maxNumberOfWinners,inputData("marketDataDir"),inputData("discoveryInterval").toInt)
 
 		val collectionInterval = inputData("collectionInterval").toLong		
 		while(true) {
@@ -45,7 +46,7 @@ object MarketCollectorApp {
 			catch {
 			case e:BetFairException => log.error("EventCollector error.",e)
 			}
-			Thread.sleep(collectionInterval*1000)
+			Thread.sleep(collectionInterval)
 		}
 
 	}
@@ -65,8 +66,9 @@ object MarketCollectorApp {
 		println("marketdata_collector marketDataDir=? bfUser=? bfPassword=? bfProductId=? collectionInterval=? discoveryInterval=? startInMinutesFrom=? startInMinutesTo=?\n")
 		println("marketDataDir - The directory that market events are written to")
 		println("bfUser/bfPassword/bfProductId - Betfair account that is used to collect market data using Betfair public API.")
-		println("collectionInterval - Market data collection interval.")
-		println("discoveryInterval - New markets discovery interval.")
+		println("collectionInterval - Market data collection interval in ms.")
+		println("discoveryInterval - New markets discovery interval in ms.")
 		println("startInMinutesFrom/startInMinutesTo - Market data is collected for markets with market time between startInMinutesFrom and startInMinutesTo.")	
+		println("maxNumOfWinners - Collect market data for markets with number of winners less or equal to maxNumOfWinners. Default = Intifity.")	
 	}
 }
