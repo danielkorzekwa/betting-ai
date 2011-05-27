@@ -18,7 +18,8 @@ class MarketServiceIntegrationTest {
   val betfairServiceFactoryBean = new dk.bot.betfairservice.DefaultBetFairServiceFactoryBean();
   betfairServiceFactoryBean.setUser(System.getenv("bfUser"))
   betfairServiceFactoryBean.setPassword(System.getenv("bfPassword"))
-  betfairServiceFactoryBean.setProductId(82)
+  val productId = if (System.getenv("bfProductId") != null) System.getenv("bfProductId").toInt else 82
+  betfairServiceFactoryBean.setProductId(productId)
   val loginResponse = betfairServiceFactoryBean.login
   val betfairService: BetFairService = (betfairServiceFactoryBean.getObject.asInstanceOf[BetFairService])
 
@@ -40,12 +41,30 @@ class MarketServiceIntegrationTest {
     val allMarkets = marketService.getMarkets(dateFrom, dateTo)
     if (!allMarkets.isEmpty) {
       val menuPathFilter = marketService.getMarketDetails(allMarkets.head).menuPath
-      val filteredMarkets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)), menuPathFilter)
+      val filteredMarkets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)), Option(menuPathFilter))
 
       /**Check if all filtered markets have the same menuPath.*/
       for (marketId <- filteredMarkets) {
         val menuPath = marketService.getMarketDetails(marketId).menuPath
         assertEquals(menuPathFilter, menuPath)
+      }
+    }
+  }
+
+  @Test
+  def getMarkets_for_max_num_of_winners {
+    val dateFrom = new Date(System.currentTimeMillis)
+    val dateTo = new Date(System.currentTimeMillis + (1000 * 3600 * 48))
+    val maxNumOfWinners = 1
+    val allMarkets = marketService.getMarkets(dateFrom, dateTo)
+    if (!allMarkets.isEmpty) {
+      val menuPathFilter = marketService.getMarketDetails(allMarkets.head).menuPath
+      val filteredMarkets = marketService.getMarkets(new Date(System.currentTimeMillis), new Date(System.currentTimeMillis + (1000 * 3600 * 48)), Option(menuPathFilter), Option(maxNumOfWinners))
+
+      /**Check if all filtered markets are winner markets.*/
+      for (marketId <- filteredMarkets) {
+        val numOfWinners = marketService.getMarketDetails(marketId).numOfWinners
+        assertEquals(1, numOfWinners)
       }
     }
   }
@@ -98,8 +117,9 @@ class MarketServiceIntegrationTest {
       tradedVolume.values.foreach(tv => assertTrue("No traded volume for runner", tv.pricesTradedVolume.size > 0))
     }
   }
-  
-  @Test def cancelBet_betNotFound {
-	  marketService.cancelBet(1234)
+
+  @Test
+  def cancelBet_betNotFound {
+    marketService.cancelBet(1234)
   }
 }

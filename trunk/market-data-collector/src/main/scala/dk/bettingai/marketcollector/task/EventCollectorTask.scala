@@ -25,10 +25,12 @@ import java.text.SimpleDateFormat
  * @param marketService This service returns list of markets, and market data (runner prices, traded volume) that is used to calculate market events.
  * @param startInMinutesFrom Market time that markets are monitored from, e.g. -60 means now-60 minutes.
  * @param startInMinutesTo Market time that markets are monitored to, e.g. 60 means now+60 minutes.
+ * @param maxNumOfWinners Collect market data for markets with number of winners less or equal to maxNumOfWinners
  * @param marketDataDir The directory that market events are written to.
- * @param marketDiscoveryIntervalSec How often new markets are discovered, e.g. if it's set to 60, then new markets will be discovered every 60 seconds, even though this task is executed every 1 second.
+ * @param marketDiscoveryInterval [ms] How often new markets are discovered, e.g. if it's set to 60000, then new markets will be discovered every 60 seconds, even though this task is executed every 1 second.
  */
-class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,startInMinutesTo:Int, marketDataDir:String,marketDiscoveryIntervalSec:Int) extends IEventCollectorTask{
+class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,startInMinutesTo:Int,maxNumOfWinners:Option[Int], 
+		marketDataDir:String,marketDiscoveryInterval:Int) extends IEventCollectorTask{
 
 	private val log = LoggerFactory.getLogger(getClass)
 
@@ -50,8 +52,8 @@ class EventCollectorTask(marketService:MarketService, startInMinutesFrom:Int,sta
 	def execute() = {
 		/**Discover markets that the market events should be collected for.*/
 		val now = new DateTime()
-		if((now.getMillis-discoveryTime)/1000>marketDiscoveryIntervalSec) {
-			marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate)		
+		if((now.getMillis-discoveryTime)>marketDiscoveryInterval) {
+			marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate, None, maxNumOfWinners)		
 			discoveryTime = now.getMillis
 			log.info("Market discovery: " + marketIds)
 		}

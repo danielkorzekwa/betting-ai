@@ -226,6 +226,12 @@
 				<artifactId>live-trader</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>betting-risk</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- External dependencies -->
 			<dependency>

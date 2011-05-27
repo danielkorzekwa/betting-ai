@@ -44,25 +44,10 @@ object IMarketService {
  */
 trait IMarketService {
 
-  /**
-   * Returns markets from betfair betting exchange that fulfil the following criteria:
-   * - UK Horse Racing
-   * - Win only markets
-   * - Active markets
-   * - isInPlay
-   * - isBsbMarket.
-   *
-   * @param marketTimeFrom Filter markets by market time.
-   * @param marketTimeTo Filter markets by market time.
-   *
-   * @return List of market ids.
-   */
-  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date): List[Long]
 
   /**
    * Returns markets from betfair betting exchange that fulfil the following criteria:
    * - UK Horse Racing
-   * - Win only markets
    * - Active markets
    * - isInPlay
    * - isBsbMarket.
@@ -70,9 +55,10 @@ trait IMarketService {
    * @param marketTimeFrom Filter markets by market time.
    * @param marketTimeTo Filter markets by market time.
    * @param menuPathFilter Returns those markets only for which market.menuPath.contains(menuPathFilter)
+   * @param maxNumOfWinners, e.g. if 1 then only winner markets are returned, if 3 then winner, place and show markets are returned
    * @return List of market ids.
    */
-  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: String): List[Long]
+  def getMarkets(marketTimeFrom: Date, marketTimeTo: Date, menuPathFilter: Option[String], maxNumOfWinners: Option[Int]): List[Long]
 
   /**
    * Returns runner prices and price traded volumes for market runner.

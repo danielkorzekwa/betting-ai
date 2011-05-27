@@ -47,7 +47,7 @@ FAQ
 simulator marketDataDir=./marketdata traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader
 
 2)How to start market data collector from command line?
-marketdatacollector marketDataDir=./marketdata bfUser=john bfPassword=green bfProductId=82 collectionInterval=5 discoveryInterval=300 startInMinutesFrom=-60 startInMinutesTo=300
+marketdatacollector marketDataDir=./marketdata bfUser=john bfPassword=green bfProductId=82 collectionInterval=1000 discoveryInterval=60000 startInMinutesFrom=-60 startInMinutesTo=300
 
 3) How to run trading optimisation from unit tests?
 Look at those two unit tests:

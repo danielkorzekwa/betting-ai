@@ -18,9 +18,14 @@
 			<artifactId>market-simulator</artifactId>
 		</dependency>
 
-	<dependency>
+	   <dependency>
 			<groupId>dk.bettingai</groupId>
 				<artifactId>trading-optimiser</artifactId>
+			</dependency>
+			
+			<dependency>
+				<groupId>dk.bettingai</groupId>
+				<artifactId>betting-risk</artifactId>
 			</dependency>
 
 		<!-- External dependencies -->
