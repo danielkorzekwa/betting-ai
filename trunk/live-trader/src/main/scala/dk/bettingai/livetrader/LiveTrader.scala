@@ -11,11 +11,11 @@ import scala.collection._
 import scala.collection.JavaConversions._
 import org.joda.time._
 import org.slf4j.LoggerFactory
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex.api._
+import dk.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
-import dk.bettingai.marketsimulator.betex.BetUtil._
+import dk.betex.BetUtil._
 import dk.bettingai.marketsimulator.risk._
 
 /**
@@ -73,7 +73,7 @@ case class LiveTrader(trader: ITrader, interval: Long, marketService: IMarketSer
             /**Discover markets that the market events should be collected for.*/
             val now = new DateTime()
             if ((now.getMillis - discoveryTime) / 1000 > marketDiscoveryIntervalSec) {
-              marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate, menuPathFilter)
+              marketIds = marketService.getMarkets(now.plusMinutes(startInMinutesFrom).toDate, now.plusMinutes(startInMinutesTo).toDate, Option(menuPathFilter),None)
               discoveryTime = now.getMillis
               if (marketIds.size > 1) {
                 log.error("Only a single market can be analysing at one time. Num of markets found: " + marketIds.size)

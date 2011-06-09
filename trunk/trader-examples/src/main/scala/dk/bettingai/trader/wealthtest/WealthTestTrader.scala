@@ -1,10 +1,10 @@
 package dk.bettingai.trader.wealthtest
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 
 /**Compares wealth and market expected profit for a simple trading strategy.
  * 

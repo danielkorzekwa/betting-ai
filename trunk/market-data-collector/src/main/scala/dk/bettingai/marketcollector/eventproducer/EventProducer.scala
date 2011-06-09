@@ -1,12 +1,12 @@
 package dk.bettingai.marketcollector.eventproducer
 
 import java.util.Date
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import Market._
 import dk.bettingai.marketcollector._
 import dk.bettingai.marketsimulator.marketevent._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex.api.IMarket._
+import dk.betex.api._
+import dk.betex.api.IMarket._
 import dk.bettingai.marketcollector.eventcalculator._
 import EventProducer._
 

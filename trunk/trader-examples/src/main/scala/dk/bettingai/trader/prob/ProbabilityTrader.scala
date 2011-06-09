@@ -1,10 +1,10 @@
 package dk.bettingai.trader.prob
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 
 /** Creates time series chart with implied probability for all market runners.
  * 

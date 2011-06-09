@@ -1,11 +1,11 @@
 package dk.bettingai.trader.ifwinlosedelta
 
 import scala.collection.JavaConversions._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 
 /** This trader places back and lay bets across all market runners based on ifWin-ifWose indicator.
  * 

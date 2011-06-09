@@ -2,7 +2,7 @@ package dk.bettingai.marketcollector.eventcalculator
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex.Market._
+import dk.betex.Market._
 
 class MarketEventCalculatorRunnerPricesMarketEventsTest {
 

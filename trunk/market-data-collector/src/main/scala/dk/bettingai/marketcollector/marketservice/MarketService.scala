@@ -3,8 +3,8 @@ package dk.bettingai.marketcollector.marketservice
 import java.util.Date
 import dk.bot.betfairservice._
 import scala.collection.JavaConversions._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import IBet._
 import BetTypeEnum._
 import BetStatusEnum._
@@ -14,7 +14,7 @@ import dk.bot.betfairservice.model._
 import IMarketService._
 import MarketService._
 import IRunnerTradedVolume._
-import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
+import dk.betex.RunnerTradedVolume._
 
 /**
  * Betfair service adapter.

@@ -1,7 +1,7 @@
 package dk.bettingai.tradingoptimiser
 
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IBet.BetTypeEnum._
 
 /** An example of trader, which is used by hill climbing tests.

@@ -1,6 +1,6 @@
 package dk.bettingai.marketsimulator.risk
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import scala.collection._
 
 /**

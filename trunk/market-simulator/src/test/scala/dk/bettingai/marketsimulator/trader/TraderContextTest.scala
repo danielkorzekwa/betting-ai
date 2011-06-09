@@ -2,7 +2,7 @@ package dk.bettingai.marketsimulator.trader
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import api._
 import Market._
 import IBet.BetTypeEnum._

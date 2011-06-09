@@ -1,7 +1,7 @@
 package dk.bettingai.livetrader
 
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import IBet._
 import BetTypeEnum._
 import BetStatusEnum._
@@ -38,7 +38,7 @@ case class UserBets(initialBets: List[IBet]) extends IUserBets {
     if (unmatchedBet.isDefined) {
       val remainingUnmatched = unmatchedBet.get.betSize - bet.betSize
       if (remainingUnmatched > 0) {
-        val remainingUnmatchedBet = Bet(unmatchedBet.get.betId, unmatchedBet.get.userId, remainingUnmatched, unmatchedBet.get.betPrice, unmatchedBet.get.betType, unmatchedBet.get.marketId, unmatchedBet.get.runnerId)
+        val remainingUnmatchedBet = Bet(unmatchedBet.get.betId, unmatchedBet.get.userId, remainingUnmatched, unmatchedBet.get.betPrice, unmatchedBet.get.betType, unmatchedBet.get.marketId, unmatchedBet.get.runnerId,unmatchedBet.get.placedDate)
         bets.update(bets.indexOf(unmatchedBet.get), remainingUnmatchedBet)
       } else {
         bets -= (unmatchedBet.get)

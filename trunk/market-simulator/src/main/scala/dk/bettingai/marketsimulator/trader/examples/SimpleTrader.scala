@@ -1,7 +1,7 @@
 package dk.bettingai.marketsimulator.trader.examples
 
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import  java.util.concurrent.atomic.AtomicInteger

@@ -1,12 +1,12 @@
 package dk.bettingai.marketcollector.eventcalculator
 
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import IRunnerTradedVolume._
 import RunnerTradedVolume._
-import dk.bettingai.marketsimulator.betex.api.IMarket._
-import dk.bettingai.marketsimulator.betex.Market._
-import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
+import dk.betex.api.IMarket._
+import dk.betex.Market._
+import dk.betex.api.IBet.BetTypeEnum._
 /**This trait represents a function that calculates market events for the delta between the previous and the current state of the market runner.
  * 
  * @author KorzekwaD

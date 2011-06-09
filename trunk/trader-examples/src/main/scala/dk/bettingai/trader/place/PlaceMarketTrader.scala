@@ -1,10 +1,10 @@
 package dk.bettingai.trader.place
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.risk.prob._
 

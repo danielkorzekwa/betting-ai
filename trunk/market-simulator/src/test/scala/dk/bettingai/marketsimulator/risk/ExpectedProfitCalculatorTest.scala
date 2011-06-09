@@ -2,10 +2,10 @@ package dk.bettingai.marketsimulator.risk
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api.IBet.BetTypeEnum._
+import dk.betex._
+import dk.betex.api.IBet.BetTypeEnum._
 import scala.collection._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import scala.collection._
 
 class ExpectedProfitCalculatorTest {

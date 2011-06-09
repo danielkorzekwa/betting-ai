@@ -1,6 +1,6 @@
 package dk.bettingai.marketsimulator.trader
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import java.util.Date

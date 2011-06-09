@@ -3,8 +3,8 @@ package dk.bettingai.trader.fsm.simple
 import dk.bettingai.trader._
 import scala.collection._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex.api._
+import dk.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import IMarket._

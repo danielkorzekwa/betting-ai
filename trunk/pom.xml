@@ -41,7 +41,6 @@
 	<modules>
 		<!-- <module>betting-oracle</module> -->
 		<module>betting-risk</module>
-		<module>betex</module>
 		<module>market-simulator</module>
 		<module>trader-examples</module>
 		<module>market-data-collector</module>
@@ -234,6 +233,12 @@
 			</dependency>
 
 			<!-- External dependencies -->
+			<dependency>
+				<groupId>dk.betex</groupId>
+				<artifactId>betex</artifactId>
+				<version>0.1</version>
+			</dependency>
+			
 			<dependency>
 				<groupId>dk.flexibet</groupId>
 				<artifactId>flexibet-betfair</artifactId>

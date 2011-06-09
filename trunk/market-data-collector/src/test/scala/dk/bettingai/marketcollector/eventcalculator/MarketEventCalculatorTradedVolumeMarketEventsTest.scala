@@ -2,10 +2,10 @@ package dk.bettingai.marketcollector.eventcalculator
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex.Market._
-import dk.bettingai.marketsimulator.betex.api.IMarket._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
+import dk.betex.Market._
+import dk.betex.api.IMarket._
+import dk.betex._
+import dk.betex.RunnerTradedVolume._
 
 class MarketEventCalculatorTradedVolumeMarketEventsTest {
 

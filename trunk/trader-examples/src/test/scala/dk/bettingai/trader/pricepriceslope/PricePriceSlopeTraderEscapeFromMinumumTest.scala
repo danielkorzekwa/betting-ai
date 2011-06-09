@@ -5,7 +5,7 @@ import Assert._
 import org.slf4j.LoggerFactory
 import java.util.Random
 import dk.bettingai.tradingoptimiser._
-import dk.bettingai.marketsimulator.betex.PriceUtil._
+import dk.betex.PriceUtil._
 import HillClimbing._
 import CoevolutionHillClimbing._
 import dk.bettingai.marketsimulator.ISimulator._

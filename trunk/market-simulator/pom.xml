@@ -13,6 +13,11 @@
 	<dependencies>
 
 		<!-- External dependencies -->
+		<dependency>
+			<groupId>dk.betex</groupId>
+			<artifactId>betex</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.scala-lang</groupId>

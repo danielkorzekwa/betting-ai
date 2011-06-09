@@ -4,7 +4,7 @@ import org.joda.time._
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
 import MarketService._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import Market._
 import dk.bettingai.marketcollector.eventproducer._
 import EventProducer._

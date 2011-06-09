@@ -2,15 +2,15 @@ package dk.bettingai.livetrader
 
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketcollector.marketservice._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex.api._
+import dk.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import IMarket._
 import Market._
 import dk.bettingai.marketsimulator.risk._
 import dk.bettingai.marketsimulator.risk._
-import dk.bettingai.marketsimulator.betex.BetUtil._
+import dk.betex.BetUtil._
 import dk.bettingai.marketsimulator._
 import scala.collection._
 import com.espertech.esper.client._
@@ -255,5 +255,30 @@ case class LiveTraderContext(marketDetails: MarketDetails, marketService: IMarke
    * @return EPStatement
    */
   def getEPNStatement(eplID: String): EPStatement = liveTrader.getEPNStatement(eplID)
+  
+  
+  /**
+   * Register listener on those matched bets, which match filter criteria
+   *
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addMatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) = throw new UnsupportedOperationException("Not implemented yet")
+
+  /**
+   * Register listener on those unmatched bets, which match filter criteria
+   *
+   * @param filter If true then listener is triggered for this bet.
+   * @param listener
+   */
+  def addUnmatchedBetsListener(filter: (IBet) => Boolean, listener: (IBet) => Unit) = throw new UnsupportedOperationException("Not implemented yet")
+
+  
+    /**
+   * Register listener on cancelled bets.
+   *
+   * @param listener
+   */
+  def addCancelledBetsListener(listener: (IBet) => Unit) = throw new UnsupportedOperationException("Not implemented yet")
 
 }

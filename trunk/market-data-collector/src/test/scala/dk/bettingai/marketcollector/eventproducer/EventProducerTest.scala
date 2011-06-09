@@ -2,9 +2,9 @@ package dk.bettingai.marketcollector.eventproducer
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import Market._
-import dk.bettingai.marketsimulator.betex.RunnerTradedVolume._
+import dk.betex.RunnerTradedVolume._
 
 class EventProducerTest {
 

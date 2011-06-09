@@ -1,7 +1,7 @@
 package dk.bettingai.marketsimulator
 
 import ISimulator._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import dk.bettingai.marketsimulator.trader._
 import IMarket._
 import IBet.BetTypeEnum._
@@ -13,7 +13,7 @@ import scala.actors.Actor
 import Actor._
 import java.util.concurrent.atomic._
 import MarketSimActor._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 
 /**
  * This trait represents a simulator that processes market events, analyses trader implementation and returns analysis report for trader implementation.

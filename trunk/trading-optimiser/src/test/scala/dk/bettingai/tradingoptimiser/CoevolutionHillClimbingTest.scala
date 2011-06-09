@@ -2,11 +2,11 @@ package dk.bettingai.tradingoptimiser
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import org.slf4j.LoggerFactory
-import dk.bettingai.marketsimulator.betex.PriceUtil._
+import dk.betex.PriceUtil._
 import java.util.Random
 import HillClimbing._
 import CoevolutionHillClimbing._
