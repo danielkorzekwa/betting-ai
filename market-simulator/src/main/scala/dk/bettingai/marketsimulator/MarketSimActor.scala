@@ -4,7 +4,7 @@ import scala.actors._
 import java.io.File
 import ISimulator._
 import dk.bettingai.marketsimulator.marketevent._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import java.io.BufferedReader
 import java.io.FileReader
 import dk.bettingai.marketsimulator.trader._

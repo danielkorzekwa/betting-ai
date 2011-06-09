@@ -1,6 +1,6 @@
 package dk.bettingai.marketcollector.eventproducer
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 /**This trait represents a service that transforms state of a market on a betting exchange into the stream of events.
  * 

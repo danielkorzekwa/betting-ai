@@ -2,7 +2,7 @@ package dk.bettingai.trader.hillclimbing.price
 
 import org.junit._
 import Assert._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator._
 import java.io.File

@@ -1,12 +1,12 @@
 package dk.bettingai.trader.tradedvolumedeltashare
 
 import scala.collection.JavaConversions._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.PriceUtil._
+import dk.betex._
+import dk.betex.PriceUtil._
 import com.espertech.esper.client._
 import com.espertech.esper.client.time._
 import org.apache.commons.math.util.MathUtils._

@@ -13,7 +13,7 @@ import org.encog.engine.network.activation.ActivationTANH
 import org.encog.neural.networks.BasicNetwork
 import dk.bettingai.marketsimulator.trader._
 import org.encog.neural.data.basic._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator._
 import ISimulator._

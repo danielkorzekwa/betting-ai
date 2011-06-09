@@ -3,7 +3,7 @@ package dk.bettingai.tradingoptimiser
 import org.junit._
 import Assert._
 import scala.util.Random
-import dk.bettingai.marketsimulator.betex.PriceUtil._
+import dk.betex.PriceUtil._
 import org.slf4j._
 import HillClimbing._
 import CoevolutionHillClimbing._

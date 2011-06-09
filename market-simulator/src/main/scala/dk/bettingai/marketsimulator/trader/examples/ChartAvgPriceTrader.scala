@@ -1,10 +1,10 @@
 package dk.bettingai.marketsimulator.trader.examples
 
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 
 /** Creates tie series chart with average price for all market runners.
  * 

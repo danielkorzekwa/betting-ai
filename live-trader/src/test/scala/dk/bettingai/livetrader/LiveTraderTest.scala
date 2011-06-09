@@ -43,7 +43,7 @@ class LiveTraderTest {
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List(1l)))
       }
     })
 
@@ -61,7 +61,7 @@ class LiveTraderTest {
   def liveTraderStartMoreThanOneMarketAreDiscovered {
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l, 2l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])),withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List(1l, 2l)))
       }
     })
 
@@ -81,7 +81,7 @@ class LiveTraderTest {
   def liveTraderStartZeroMarketAreDiscovered {
     mockery.checking(new SExpectations() {
       {
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List()))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List()))
       }
     })
 
@@ -106,7 +106,7 @@ class LiveTraderTest {
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List(1l)))
       }
     })
 
@@ -126,7 +126,7 @@ class LiveTraderTest {
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List(1l)))
       }
     })
 
@@ -147,7 +147,7 @@ class LiveTraderTest {
         atLeast(1).of(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(Nil))
         atLeast(1).of(marketService).getMarketPrices(1l); will(returnValue(marketPrices))
         one(marketService).getMarketDetails(marketId); will(returnValue(marketDetails))
-        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(menuPathFilter)); will(returnValue(List(1l)))
+        one(marketService).getMarkets(withArg(Matchers.any(classOf[Date])), withArg(Matchers.any(classOf[Date])), withArg(Option(menuPathFilter)),withArg1(None)); will(returnValue(List(1l)))
       }
     })
 
@@ -180,7 +180,9 @@ class LiveTraderTest {
     def withArg[T](matcher: Matcher[T]): T = super.`with`(matcher)
     def withArg(value: Long): Long = super.`with`(value)
     def withArg(value: String): String = super.`with`(value)
+    def withArg(value: Option[String]): Option[String] = super.`with`(value)
     def withArg(value: Int): Int = super.`with`(value)
+    def withArg1(value: Option[Int]): Option[Int] = super.`with`(value)
     def withArg(value: Date): Date = super.`with`(value)
     def withArg[Any](matcher: Any): Any = super.`with`(matcher)
   }

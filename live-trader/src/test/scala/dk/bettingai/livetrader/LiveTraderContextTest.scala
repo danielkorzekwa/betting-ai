@@ -5,10 +5,10 @@ import org.junit.Assert._
 import java.util.Date
 import dk.bettingai.marketcollector.marketservice._
 import IMarketService._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import Market._
-import dk.bettingai.marketsimulator.betex.api.IBet._
+import dk.betex.api.IBet._
 import BetTypeEnum._
 import BetStatusEnum._
 import org.junit.runner._
@@ -16,7 +16,7 @@ import org.jmock.integration.junit4._
 import org.jmock._
 import org.hamcrest._
 import org.jmock.Expectations._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex._
 import RunnerTradedVolume._
 import java.io.File
 
@@ -62,7 +62,7 @@ class LiveTraderContextTest {
 
   @Test
   def placeBet {
-    val bet = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+    val bet = Bet(100, 1000, 10, 2.2, BACK, 1, 11,1000)
     mockery.checking(new SExpectations() {
       {
         one(marketService).placeBet(bet.betSize, bet.betPrice, bet.betType, bet.marketId, bet.runnerId); will(returnValue(bet))
@@ -75,7 +75,7 @@ class LiveTraderContextTest {
 
   @Test
   def fillBetFullyPlaced {
-    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11,1000)
     mockery.checking(new SExpectations() {
       {
         one(marketService).placeBet(betToBePlaced.betSize, betToBePlaced.betPrice, betToBePlaced.betType, betToBePlaced.marketId, betToBePlaced.runnerId); will(returnValue(betToBePlaced))
@@ -90,10 +90,10 @@ class LiveTraderContextTest {
   @Test
   def fillBetFullyPlacedOtherBetsAreAvailable {
     val existingBets =
-      Bet(100, 1000, 10, 2.2, LAY, 1, 11) ::
-        Bet(100, 1000, 10, 2.2, BACK, 1, 12) ::
-        Bet(100, 1000, 10, 2.21, BACK, 1, 11) :: Nil
-    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+      Bet(100, 1000, 10d, 2.2, LAY, 1, 11,1000) ::
+        Bet(100, 1000, 10d, 2.2, BACK, 1, 12,1000) ::
+        Bet(100, 1000, 10d, 2.21, BACK, 1, 11,1000) :: Nil
+    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11,1000)
 
     mockery.checking(new SExpectations() {
       {
@@ -108,8 +108,8 @@ class LiveTraderContextTest {
 
   @Test
   def fillBetPartiallyPlaced {
-    val existingBet = Bet(100, 1000, 6, 2.2, BACK, 1, 11)
-    val betToBePlaced = Bet(100, 1000, 4, 2.2, BACK, 1, 11)
+    val existingBet = Bet(100, 1000, 6, 2.2, BACK, 1, 11,1000)
+    val betToBePlaced = Bet(100, 1000, 4, 2.2, BACK, 1, 11,1000)
     mockery.checking(new SExpectations() {
       {
         one(marketService).placeBet(existingBet.betSize, existingBet.betPrice, existingBet.betType, existingBet.marketId, existingBet.runnerId); will(returnValue(existingBet))
@@ -125,7 +125,7 @@ class LiveTraderContextTest {
 
   @Test
   def fillBetNothingPlaced {
-    val betToBePlaced = Bet(100, 1000, 10, 2.2, BACK, 1, 11)
+    val betToBePlaced = Bet(100, 1000, 10d, 2.2, BACK, 1, 11,1000)
 
     mockery.checking(new SExpectations() {
       {
@@ -197,8 +197,8 @@ class LiveTraderContextTest {
       11l -> (new RunnerPrice(2.2, 100, 0) :: new RunnerPrice(2.3, 200, 0) :: new RunnerPrice(2.4, 0, 300) :: new RunnerPrice(2.5, 0, 400) :: Nil),
       12l -> (new RunnerPrice(1.2, 10, 0) :: new RunnerPrice(1.3, 20, 0) :: new RunnerPrice(1.4, 0, 30) :: new RunnerPrice(1.5, 0, 40) :: Nil))
 
-    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11, None)
-    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11, None)
+    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, M, 1, 11, 1000,Option(1500))
+    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, M, 1, 11, 1000,Option(1500))
 
     mockery.checking(new SExpectations() {
       {
@@ -279,8 +279,8 @@ class LiveTraderContextTest {
 
   @Test
   def getBets {
-    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None)
-    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, U, 1, 11, None)
+    val bet1 = new Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, 1000,None)
+    val bet2 = new Bet(100, 1000, 10, 2.4, LAY, U, 1, 11, 1000,None)
 
     mockery.checking(new SExpectations() {
       {
@@ -300,8 +300,8 @@ class LiveTraderContextTest {
   @Test
   def getBetsMatchedOnly {
     /**Place bets.*/
-    val bet1 = Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None)
-    val bet2 = Bet(101, 1000, 10, 2.4, LAY, U, 1, 11, None)
+    val bet1 = Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, 1000,None)
+    val bet2 = Bet(101, 1000, 10, 2.4, LAY, U, 1, 11, 1000,None)
 
     mockery.checking(new SExpectations() {
       {
@@ -314,7 +314,7 @@ class LiveTraderContextTest {
     liveCtx.placeBet(bet2.betSize, bet2.betPrice, bet2.betType, bet2.runnerId)
 
     /**Bet is matched.*/
-    val matchedBet = new Bet(101, 1000, 4, 2.4, LAY, M, 1, 11, None)
+    val matchedBet = new Bet(101, 1000, 4, 2.4, LAY, M, 1, 11, 1000,Option(2000))
     mockery.checking(new SExpectations() {
       {
         one(marketService).getUserMatchedBets(withArg(marketId), withArg(Matchers.any(classOf[Date]))); will(returnValue(matchedBet :: Nil))
@@ -329,13 +329,13 @@ class LiveTraderContextTest {
 
     /**Check all bets.*/
     val allBets = liveCtx.getBets(false)
-    assertEquals(Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, None) :: Bet(101, 1000, 6, 2.4, LAY, U, 1, 11, None) :: matchedBet :: Nil, allBets)
+    assertEquals(Bet(100, 1000, 10, 2.2, BACK, U, 1, 11, 1000,None) :: Bet(101, 1000, 6, 2.4, LAY, U, 1, 11, 1000,None) :: matchedBet :: Nil, allBets)
   }
 
   /**Tests for getBet*/
   @Test
   def getBet {
-    val bet = Bet(1, 200, 3, 2.1, BACK, U, 1, 11, None) :: Bet(1, 200, 7, 2.1, BACK, M, 1, 11, None) :: Nil
+    val bet = Bet(1, 200, 3, 2.1, BACK, U, 1, 11, 1000,Option(2000)) :: Bet(1, 200, 7, 2.1, BACK, M, 1, 11, 1000,Option(2000)) :: Nil
     mockery.checking(new SExpectations() {
       {
         one(marketService).getBet(100); will(returnValue(bet))

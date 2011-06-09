@@ -1,8 +1,8 @@
 package dk.bettingai.marketcollector.marketservice
 
 import java.util.Date
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import IBet._
 import BetTypeEnum._
 import BetStatusEnum._

@@ -1,9 +1,9 @@
 package dk.bettingai.marketsimulator.marketevent
 
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex._
+import dk.betex.api._
 import java.util.Date
-import  dk.bettingai.marketsimulator.betex.Market._
+import  dk.betex.Market._
 import scala.util.parsing.json._
 import java.text._
 import org.codehaus.jackson._

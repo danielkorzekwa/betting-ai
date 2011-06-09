@@ -4,7 +4,7 @@ import ISimulator._
 import dk.bettingai.marketsimulator.trader._
 import dk.bettingai.marketsimulator.risk._
 import java.io.File
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import scala.collection.immutable.TreeMap
 
 /**This trait represents a simulator that processes market events, analyses traders  and returns analysis reports.

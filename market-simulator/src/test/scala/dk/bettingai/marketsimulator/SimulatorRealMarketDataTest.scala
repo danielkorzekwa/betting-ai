@@ -4,11 +4,11 @@ import org.junit._
 import Assert._
 import scala.io._
 import java.io._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex.api._
+import dk.betex._
 import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator.trader.examples._
-import dk.bettingai.marketsimulator.betex.Market._
+import dk.betex.Market._
 import java.util.Date
 import scala.collection._
 import immutable.TreeMap

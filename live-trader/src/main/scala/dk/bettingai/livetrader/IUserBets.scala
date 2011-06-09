@@ -1,6 +1,6 @@
 package dk.bettingai.livetrader
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IBet._
 import BetTypeEnum._
 import BetStatusEnum._

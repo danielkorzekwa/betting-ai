@@ -4,8 +4,8 @@ import org.junit._
 import Assert._
 import org.jmock._
 import org.jmock.Expectations._
-import dk.bettingai.marketsimulator.betex.api._
-import dk.bettingai.marketsimulator.betex._
+import dk.betex.api._
+import dk.betex._
 import org.junit.runner._
 import java.util.Date
 import org.hamcrest.TypeSafeMatcher

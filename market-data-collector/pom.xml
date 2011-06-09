@@ -23,6 +23,10 @@
 			<groupId>dk.flexibet</groupId>
 			<artifactId>flexibet-betfair</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>dk.betex</groupId>
+			<artifactId>betex</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>joda-time</groupId>

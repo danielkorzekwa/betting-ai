@@ -1,11 +1,11 @@
 package dk.bettingai.trader.hillclimbing.price
 
-import dk.bettingai.marketsimulator.betex.api._
+import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.betex._
-import dk.bettingai.marketsimulator.betex.PriceUtil._
+import dk.betex._
+import dk.betex.PriceUtil._
 import scala.util._
 import org.slf4j.LoggerFactory
 import org.apache.commons.math.random._
