@@ -31,7 +31,7 @@
 		
 		<dependency>
 			<groupId>dk.betex</groupId>
-			<artifactId>betex</artifactId>
+			<artifactId>betex-engine</artifactId>
 		</dependency>
 		
 		<dependency>
