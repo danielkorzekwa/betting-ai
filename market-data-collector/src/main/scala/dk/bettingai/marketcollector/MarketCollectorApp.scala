@@ -35,7 +35,8 @@ object MarketCollectorApp {
 		/**Create event collector task.*/
 		val marketService = new MarketService(betfairService)
 		val maxNumberOfWinners = if(inputData.contains("maxNumOfWinners")) Option(inputData("maxNumOfWinners").toInt) else None
-		val eventCollectorTask = new EventCollectorTask(marketService,inputData("startInMinutesFrom").toInt,inputData("startInMinutesTo").toInt,maxNumberOfWinners,inputData("marketDataDir"),inputData("discoveryInterval").toInt)
+		 val marketEventListener = EventCollectorTask.FilesystemEventListener(inputData("marketDataDir"))
+		val eventCollectorTask = new EventCollectorTask(marketService,inputData("startInMinutesFrom").toInt,inputData("startInMinutesTo").toInt,maxNumberOfWinners,inputData("discoveryInterval").toInt,marketEventListener)
 
 		val collectionInterval = inputData("collectionInterval").toLong		
 		while(true) {
