@@ -6,7 +6,7 @@ import scala.io._
 import java.io._
 import dk.betex.api._
 import dk.betex._
-import dk.bettingai.marketsimulator.marketevent._
+import dk.betex.eventcollector.eventprocessor._
 import dk.bettingai.marketsimulator.trader.examples._
 import dk.betex.Market._
 import java.util.Date
