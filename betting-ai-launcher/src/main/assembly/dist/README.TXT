@@ -46,8 +46,8 @@ FAQ
 1)How to start market simulator from command line?
 simulator marketDataDir=./marketdata traderImpl=dk.bettingai.marketsimulator.trader.SimpleTrader
 
-2)How to start market data collector from command line?
-marketdatacollector marketDataDir=./marketdata bfUser=john bfPassword=green bfProductId=82 collectionInterval=1000 discoveryInterval=60000 startInMinutesFrom=-60 startInMinutesTo=300
+2)How to colelct market data?
+Go to http://code.google.com/p/betting-exchange-event-collector
 
 3) How to run trading optimisation from unit tests?
 Look at those two unit tests:
