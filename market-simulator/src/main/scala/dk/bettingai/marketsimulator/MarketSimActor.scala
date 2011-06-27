@@ -3,7 +3,7 @@ package dk.bettingai.marketsimulator
 import scala.actors._
 import java.io.File
 import ISimulator._
-import dk.bettingai.marketsimulator.marketevent._
+import dk.betex.eventcollector.eventprocessor._
 import dk.betex.api._
 import java.io.BufferedReader
 import java.io.FileReader
