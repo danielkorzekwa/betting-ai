@@ -1,7 +1,7 @@
 package dk.bettingai.livetrader
 
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketcollector.marketservice._
+import dk.betex.eventcollector.marketservice._
 import IMarketService._
 import scala.actors.Actor
 import Actor._

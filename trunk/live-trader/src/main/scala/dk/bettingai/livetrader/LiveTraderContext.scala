@@ -1,7 +1,6 @@
 package dk.bettingai.livetrader
 
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketcollector.marketservice._
 import dk.betex.api._
 import dk.betex._
 import IBet.BetTypeEnum._
@@ -15,7 +14,7 @@ import dk.bettingai.marketsimulator._
 import scala.collection._
 import com.espertech.esper.client._
 import java.util.Date
-import dk.bettingai.marketcollector.marketservice._
+import dk.betex.eventcollector.marketservice._
 import IMarketService._
 import dk.bettingai.marketsimulator.risk._
 import org.apache.commons.io.FileUtils

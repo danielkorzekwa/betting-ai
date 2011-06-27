@@ -3,7 +3,7 @@ package dk.bettingai.livetrader
 import org.junit._
 import Assert._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketcollector.marketservice._
+import dk.betex.eventcollector.marketservice._
 import IMarketService._
 import org.junit.runner._
 import org.jmock.integration.junit4._
