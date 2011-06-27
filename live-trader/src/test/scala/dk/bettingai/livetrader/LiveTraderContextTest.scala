@@ -3,7 +3,7 @@ package dk.bettingai.livetrader
 import org.junit.Test
 import org.junit.Assert._
 import java.util.Date
-import dk.bettingai.marketcollector.marketservice._
+import dk.betex.eventcollector.marketservice._
 import IMarketService._
 import dk.betex._
 import dk.betex.api._

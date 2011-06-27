@@ -17,10 +17,6 @@
 			<groupId>dk.bettingai</groupId>
 			<artifactId>market-simulator</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>dk.bettingai</groupId>
-			<artifactId>market-data-collector</artifactId>
-		</dependency>
 
 		<!-- External dependencies -->
 
@@ -32,6 +28,10 @@
 		<dependency>
 			<groupId>dk.betex</groupId>
 			<artifactId>betex-engine</artifactId>
+		</dependency>
+		<dependency>
+   			<groupId>dk.betex</groupId>
+   			<artifactId>betex-event-collector</artifactId>
 		</dependency>
 		
 		<dependency>
