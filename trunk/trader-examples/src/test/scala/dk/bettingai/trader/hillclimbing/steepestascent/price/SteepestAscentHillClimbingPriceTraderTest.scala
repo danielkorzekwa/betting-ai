@@ -3,7 +3,6 @@ package dk.bettingai.trader.hillclimbing.steepestascent.price
 import org.junit._
 import Assert._
 import dk.betex._
-import dk.bettingai.marketsimulator.marketevent._
 import dk.bettingai.marketsimulator._
 import java.io.File
 import scala.collection.immutable.TreeMap
