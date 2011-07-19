@@ -4,7 +4,7 @@ import org.junit._
 import Assert._
 import ISimulator._
 import dk.bettingai.marketsimulator.trader.examples.SimpleTrader
-import dk.bettingai.marketsimulator.risk.MarketExpectedProfit
+import dk.betting.risk.liability.MarketExpectedProfit
 import java.util.Date
 
 class SimulationReportTest {

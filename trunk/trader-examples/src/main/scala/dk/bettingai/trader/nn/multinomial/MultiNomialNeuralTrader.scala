@@ -5,7 +5,8 @@ import dk.bettingai.marketsimulator.trader._
 import dk.betex._
 import dk.betex.PriceUtil._
 import scala.collection.JavaConversions._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 import dk.betex.api._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._

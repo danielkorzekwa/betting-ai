@@ -5,8 +5,10 @@ import IMarket._
 import IBet.BetTypeEnum._
 import dk.bettingai.marketsimulator.trader._
 import dk.betex._
-import dk.bettingai.marketsimulator.risk._
-import dk.bettingai.risk.prob._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 
 class PlaceMarketTrader extends ITrader {
 

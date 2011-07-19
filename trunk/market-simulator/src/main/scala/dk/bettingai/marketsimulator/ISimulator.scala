@@ -2,7 +2,7 @@ package dk.bettingai.marketsimulator
 
 import ISimulator._
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
 import java.io.File
 import dk.betex.api._
 import scala.collection.immutable.TreeMap
