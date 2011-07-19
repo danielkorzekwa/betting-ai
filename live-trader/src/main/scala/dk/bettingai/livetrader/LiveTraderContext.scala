@@ -7,8 +7,8 @@ import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import IMarket._
 import Market._
-import dk.bettingai.marketsimulator.risk._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 import dk.betex.BetUtil._
 import dk.bettingai.marketsimulator._
 import scala.collection._
@@ -16,7 +16,6 @@ import com.espertech.esper.client._
 import java.util.Date
 import dk.betex.eventcollector.marketservice._
 import IMarketService._
-import dk.bettingai.marketsimulator.risk._
 import org.apache.commons.io.FileUtils
 import java.io.File
 import dk.bettingai.marketsimulator.reporting._

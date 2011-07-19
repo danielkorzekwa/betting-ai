@@ -8,7 +8,8 @@ import dk.betex.api._
 import java.io.BufferedReader
 import java.io.FileReader
 import dk.bettingai.marketsimulator.trader._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 import IBet.BetStatusEnum._
 import scala.annotation._
 import MarketSimActor._

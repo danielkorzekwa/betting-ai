@@ -1,7 +1,8 @@
 package dk.bettingai.marketsimulator
 
 import ISimulator._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 import java.util.Date
 
 /**This class represents the result of market simulation.

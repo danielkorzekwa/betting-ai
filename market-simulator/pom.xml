@@ -21,6 +21,10 @@
    			<groupId>dk.betex</groupId>
    			<artifactId>betex-event-collector</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>dk.betex</groupId>
+			<artifactId>betting-risk</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.scala-lang</groupId>

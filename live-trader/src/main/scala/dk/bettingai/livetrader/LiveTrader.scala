@@ -16,7 +16,8 @@ import dk.betex._
 import IBet.BetTypeEnum._
 import IBet.BetStatusEnum._
 import dk.betex.BetUtil._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 
 /**
  * This class allows for running trader on a betting exchange market. Trader observes a market and places some bets.

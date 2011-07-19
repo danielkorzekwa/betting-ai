@@ -40,7 +40,6 @@
 	<!-- Define the sub-components -->
 	<modules>
 		<!-- <module>betting-oracle</module> -->
-		<module>betting-risk</module>
 		<module>market-simulator</module>
 		<module>betting-ai-launcher</module>
 		<module>trading-optimiser</module>
@@ -218,12 +217,6 @@
 				<version>${project.version}</version>
 			</dependency>
 			
-			<dependency>
-				<groupId>dk.bettingai</groupId>
-				<artifactId>betting-risk</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
 			<!-- External dependencies -->
 			<dependency>
 				<groupId>dk.betex</groupId>
@@ -241,6 +234,12 @@
 				<groupId>dk.flexibet</groupId>
 				<artifactId>flexibet-betfair</artifactId>
 				<version>0.7-SNAPSHOT</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>dk.betex</groupId>
+				<artifactId>betting-risk</artifactId>
+				<version>0.1-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>

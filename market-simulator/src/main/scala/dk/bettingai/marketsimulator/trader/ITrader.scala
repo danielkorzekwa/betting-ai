@@ -4,7 +4,7 @@ import dk.betex.api._
 import IMarket._
 import IBet.BetTypeEnum._
 import java.util.Date
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
 import scala.collection._
 
 /**This trait represents a trader that can place bets on a betting exchange.

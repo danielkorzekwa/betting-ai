@@ -16,7 +16,8 @@ import SteepestAscentHillClimbingPriceSlopeTrader._
 import com.espertech.esper.client._
 import com.espertech.esper.client.time._
 import org.apache.commons.math.util.MathUtils._
-import dk.bettingai.marketsimulator.risk._
+import dk.betting.risk.prob._
+import dk.betting.risk.liability._
 import scala.collection._
 
 /** Simple trading strategy based on price slope variable.
